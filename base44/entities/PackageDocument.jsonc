@@ -1,0 +1,146 @@
+{
+  "name": "PackageDocument",
+  "type": "object",
+  "properties": {
+    "project_id": {
+      "type": "string"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "prd",
+        "tech_spec",
+        "irs_audit",
+        "legal_framework"
+      ]
+    },
+    "title": {
+      "type": "string"
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "heading": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "heading",
+          "body"
+        ]
+      }
+    },
+    "audit": {
+      "type": "object",
+      "properties": {
+        "overall": {
+          "type": "number"
+        },
+        "dimensions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "score": {
+                "type": "number"
+              },
+              "max": {
+                "type": "number"
+              },
+              "note": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "score",
+              "max",
+              "note"
+            ]
+          }
+        },
+        "enhancement_ideas": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "detail": {
+                "type": "string"
+              },
+              "score_impact": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "title",
+              "detail",
+              "score_impact"
+            ]
+          }
+        }
+      },
+      "required": [
+        "overall",
+        "dimensions",
+        "enhancement_ideas"
+      ]
+    }
+  },
+  "required": [
+    "project_id",
+    "kind",
+    "title"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

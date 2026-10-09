@@ -12,7 +12,6 @@ import FundingTable from '@/components/dossier/FundingTable';
 import ForecastTable from '@/components/dossier/ForecastTable';
 import EngineTab from '@/components/valueEngine/EngineTab';
 import FundingDrafts from '@/components/valueEngine/FundingDrafts';
-import PackageZip from '@/components/package/PackageZip';
 
 function Section({ title, children }) {
   return (
@@ -131,7 +130,6 @@ export default function ProjectDetail() {
           <TabsTrigger value="funding">Funding</TabsTrigger>
           <TabsTrigger value="engine">Value Engine</TabsTrigger>
           <TabsTrigger value="narrative">Narrative</TabsTrigger>
-          <TabsTrigger value="package">Zip Package</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-8">
@@ -187,10 +185,6 @@ export default function ProjectDetail() {
 
         <TabsContent value="narrative" className="space-y-6">
           <Section title="Investor Narrative">{project.investor_narrative}</Section>
-        </TabsContent>
-
-        <TabsContent value="package" className="space-y-6">
-          <PackageZip project={project} competitors={competitors} funding={funding} />
         </TabsContent>
       </Tabs>
 

@@ -96,6 +96,34 @@
     "scan_score": {
       "type": "number"
     },
+    "competitive_radar": {
+      "type": "object",
+      "properties": {
+        "dimensions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "company_scores": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "dimension": {
+                "type": "string"
+              },
+              "score": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "generated_date": {
+          "type": "string"
+        }
+      }
+    },
     "value_scan": {
       "type": "object",
       "properties": {

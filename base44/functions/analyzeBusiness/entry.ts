@@ -8,6 +8,23 @@ const RESEARCH_SCHEMA = {
     value_proposition: { type: "string" },
     market_analysis: { type: "string" },
     strategic_edge: { type: "string" },
+    company_radar: {
+      type: "object",
+      properties: {
+        scores: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              dimension: { type: "string" },
+              score: { type: "number" }
+            },
+            required: ["dimension", "score"]
+          }
+        }
+      },
+      required: ["scores"]
+    },
     competitors: {
       type: "array",
       items: {
@@ -16,9 +33,21 @@ const RESEARCH_SCHEMA = {
           name: { type: "string" },
           strengths: { type: "string" },
           weaknesses: { type: "string" },
-          our_advantage: { type: "string" }
+          our_advantage: { type: "string" },
+          overall_score: { type: "number" },
+          radar_scores: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                dimension: { type: "string" },
+                score: { type: "number" }
+              },
+              required: ["dimension", "score"]
+            }
+          }
         },
-        required: ["name"]
+        required: ["name", "overall_score", "radar_scores"]
       }
     },
     funding_sources: {
@@ -37,7 +66,7 @@ const RESEARCH_SCHEMA = {
       }
     }
   },
-  required: ["company_name", "industry", "value_proposition", "market_analysis", "strategic_edge", "competitors", "funding_sources"]
+  required: ["company_name", "industry", "value_proposition", "market_analysis", "strategic_edge", "competitors", "company_radar", "funding_sources"]
 };
 
 const SYNTHESIS_SCHEMA = {
@@ -87,8 +116,9 @@ Produce all of the following:
 3. value_proposition — the real, differentiated value the company offers, distilled to 2-3 sharp sentences. Identify the gap between what the company says it does and what the market actually needs.
 4. market_analysis — market size, growth trajectory, key trends and tailwinds, and the macro forces working in this company's favor. Cite real signals where possible.
 5. strategic_edge — the specific, defensible advantage this company holds (or could hold) over incumbents. Be concrete, not generic.
-6. competitors — 3 to 5 REAL competitors. For each: name, strengths, weaknesses, and our_advantage (how the target company beats or bypasses them).
-7. funding_sources — 4 to 6 REAL funding sources whose investment thesis aligns with this business (grants, venture firms, angel groups, or loan programs). For each: name, type (one of: grant, vc, angel, loan), focus_area, alignment_rationale (why this is a fit), stage (the stage they invest at), and contact_info (website or application portal — if unknown, write "verify").
+6. competitors — 3 to 5 REAL competitors. For each: name, strengths, weaknesses, our_advantage (how the target company beats or bypasses them), overall_score (0 to 10 overall competitiveness), and radar_scores (a 0 to 10 score for EACH of these five dimensions, named verbatim: Market Reach, Product Differentiation, Traction, Team Strength, Pricing Power).
+7. company_radar — the target company scored 0 to 10 on the SAME five dimensions (Market Reach, Product Differentiation, Traction, Team Strength, Pricing Power). Score truthfully against the real competitors you identified; do not inflate.
+8. funding_sources — 4 to 6 REAL funding sources whose investment thesis aligns with this business (grants, venture firms, angel groups, or loan programs). For each: name, type (one of: grant, vc, angel, loan), focus_area, alignment_rationale (why this is a fit), stage (the stage they invest at), and contact_info (website or application portal — if unknown, write "verify").
 
 Ground everything in real data. Quality and specificity over quantity.`;
 

@@ -16,6 +16,23 @@
     },
     "our_advantage": {
       "type": "string"
+    },
+    "overall_score": {
+      "type": "number"
+    },
+    "radar_scores": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number"
+          }
+        }
+      }
     }
   },
   "required": [

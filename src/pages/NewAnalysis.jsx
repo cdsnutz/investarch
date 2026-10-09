@@ -52,10 +52,11 @@ export default function NewAnalysis() {
         investor_narrative: d.investor_narrative,
         forecast_years: d.forecast_years,
         key_milestones: d.key_milestones,
+        ...(d.company_radar ? { competitive_radar: { dimensions: d.company_radar.scores.map((s) => s.dimension), company_scores: d.company_radar.scores, generated_date: new Date().toISOString() } } : {}),
         status: 'complete'
       });
       if (Array.isArray(d.competitors) && d.competitors.length) {
-        await base44.entities.Competitor.bulkCreate(d.competitors.map((c) => ({ project_id: project.id, name: c.name, strengths: c.strengths, weaknesses: c.weaknesses, our_advantage: c.our_advantage })));
+        await base44.entities.Competitor.bulkCreate(d.competitors.map((c) => ({ project_id: project.id, name: c.name, strengths: c.strengths, weaknesses: c.weaknesses, our_advantage: c.our_advantage, overall_score: c.overall_score, radar_scores: c.radar_scores || [] })));
       }
       if (Array.isArray(d.funding_sources) && d.funding_sources.length) {
         await base44.entities.FundingSource.bulkCreate(d.funding_sources.map((f) => ({ project_id: project.id, name: f.name, type: f.type, focus_area: f.focus_area, alignment_rationale: f.alignment_rationale, stage: f.stage, contact_info: f.contact_info })));

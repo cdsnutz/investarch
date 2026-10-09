@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Printer, ExternalLink, Loader2, Target, TrendingUp, Building2 } from 'lucide-react';
 import CompetitorTable from '@/components/dossier/CompetitorTable';
+import CompetitiveChart from '@/components/dossier/CompetitiveChart';
 import FundingTable from '@/components/dossier/FundingTable';
 import ForecastTable from '@/components/dossier/ForecastTable';
 import EngineTab from '@/components/valueEngine/EngineTab';
@@ -28,6 +29,7 @@ export default function ProjectDetail() {
   const [funding, setFunding] = useState([]);
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
+  const [scoringRadar, setScoringRadar] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -48,6 +50,21 @@ export default function ProjectDetail() {
     })();
     return () => { active = false; };
   }, [id]);
+
+  const runCompetitiveScoring = async () => {
+    setScoringRadar(true);
+    try {
+      await base44.functions.invoke('scoreCompetition', { projectId: id });
+      const [p, comp] = await Promise.all([
+        base44.entities.Project.get(id),
+        base44.entities.Competitor.filter({ project_id: id }, { limit: 50 })
+      ]);
+      setProject(p);
+      setCompetitors(comp.items || []);
+    } finally {
+      setScoringRadar(false);
+    }
+  };
 
   const runEngine = async () => {
     setRunning(true);
@@ -132,6 +149,7 @@ export default function ProjectDetail() {
 
         <TabsContent value="competitive" className="space-y-6">
           <div className="flex items-center gap-2 mb-1"><Building2 className="size-4 text-muted-foreground" /><h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Competitive Landscape</h3></div>
+          <CompetitiveChart project={project} competitors={competitors} onScore={runCompetitiveScoring} scoring={scoringRadar} />
           <CompetitorTable competitors={competitors} />
         </TabsContent>
 

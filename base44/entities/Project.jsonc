@@ -1,0 +1,115 @@
+{
+  "name": "Project",
+  "type": "object",
+  "properties": {
+    "url": {
+      "type": "string"
+    },
+    "company_name": {
+      "type": "string"
+    },
+    "industry": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "analyzing",
+        "complete",
+        "failed"
+      ],
+      "default": "analyzing"
+    },
+    "value_proposition": {
+      "type": "string"
+    },
+    "executive_summary": {
+      "type": "string"
+    },
+    "market_analysis": {
+      "type": "string"
+    },
+    "strategic_edge": {
+      "type": "string"
+    },
+    "financial_forecast": {
+      "type": "string"
+    },
+    "investor_narrative": {
+      "type": "string"
+    },
+    "forecast_years": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "year": {
+            "type": "number"
+          },
+          "revenue": {
+            "type": "number"
+          },
+          "expenses": {
+            "type": "number"
+          },
+          "ebitda": {
+            "type": "number"
+          },
+          "growth_rate": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "key_milestones": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "url"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

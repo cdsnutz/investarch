@@ -9,6 +9,8 @@ import { ArrowLeft, Printer, ExternalLink, Loader2, Target, TrendingUp, Building
 import CompetitorTable from '@/components/dossier/CompetitorTable';
 import FundingTable from '@/components/dossier/FundingTable';
 import ForecastTable from '@/components/dossier/ForecastTable';
+import EngineTab from '@/components/valueEngine/EngineTab';
+import FundingDrafts from '@/components/valueEngine/FundingDrafts';
 
 function Section({ title, children }) {
   return (
@@ -25,6 +27,7 @@ export default function ProjectDetail() {
   const [competitors, setCompetitors] = useState([]);
   const [funding, setFunding] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [running, setRunning] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -45,6 +48,21 @@ export default function ProjectDetail() {
     })();
     return () => { active = false; };
   }, [id]);
+
+  const runEngine = async () => {
+    setRunning(true);
+    try {
+      await base44.functions.invoke('buildPlanAndScan', { projectId: id });
+      const [p, fund] = await Promise.all([
+        base44.entities.Project.get(id),
+        base44.entities.FundingSource.filter({ project_id: id }, { limit: 50 })
+      ]);
+      setProject(p);
+      setFunding(fund.items || []);
+    } finally {
+      setRunning(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -93,6 +111,7 @@ export default function ProjectDetail() {
           <TabsTrigger value="competitive">Competitive</TabsTrigger>
           <TabsTrigger value="financials">Financials</TabsTrigger>
           <TabsTrigger value="funding">Funding</TabsTrigger>
+          <TabsTrigger value="engine">Value Engine</TabsTrigger>
           <TabsTrigger value="narrative">Narrative</TabsTrigger>
         </TabsList>
 
@@ -137,6 +156,13 @@ export default function ProjectDetail() {
         <TabsContent value="funding" className="space-y-6">
           <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Aligned Funding Sources</h3>
           <FundingTable sources={funding} />
+          <div className="pt-2">
+            <FundingDrafts sources={funding} />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="engine" className="space-y-6">
+          <EngineTab project={project} running={running} onRun={runEngine} />
         </TabsContent>
 
         <TabsContent value="narrative" className="space-y-6">

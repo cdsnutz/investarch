@@ -11,7 +11,7 @@ export default function Dashboard() {
   const [projects, setProjects] = useState(null);
 
   useEffect(() => {
-    base44.entities.Project.filter({}, { sort: '-created_date', limit: 50, fields: ['company_name', 'industry', 'status', 'url', 'created_date'] })
+    base44.entities.Project.filter({}, { sort: '-created_date', limit: 50, fields: ['company_name', 'industry', 'status', 'url', 'created_date', 'scan_score'] })
       .then((page) => setProjects(page.items))
       .catch(() => setProjects([]));
   }, []);
@@ -57,6 +57,7 @@ export default function Dashboard() {
                   <Badge variant={p.status === 'complete' ? 'secondary' : 'outline'} className={p.status === 'complete' ? 'bg-emerald-100 text-emerald-700' : ''}>
                     {p.status}
                   </Badge>
+                  {p.scan_score != null && <Badge variant="outline">Scan {p.scan_score}/100</Badge>}
                   <span className="text-xs text-muted-foreground">{moment(p.created_date).format('MMM D, YYYY')}</span>
                 </div>
               </Card>

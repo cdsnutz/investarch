@@ -28,6 +28,15 @@
     },
     "contact_info": {
       "type": "string"
+    },
+    "application_draft": {
+      "type": "string"
+    },
+    "outreach_subject": {
+      "type": "string"
+    },
+    "outreach_email": {
+      "type": "string"
     }
   },
   "required": [

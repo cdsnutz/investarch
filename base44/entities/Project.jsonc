@@ -66,6 +66,86 @@
       "items": {
         "type": "string"
       }
+    },
+    "plan_points": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "number"
+          },
+          "title": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number"
+          },
+          "revision_note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "plan_revisions": {
+      "type": "number"
+    },
+    "scan_score": {
+      "type": "number"
+    },
+    "value_scan": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "number"
+        },
+        "generated_date": {
+          "type": "string"
+        },
+        "dimensions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "category": {
+                "type": "string"
+              },
+              "score": {
+                "type": "number"
+              },
+              "max": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "point": {
+                "type": "number"
+              },
+              "category": {
+                "type": "string"
+              },
+              "score": {
+                "type": "number"
+              },
+              "verdict": {
+                "type": "string"
+              },
+              "note": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "required": [

@@ -6,21 +6,26 @@ import { buildPdf } from '@/lib/pdfBuilder';
 import JSZip from 'jszip';
 
 const STAGES = [
-  'Genesis pod: dossier loaded',
-  'Legal pod: hardening language',
+  'Genesis pod: extracting intangible assets',
+  'Legal Council pod: hardening the fortress',
+  'Valuation pod: running DCF and comparables',
+  'Moat pod: constructing the defensibility case',
+  'Exit pod: mapping acquirers and synergies',
   'Spec pod: drafting PRD and specifications',
-  'Capital pod: mapping the funding directory',
-  'Scoring pod: auditing investment readiness',
-  'Packaging pod: rendering the ZIP'
+  'Capital pod: building the funding matrix',
+  'Scoring pod: auditing readiness and value unlocks',
+  'Packaging pod: compiling the VDR ZIP'
 ];
 
 const CONTENTS = [
-  '01_Investment_Dossier.pdf',
-  '02_Product_Requirements_Document.pdf',
-  '03_Technical_Specifications.pdf',
-  '04_Funding_and_Capital_Directory.pdf',
-  '05_Investment_Readiness_Audit.pdf',
-  '06_Legal_Framework.pdf'
+  '01_Executive_Sovereign_Dossier.pdf',
+  '02_Enterprise_Value_Appraisal.pdf',
+  '03_The_Moat_and_Defensibility_Report.pdf',
+  '04_Strategic_Exit_Roadmap.pdf',
+  '05_Technical_PRD_and_Specs.pdf',
+  '06_Capital_Access_Directory.pdf',
+  '07_Institutional_Readiness_Audit.pdf',
+  '08_Legal_Governance_Framework.pdf'
 ];
 
 const slug = (s) => (s || 'Company').replace(/[^a-z0-9]+/gi, '_').replace(/^_|_$/g, '');
@@ -69,25 +74,45 @@ export default function PackagePanel({ project, funding }) {
   const [error, setError] = useState('');
 
   const assembleZip = (data) => {
+    const val = data.valuation || {};
+    const lo = Math.min(val.dcf_low ?? Infinity, val.cca_low ?? Infinity);
+    const hi = Math.max(val.dcf_high ?? 0, val.cca_high ?? 0);
+    const fmt = (n) => (typeof n === 'number' && isFinite(n) ? n.toLocaleString('en-US', { maximumFractionDigits: 0 }) : '-');
     const docs = [
-      { name: '01_Investment_Dossier.pdf', args: { title: 'Investment Dossier', subtitle: `${project.company_name || ''}${project.url ? ` | ${project.url}` : ''}`, sections: dossierSections(project), footer: project.company_name || 'InvestArch' } },
-      { name: '02_Product_Requirements_Document.pdf', args: { title: data.prd.title || 'Product Requirements Document', subtitle: project.company_name, sections: data.prd.sections, footer: project.company_name || 'InvestArch' } },
-      { name: '03_Technical_Specifications.pdf', args: { title: data.spec.title || 'Technical Specification', subtitle: project.company_name, sections: data.spec.sections, footer: project.company_name || 'InvestArch' } },
-      { name: '04_Funding_and_Capital_Directory.pdf', args: { title: 'Funding and Capital Directory', subtitle: project.company_name, sections: fundingSections(funding), footer: project.company_name || 'InvestArch' } },
+      { name: '01_Executive_Sovereign_Dossier.pdf', args: { title: 'Executive Sovereign Dossier', subtitle: `${project.company_name || ''}${project.url ? ` | ${project.url}` : ''}`, sections: dossierSections(project), footer: project.company_name || 'InvestArch' } },
       {
-        name: '05_Investment_Readiness_Audit.pdf',
+        name: '02_Enterprise_Value_Appraisal.pdf',
         args: {
-          title: 'Investment Readiness Audit',
+          title: 'Enterprise Value Appraisal',
+          subtitle: project.company_name,
+          footer: project.company_name || 'InvestArch',
+          sections: [
+            { heading: 'Valuation Summary', body: `Headline multiple: ${val.multiple ?? '-'}x. Modeled ranges, every figure grounded in stated assumptions: DCF ${fmt(val.dcf_low)} to ${fmt(val.dcf_high)} USD; Comparable Company Analysis ${fmt(val.cca_low)} to ${fmt(val.cca_high)} USD. Combined appraisal band: ${fmt(isFinite(lo) ? lo : 0)} to ${fmt(hi)} USD. All figures are modeled projections, not verified market data.` },
+            ...(val.sections || [])
+          ]
+        }
+      },
+      { name: '03_The_Moat_and_Defensibility_Report.pdf', args: { title: 'The Moat and Defensibility Report', subtitle: project.company_name, footer: project.company_name || 'InvestArch', sections: data.moat?.sections || [], } },
+      { name: '04_Strategic_Exit_Roadmap.pdf', args: { title: 'Strategic Exit Roadmap', subtitle: project.company_name, footer: project.company_name || 'InvestArch', sections: data.exit?.sections || [] } },
+      { name: '05_Technical_PRD_and_Specs.pdf', args: { title: 'Product Requirements and Technical Specifications', subtitle: project.company_name, footer: project.company_name || 'InvestArch', sections: [...(data.prd?.sections || []), ...(data.spec?.sections || [])] } },
+      { name: '06_Capital_Access_Directory.pdf', args: { title: 'Capital Access Directory', subtitle: project.company_name, sections: fundingSections(funding), footer: project.company_name || 'InvestArch' } },
+      {
+        name: '07_Institutional_Readiness_Audit.pdf',
+        args: {
+          title: 'Institutional Readiness Audit',
           subtitle: project.company_name,
           footer: project.company_name || 'InvestArch',
           sections: [
             { heading: 'Investment Readiness Score', body: `Total IRS: ${data.irs.total}/100. Scored across four dimensions of 25 points: market size (TAM/SAM/SOM), defensibility moat, scalability vector, and legal hardness. Scoring is truthful: a low score is the map of what to fix.` },
             ...data.irs.dimensions.map((d) => ({ heading: `${d.dimension}: ${d.score}/${d.max}`, body: d.note })),
-            ...data.irs.enhancements.map((e) => ({ heading: `Enhancement: ${e.title}`, body: e.action }))
+            ...data.irs.enhancements.map((e) => ({ heading: `Enhancement: ${e.title}`, body: e.action })),
+            { heading: 'Growth Blueprint: LTV/CAC Optimization', body: data.irs.growth_blueprint.filter((g) => g.lever === 'LTV/CAC Optimization').map((g) => `${g.title}. ${g.action}`).join('\n\n') },
+            { heading: 'Growth Blueprint: Revenue Diversification', body: data.irs.growth_blueprint.filter((g) => g.lever === 'Revenue Diversification').map((g) => `${g.title}. ${g.action}`).join('\n\n') },
+            { heading: 'Growth Blueprint: IP Fortressing', body: data.irs.growth_blueprint.filter((g) => g.lever === 'IP Fortressing').map((g) => `${g.title}. ${g.action}`).join('\n\n') }
           ]
         }
       },
-      { name: '06_Legal_Framework.pdf', args: { title: data.legal.title || 'Legal Framework', subtitle: project.company_name, sections: data.legal.sections, footer: project.company_name || 'InvestArch' } }
+      { name: '08_Legal_Governance_Framework.pdf', args: { title: 'Legal Governance Framework', subtitle: project.company_name, sections: data.legal?.sections || [], footer: project.company_name || 'InvestArch' } }
     ];
     const zip = new JSZip();
     docs.forEach((d) => zip.file(d.name, buildPdf(d.args)));
@@ -98,7 +123,7 @@ export default function PackagePanel({ project, funding }) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${slug(project.company_name)}_Investment_Readiness_Package.zip`;
+    a.download = `${slug(project.company_name)}_Sovereign_Investment_VDR.zip`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -107,7 +132,7 @@ export default function PackagePanel({ project, funding }) {
     setBuilding(true);
     setError('');
     setStage(0);
-    const timer = setInterval(() => setStage((s) => Math.min(s + 1, STAGES.length - 1)), 10000);
+    const timer = setInterval(() => setStage((s) => Math.min(s + 1, STAGES.length - 1)), 12000);
     try {
       const res = await base44.functions.invoke('generateReadinessPackage', { projectId: project.id });
       const data = res.data;
@@ -126,19 +151,51 @@ export default function PackagePanel({ project, funding }) {
     if (pkg) triggerDownload(await assembleZip(pkg));
   };
 
+  const val = pkg?.valuation;
+  const valRange = val
+    ? `${Math.min(val.dcf_low ?? Infinity, val.cca_low ?? Infinity).toLocaleString('en-US', { maximumFractionDigits: 0 })} to ${Math.max(val.dcf_high ?? 0, val.cca_high ?? 0).toLocaleString('en-US', { maximumFractionDigits: 0 })}`
+    : '';
+
   return (
     <div className="rounded-xl border bg-card p-6 space-y-4">
       <div className="flex items-center gap-2">
         <PackageOpen className="size-4 text-muted-foreground" />
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Investment Readiness Zip-Package</h3>
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Sovereign Investment VDR</h3>
       </div>
-      <p className="text-sm text-muted-foreground">One archive, six institutional documents: the investment dossier, a formal PRD, the technical specification, the funding and capital directory, the investment readiness audit with enhancement moves, and the legal framework in hardened institutional language.</p>
+      <p className="text-sm text-muted-foreground">One virtual data room, eight documents: the sovereign dossier, the enterprise value appraisal (DCF and comparables), the moat and defensibility report, the strategic exit roadmap with named acquirers, the technical PRD and specs, the capital access directory, the institutional readiness audit with the growth blueprint, and the legal governance framework in hardened institutional language.</p>
       <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-1.5 text-sm">
         {CONTENTS.map((c) => <li key={c} className="flex gap-2"><span className="size-1.5 rounded-full bg-emerald-500 mt-2 shrink-0" /><span className="font-mono text-xs">{c}</span></li>)}
       </ul>
+      {val && (
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div className="rounded-lg bg-muted p-4">
+            <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Enterprise Value Appraisal</span>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="text-2xl font-semibold tabular-nums">{val.multiple}x</span>
+              <span className="text-xs text-muted-foreground truncate">{valRange} USD (modeled)</span>
+            </div>
+            <div className="flex flex-wrap gap-2 mt-2 text-xs">
+              <span className="rounded-md bg-background border px-2 py-0.5">DCF: {val.dcf_low?.toLocaleString('en-US', { maximumFractionDigits: 0 })} to {val.dcf_high?.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
+              <span className="rounded-md bg-background border px-2 py-0.5">CCA: {val.cca_low?.toLocaleString('en-US', { maximumFractionDigits: 0 })} to {val.cca_high?.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
+            </div>
+          </div>
+          <div className="rounded-lg bg-muted p-4">
+            <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Moat Strength and Exit Map</span>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="text-2xl font-semibold tabular-nums">{pkg.moat.moat_score}</span>
+              <span className="text-xs text-muted-foreground">/ 10 moat rating</span>
+            </div>
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {(pkg.exit?.acquirers || []).map((a) => (
+                <span key={a.name} className="text-xs rounded-md bg-background border px-2 py-0.5">{a.name}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
       {pkg?.irs && (
         <div className="rounded-lg bg-muted p-4">
-          <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Investment Readiness Score</span>
+          <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Institutional Readiness Score</span>
           <div className="flex items-baseline gap-2 mt-1">
             <span className="text-3xl font-semibold tabular-nums">{pkg.irs.total}</span>
             <span className="text-sm text-muted-foreground">/ 100</span>
@@ -154,7 +211,7 @@ export default function PackagePanel({ project, funding }) {
       <div className="flex items-center gap-3">
         <Button onClick={build} disabled={building}>
           {building ? <Loader2 className="size-4 mr-1.5 animate-spin" /> : null}
-          {building ? 'Building package' : pkg ? 'Rebuild and download' : 'Build and download ZIP'}
+          {building ? 'Compiling VDR' : pkg ? 'Rebuild and download' : 'Build VDR ZIP'}
         </Button>
         {pkg && !building && (
           <Button variant="outline" onClick={redownload}>Download again</Button>
@@ -163,7 +220,7 @@ export default function PackagePanel({ project, funding }) {
       {building && (
         <p className="text-sm text-muted-foreground">
           <span className="font-medium text-foreground">{STAGES[stage]}</span>
-          {' '}| Four specialist pipelines are running; this takes one to two minutes.
+          {' '}| Seven specialist pipelines are running; this takes two to three minutes.
         </p>
       )}
     </div>

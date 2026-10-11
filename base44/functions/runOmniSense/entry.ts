@@ -103,7 +103,15 @@ Truth rule: open, public data only — no surveillance, no non-public or persona
       observed_date: t
     }));
     const created = await db.LiveSignal.bulkCreate(records);
-    return Response.json({ signals_created: (created || []).length || records.length, skipped_existing: signals.length - fresh.length });
+
+    // Escalation pass: high-confidence signals still sitting in 'observed' move to 'actionable'.
+    const escPage = await db.LiveSignal.filter({ status: 'observed' }, { limit: 100, fields: ['confidence'] });
+    const escalations = (escPage.items || []).filter((s) => (Number(s.confidence) || 0) >= 8);
+    if (escalations.length) {
+      await db.LiveSignal.bulkUpdate(escalations.map((s) => ({ id: s.id, status: 'actionable' })));
+    }
+
+    return Response.json({ signals_created: (created || []).length || records.length, skipped_existing: signals.length - fresh.length, escalations: escalations.length });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

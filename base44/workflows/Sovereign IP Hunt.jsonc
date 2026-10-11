@@ -1,0 +1,59 @@
+{
+  "name": "Sovereign IP Hunt",
+  "description": "Daily run of the Signal Miner and Synthesizer: harvests market pain-signals, yields 20 IP-seeds, and assigns the Hold/Flip/Build wealth strategy",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "sovereign_ip_hunt",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_hunt": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runIpHunt",
+            "args": {}
+          },
+          "then": "assign_strategy",
+          "x-base44": {
+            "title": "Run the hunt",
+            "description": "Signal Miner + Synthesizer"
+          }
+        }
+      },
+      {
+        "assign_strategy": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "ipWealthStrategy",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Assign wealth strategy",
+            "description": "Hold / Flip / Build verdicts"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 5 * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}

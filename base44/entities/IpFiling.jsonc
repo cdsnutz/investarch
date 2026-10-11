@@ -1,0 +1,89 @@
+{
+  "name": "IpFiling",
+  "type": "object",
+  "properties": {
+    "seed_id": {
+      "type": "string"
+    },
+    "filing_type": {
+      "type": "string",
+      "enum": [
+        "patent",
+        "trademark",
+        "deed"
+      ]
+    },
+    "abstract": {
+      "type": "string"
+    },
+    "claims": {
+      "type": "string"
+    },
+    "detailed_description": {
+      "type": "string"
+    },
+    "prior_art_note": {
+      "type": "string"
+    },
+    "brand_name": {
+      "type": "string"
+    },
+    "trademark_classes": {
+      "type": "string"
+    },
+    "logo_concepts": {
+      "type": "string"
+    },
+    "clearance_note": {
+      "type": "string"
+    },
+    "deed_text": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "seed_id",
+    "filing_type"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -16,6 +16,7 @@ import ResetPassword from '@/pages/ResetPassword';
 import Dashboard from '@/pages/Dashboard';
 import NewAnalysis from '@/pages/NewAnalysis';
 import ProjectDetail from '@/pages/ProjectDetail';
+import IpFactory from '@/pages/IpFactory';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -53,6 +54,7 @@ const AuthenticatedApp = () => {
           <Route path="/" element={<Dashboard />} />
           <Route path="/new" element={<NewAnalysis />} />
           <Route path="/projects/:id" element={<ProjectDetail />} />
+          <Route path="/ip-factory" element={<IpFactory />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

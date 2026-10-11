@@ -1,0 +1,117 @@
+{
+  "name": "IpSeed",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "gap": {
+      "type": "string"
+    },
+    "pain_signal": {
+      "type": "string"
+    },
+    "source_channel": {
+      "type": "string"
+    },
+    "solution": {
+      "type": "string"
+    },
+    "asymmetric_score": {
+      "type": "number"
+    },
+    "mini_plan": {
+      "type": "string"
+    },
+    "blueprint": {
+      "type": "object",
+      "properties": {
+        "tech_stack": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "db_schema": {
+          "type": "string"
+        },
+        "core_logic": {
+          "type": "string"
+        }
+      }
+    },
+    "strategy": {
+      "type": "string",
+      "enum": [
+        "hold",
+        "flip",
+        "build"
+      ],
+      "default": "hold"
+    },
+    "strategy_note": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "seed",
+        "built"
+      ],
+      "default": "seed"
+    },
+    "repo_name": {
+      "type": "string"
+    },
+    "yield_date": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "gap",
+    "solution",
+    "yield_date"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

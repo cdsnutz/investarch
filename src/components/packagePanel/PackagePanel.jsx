@@ -23,7 +23,8 @@ const FOLDERS = [
   '/02_Technical_Vault/  (codebase, full specification, onboarding guide, user manual)',
   '/03_Financial_Leverage/  (loan justification, formal bank application, capital directory)',
   '/04_Future_IP_Portfolio/  (three IP innovation mini-plans)',
-  '/05_Audit/  (institutional readiness score)'
+  '/05_Audit/  (institutional readiness score)',
+  '/06_IP_Factory_Daily_Yield/  (daily IP seeds, legal filings, liquidation prospectuses)'
 ];
 
 const slug = (s) => (s || 'Company').replace(/[^a-z0-9]+/gi, '_').replace(/^_|_$/g, '');
@@ -63,6 +64,44 @@ function fundingSections(funding) {
     s.push({ heading: f.name, body: lines.join('\n') });
   });
   return s;
+}
+
+function ipYieldDocs(ipYield) {
+  const docs = [];
+  const seeds = (ipYield?.seeds || []).slice().sort((a, b) => (b.asymmetric_score || 0) - (a.asymmetric_score || 0));
+  const filingsBySeed = {};
+  (ipYield?.filings || []).forEach((f) => { (filingsBySeed[f.seed_id] = filingsBySeed[f.seed_id] || []).push(f); });
+  const prospectusBySeed = {};
+  (ipYield?.prospectuses || []).forEach((p) => { prospectusBySeed[p.seed_id] = p; });
+  seeds.forEach((seed, i) => {
+    const s = slug(seed.title);
+    const bp = seed.blueprint || {};
+    const planSections = [
+      { heading: 'The Gap', body: seed.gap || '' },
+      ...(seed.pain_signal ? [{ heading: 'Pain-Signal', body: `${seed.pain_signal}\n\nSource: ${seed.source_channel || 'unlisted'}` }] : []),
+      { heading: 'The Solution', body: seed.solution || '' },
+      { heading: 'Business Case', body: seed.mini_plan || '' },
+      ...(bp.tech_stack?.length ? [{ heading: 'Tech Stack', body: bp.tech_stack.join('\n') }] : []),
+      ...(bp.db_schema ? [{ heading: 'Database Schema', body: bp.db_schema }] : []),
+      ...(bp.core_logic ? [{ heading: 'Core Logic', body: bp.core_logic }] : []),
+      { heading: 'Wealth Strategy', body: `${(seed.strategy || 'hold').toUpperCase()}${seed.strategy_note ? ` | ${seed.strategy_note}` : ''}` }
+    ];
+    docs.push({ name: `06_IP_Factory_Daily_Yield/Daily_Seeds_${seed.yield_date || 'yield'}/Seed_${String(i + 1).padStart(2, '0')}_${s}_MiniPlan.pdf`, args: { title: `IP Seed ${String(i + 1).padStart(2, '0')}: ${seed.title}`, subtitle: `Asymmetric advantage ${seed.asymmetric_score ?? '-'}/10 | ${seed.yield_date || ''}`, sections: planSections, footer: 'InvestArch IP Factory' } });
+    (filingsBySeed[seed.id] || []).forEach((f, j) => {
+      const label = f.filing_type === 'patent' ? 'Patent_Application_Draft' : f.filing_type === 'trademark' ? 'Trademark_Filing_Packet' : 'Deed_of_Ownership';
+      const sections = f.filing_type === 'patent'
+        ? [{ heading: 'Abstract', body: f.abstract || '' }, { heading: 'Claims', body: f.claims || '' }, { heading: 'Detailed Description', body: f.detailed_description || '' }, { heading: 'Prior Art Note', body: f.prior_art_note || '' }]
+        : f.filing_type === 'trademark'
+          ? [{ heading: 'Brand Name', body: f.brand_name || '' }, { heading: 'Trademark Classes', body: f.trademark_classes || '' }, { heading: 'Logo Concepts', body: f.logo_concepts || '' }, { heading: 'Clearance Note', body: f.clearance_note || '' }]
+          : [{ heading: 'Deed Text', body: f.deed_text || '' }];
+      docs.push({ name: `06_IP_Factory_Daily_Yield/Legal_Filings/${String(i + 1).padStart(2, '0')}_${s}_${label}${j > 0 ? `_${j + 1}` : ''}.pdf`, args: { title: `${seed.title}: ${label.replace(/_/g, ' ')}`, subtitle: 'Draft legal work product for attorney review', sections, footer: 'InvestArch IP Registrar' } });
+    });
+    const prospectus = prospectusBySeed[seed.id];
+    if (prospectus) {
+      docs.push({ name: `06_IP_Factory_Daily_Yield/Liquidation_Prospectus/${String(i + 1).padStart(2, '0')}_${s}_Prospectus.pdf`, args: { title: `Liquidation Prospectus: ${seed.title}`, subtitle: `${prospectus.offer_type} offer | indicative`, sections: [{ heading: 'Target Acquirers and Licensees', body: (prospectus.targets || []).map((t, k) => `${k + 1}. ${t.name}: ${t.rationale}`).join('\n\n') }, { heading: 'Prospectus', body: prospectus.prospectus || '' }, { heading: 'Offer Terms', body: prospectus.offer_terms || '' }], footer: 'InvestArch IP Dealer' } });
+    }
+  });
+  return docs;
 }
 
 export default function PackagePanel({ project, funding }) {
@@ -110,6 +149,7 @@ export default function PackagePanel({ project, funding }) {
     (data.daydream?.ideas || []).slice(0, 3).forEach((idea, i) => {
       docs.push({ name: `04_Future_IP_Portfolio/IP_Innovation_0${i + 1}_Plan.pdf`, args: { title: `IP Innovation 0${i + 1}: ${idea.name}`, subtitle: project.company_name, footer: project.company_name || 'InvestArch', sections: [{ heading: 'Thesis', body: idea.thesis }, ...(idea.sections || [])] } });
     });
+    ipYieldDocs(data.ipYield).forEach((d) => docs.push(d));
     const zip = new JSZip();
     docs.forEach((d) => zip.file(d.name, buildPdf(d.args)));
     (data.codebase?.files || []).forEach((f) => zip.file(`02_Technical_Vault/Codebase/${f.path}`, f.content));
@@ -136,6 +176,12 @@ export default function PackagePanel({ project, funding }) {
       setPkg(data);
       const cb = await base44.functions.invoke('buildCodebase', { projectId: project.id });
       data.codebase = cb.data;
+      const [seedPage, filingPage, prospectusPage] = await Promise.all([
+        base44.entities.IpSeed.filter({}, { sort: '-asymmetric_score', limit: 100 }),
+        base44.entities.IpFiling.filter({}, { limit: 100 }),
+        base44.entities.IpProspectus.filter({}, { limit: 100 })
+      ]);
+      data.ipYield = { seeds: seedPage.items || [], filings: filingPage.items || [], prospectuses: prospectusPage.items || [] };
       setPkg({ ...data });
       setStage(STAGES.length - 1);
       triggerDownload(await assembleZip(data));

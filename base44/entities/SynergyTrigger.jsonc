@@ -1,0 +1,67 @@
+{
+  "name": "SynergyTrigger",
+  "type": "object",
+  "properties": {
+    "source_seed_id": {
+      "type": "string"
+    },
+    "target_seed_id": {
+      "type": "string"
+    },
+    "trigger_name": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string"
+    },
+    "channel": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "source_seed_id",
+    "target_seed_id",
+    "trigger_name"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

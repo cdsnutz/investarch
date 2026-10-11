@@ -1,11 +1,11 @@
 {
   "name": "Sovereign IP Hunt",
-  "description": "Daily sovereign cycle: Metamorphosis learns from the portfolio, the hunt yields 20 IP-seeds, War-Room maps disruptions, Ghost Validation tests demand, Treasury prices the portfolio, and the Execution Order is issued",
+  "description": "Daily sovereign cycle V7: Metamorphosis learns, the hunt yields 20 IP-seeds, War-Room maps disruptions, Ghost Validation tests demand, Treasury prices the portfolio, Deployment and Traffic kits are cut, the Synergy loop cross-pollinates, the Governance Nexus scans for infringement, the Neural-CFO allocates capital, and the Execution Order is issued",
   "definition": {
     "document": {
       "dsl": "1.0.0",
       "name": "sovereign_ip_hunt",
-      "version": "2.0",
+      "version": "3.0",
       "namespace": "base44"
     },
     "do": [
@@ -86,10 +86,80 @@
             "function_name": "runTreasury",
             "args": {}
           },
-          "then": "issue_order",
+          "then": "deploy_kit",
           "x-base44": {
             "title": "Treasury",
             "description": "Price the portfolio"
+          }
+        }
+      },
+      {
+        "deploy_kit": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runDeploymentKit",
+            "args": {}
+          },
+          "then": "traffic_siphon",
+          "x-base44": {
+            "title": "Deployment Pod",
+            "description": "Zero-touch deploy kits"
+          }
+        }
+      },
+      {
+        "traffic_siphon": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runTrafficSiphon",
+            "args": {}
+          },
+          "then": "synergy_sync",
+          "x-base44": {
+            "title": "Traffic-Siphon",
+            "description": "Distribution kits"
+          }
+        }
+      },
+      {
+        "synergy_sync": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runSynergySync",
+            "args": {}
+          },
+          "then": "governance_scan",
+          "x-base44": {
+            "title": "Synergy-Core",
+            "description": "Cross-pollination upsells"
+          }
+        }
+      },
+      {
+        "governance_scan": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runGovernanceScan",
+            "args": {}
+          },
+          "then": "neural_cfo",
+          "x-base44": {
+            "title": "Governance Nexus",
+            "description": "Infringement scan + C&D drafts"
+          }
+        }
+      },
+      {
+        "neural_cfo": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runNeuralCFO",
+            "args": {}
+          },
+          "then": "issue_order",
+          "x-base44": {
+            "title": "Neural-CFO",
+            "description": "Capital allocation"
           }
         }
       },

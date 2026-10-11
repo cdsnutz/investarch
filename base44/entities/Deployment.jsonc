@@ -1,0 +1,98 @@
+{
+  "name": "Deployment",
+  "type": "object",
+  "properties": {
+    "seed_id": {
+      "type": "string"
+    },
+    "platform": {
+      "type": "string"
+    },
+    "kit_configs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "dns_checklist": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "env_template": {
+      "type": "string"
+    },
+    "launch_note": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "kit_ready",
+        "deploying",
+        "live",
+        "offline"
+      ],
+      "default": "kit_ready"
+    },
+    "live_url": {
+      "type": "string"
+    },
+    "deployed_date": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "seed_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

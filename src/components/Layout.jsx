@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
-import { LayoutDashboard, Plus, LogOut, Crosshair, Radar, FlaskConical } from 'lucide-react';
+import { LayoutDashboard, Plus, LogOut, Radar, FlaskConical } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const NAV = [
@@ -15,51 +15,41 @@ export default function Layout() {
   const { pathname } = useLocation();
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-paper">
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-64 flex-col fixed inset-y-0 bg-slate-950 text-slate-300 border-r border-slate-800">
-        <div className="px-6 py-7 flex items-center gap-2.5 border-b border-slate-800/80">
-          <div className="size-8 rounded-md bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">
-            <Crosshair className="size-4 text-slate-950" />
-          </div>
-          <div>
-            <div className="text-sm font-semibold tracking-tight text-white">INVESTARCH</div>
-            <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Wealth &amp; Business Dossiers</div>
-          </div>
+      <aside className="hidden md:flex w-64 flex-col fixed inset-y-0 bg-bottle text-bottle-foreground">
+        <div className="px-6 py-7 border-b border-white/10">
+          <div className="font-heading text-xl tracking-tight">InvestArch</div>
+          <div className="text-[10px] uppercase tracking-[0.18em] text-white/50 mt-1">Wealth &amp; Business Dossiers</div>
         </div>
-        <nav className="flex-1 px-3 py-5 space-y-1">
+        <nav className="flex-1 px-4 py-6 space-y-0.5">
           {NAV.map((item) => {
             const active = pathname === item.to;
             return (
-              <Link key={item.to} to={item.to} className={cn("flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition", active ? "bg-slate-800 text-white" : "text-slate-400 hover:text-white hover:bg-slate-900")}>
-                <item.icon className="size-4" />
+              <Link key={item.to} to={item.to} className={cn("flex items-center gap-3 px-3 py-2.5 text-xs uppercase tracking-[0.12em] transition", active ? "bg-white/10 text-white" : "text-white/60 hover:text-white hover:bg-white/5")}>
+                <item.icon className="size-3.5" />
                 {item.label}
               </Link>
             );
           })}
         </nav>
-        <div className="px-4 py-4 border-t border-slate-800/80">
-          <div className="text-xs text-slate-500 truncate mb-2 px-1">{user?.email || 'Signed in'}</div>
-          <button onClick={() => logout()} className="flex items-center gap-2 text-xs text-slate-400 hover:text-white px-1">
+        <div className="px-4 py-4 border-t border-white/10">
+          <div className="text-xs text-white/50 truncate mb-2 px-1">{user?.email || 'Signed in'}</div>
+          <button onClick={() => logout()} className="flex items-center gap-2 text-xs text-white/60 hover:text-white px-1">
             <LogOut className="size-3.5" /> Sign out
           </button>
         </div>
       </aside>
 
       {/* Mobile top bar */}
-      <div className="md:hidden fixed top-0 inset-x-0 z-30 bg-slate-950 text-white px-4 h-14 flex items-center justify-between border-b border-slate-800">
-        <div className="flex items-center gap-2">
-          <div className="size-7 rounded-md bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">
-            <Crosshair className="size-4 text-slate-950" />
-          </div>
-          <span className="text-sm font-semibold tracking-tight">INVESTARCH</span>
-        </div>
+      <div className="md:hidden fixed top-0 inset-x-0 z-30 bg-bottle text-bottle-foreground px-4 h-14 flex items-center justify-between border-b border-white/10">
+        <span className="font-heading text-lg tracking-tight">InvestArch</span>
         <div className="flex items-center gap-4">
-          <Link to="/" className="text-slate-300"><LayoutDashboard className="size-5" /></Link>
-          <Link to="/new" className="text-slate-300"><Plus className="size-5" /></Link>
-          <Link to="/ip-factory" className="text-slate-300"><Radar className="size-5" /></Link>
-          <Link to="/simulator" className="text-slate-300"><FlaskConical className="size-5" /></Link>
-          <button onClick={() => logout()} className="text-slate-400"><LogOut className="size-5" /></button>
+          <Link to="/" className="text-white/70"><LayoutDashboard className="size-5" /></Link>
+          <Link to="/new" className="text-white/70"><Plus className="size-5" /></Link>
+          <Link to="/ip-factory" className="text-white/70"><Radar className="size-5" /></Link>
+          <Link to="/simulator" className="text-white/70"><FlaskConical className="size-5" /></Link>
+          <button onClick={() => logout()} className="text-white/50"><LogOut className="size-5" /></button>
         </div>
       </div>
 

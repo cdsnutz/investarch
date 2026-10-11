@@ -93,27 +93,6 @@ const EXIT_SCHEMA = {
   required: ["title", "acquirers", "sections"]
 };
 
-const CODEBASE_SCHEMA = {
-  type: "object",
-  properties: {
-    repo_name: { type: "string" },
-    files: {
-      type: "array",
-      items: {
-        type: "object",
-        properties: {
-          path: { type: "string" },
-          content: { type: "string" }
-        },
-        required: ["path", "content"]
-      }
-    },
-    user_manual: { type: "string" },
-    onboarding_guide: { type: "string" }
-  },
-  required: ["repo_name", "files", "user_manual", "onboarding_guide"]
-};
-
 const CREDIT_SCHEMA = {
   type: "object",
   properties: {
@@ -369,20 +348,6 @@ Then produce a Growth Blueprint of 6 items, two per lever, each with title and a
 - lever "IP Fortressing": which assets to patent, trademark, or otherwise protect to raise Legal Hardness and enterprise value.
 ${rules}`;
 
-    const codebasePrompt = `You are a staff full-stack engineer (BUILD POD). Using the product requirements and technical specification for this business, generate a complete monorepo codebase: a working directory structure, not snippets.
-
-Output files: 12 to 18 files covering:
-- README.md (what this is, how to run it)
-- Root configuration: package.json (with real dependencies), docker-compose.yml, .env.template
-- frontend/: React application shell (App.jsx, main entry, one or two core pages or components, API client)
-- backend/: API server (Node with Express, or Python with FastAPI), main entrypoint, routes matching the API surface, one or two core service modules
-- database/: schema file(s) implementing the data schemas
-Every file must be complete and internally consistent: imports match real paths, endpoints match routes, schema matches models. No placeholders, no TODO, no lorem, no stub functions. Keep each file focused and under 150 lines.
-Also produce:
-- user_manual: a plain-text end-user manual describing how the product operates, page by page.
-- onboarding_guide: a plain-text developer onboarding guide: clone, environment setup, run locally, deploy, and where each module lives.
-${rules}`;
-
     const [prd, legal, valuation, moat, exit] = await Promise.all([
       base44.asServiceRole.integrations.Core.InvokeLLM({ prompt: prdPrompt, response_json_schema: DOC_SCHEMA }),
       base44.asServiceRole.integrations.Core.InvokeLLM({ prompt: legalPrompt, response_json_schema: DOC_SCHEMA }),
@@ -391,15 +356,14 @@ ${rules}`;
       base44.asServiceRole.integrations.Core.InvokeLLM({ prompt: exitPrompt, response_json_schema: EXIT_SCHEMA })
     ]);
 
-    const [spec, audit, credit, daydream, codebase] = await Promise.all([
+    const [spec, audit, credit, daydream] = await Promise.all([
       base44.asServiceRole.integrations.Core.InvokeLLM({ prompt: specPrompt, response_json_schema: DOC_SCHEMA }),
       base44.asServiceRole.integrations.Core.InvokeLLM({ prompt: auditPrompt, response_json_schema: AUDIT_SCHEMA }),
       base44.asServiceRole.integrations.Core.InvokeLLM({ prompt: creditPrompt, response_json_schema: CREDIT_SCHEMA }),
-      base44.asServiceRole.integrations.Core.InvokeLLM({ prompt: daydreamPrompt, response_json_schema: DAYDREAM_SCHEMA }),
-      base44.asServiceRole.integrations.Core.InvokeLLM({ prompt: codebasePrompt, model: 'claude-sonnet-5', response_json_schema: CODEBASE_SCHEMA })
+      base44.asServiceRole.integrations.Core.InvokeLLM({ prompt: daydreamPrompt, response_json_schema: DAYDREAM_SCHEMA })
     ]);
 
-    return Response.json({ prd, spec, legal, valuation, moat, exit, credit, daydream, codebase, irs: audit });
+    return Response.json({ prd, spec, legal, valuation, moat, exit, credit, daydream, irs: audit });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

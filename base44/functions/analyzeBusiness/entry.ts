@@ -126,9 +126,11 @@ Produce all of the following:
 Ground everything in real data. Quality and specificity over quantity.`;
 
     const research = await base44.asServiceRole.integrations.Core.InvokeLLM({
-      prompt: researchPrompt,
-      add_context_from_internet: true,
-      model: "gemini_3_8_flash",
+      prompt: isIdea
+        ? `${researchPrompt}\nNote: the target is a raw idea with no existing web presence, so web context is not used here. Ground market sizing, competitor scores, and funding sources in industry-standard benchmarks, and label every modeled figure as an analyst estimate with its assumption stated.`
+        : researchPrompt,
+      add_context_from_internet: !isIdea,
+      model: isIdea ? 'automatic' : "gemini_3_8_flash",
       response_json_schema: RESEARCH_SCHEMA
     });
 

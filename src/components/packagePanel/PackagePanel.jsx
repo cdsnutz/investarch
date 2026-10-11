@@ -134,6 +134,9 @@ export default function PackagePanel({ project, funding }) {
       const res = await base44.functions.invoke('generateReadinessPackage', { projectId: project.id });
       const data = res.data;
       setPkg(data);
+      const cb = await base44.functions.invoke('buildCodebase', { projectId: project.id });
+      data.codebase = cb.data;
+      setPkg({ ...data });
       setStage(STAGES.length - 1);
       triggerDownload(await assembleZip(data));
     } catch (e) {

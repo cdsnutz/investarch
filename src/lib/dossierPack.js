@@ -19,7 +19,7 @@ function splitIntoSections(text) {
   return sections.map((s) => ({ heading: s.heading, body: s.body.trim() })).filter((s) => s.heading || s.body);
 }
 
-export async function buildDossierPack({ seed, filings, prospectus, onboardingGuide }) {
+export async function buildDossierPack({ seed, filings, prospectus, codebase }) {
   const zip = new JSZip();
   const base = (seed.title || 'IP-Asset').replace(/[^\w\s-]/g, '').trim() || 'IP-Asset';
 
@@ -68,11 +68,17 @@ export async function buildDossierPack({ seed, filings, prospectus, onboardingGu
     }));
   }
 
-  if (onboardingGuide) {
+  if (codebase?.files?.length) {
+    (codebase.files || []).forEach((f) => zip.file(`${base}/Codebase/${f.path}`, f.content));
+    zip.file(`${base}/Codebase/Developer_Onboarding_Guide.md`, codebase.onboarding_guide || '');
+    zip.file(`${base}/Codebase/User_Manual.md`, codebase.user_manual || '');
+  }
+
+  if (codebase?.onboarding_guide) {
     zip.file(`${base}/04_Developer_Onboarding_Guide.pdf`, buildPdf({
       title: `Developer Onboarding Guide: ${seed.title}`,
       subtitle: 'Architecture, setup and extension points for the engineering team',
-      sections: splitIntoSections(onboardingGuide),
+      sections: splitIntoSections(codebase.onboarding_guide),
       footer: 'Developer Onboarding Guide — Confidential'
     }));
   }

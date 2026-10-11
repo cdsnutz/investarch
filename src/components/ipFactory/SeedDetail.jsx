@@ -90,13 +90,10 @@ export default function SeedDetail({ seed, filings, prospectus, open, onClose, o
       const res = await base44.functions.invoke('liquidateIp', { seedId: seed.id });
       prospectusRec = res.data?.prospectus;
     }
-    let guide = seed.onboarding_guide || '';
-    if (!guide) {
-      const res = await base44.functions.invoke('architectSeed', { seedId: seed.id });
-      guide = res.data?.onboarding_guide || '';
-    }
+    const arch = await base44.functions.invoke('architectSeed', { seedId: seed.id });
+    const codebase = arch.data || {};
     const fresh = await base44.entities.IpFiling.filter({ seed_id: seed.id }, { limit: 20 });
-    const blob = await buildDossierPack({ seed, filings: fresh.items || [], prospectus: prospectusRec, onboardingGuide: guide });
+    const blob = await buildDossierPack({ seed, filings: fresh.items || [], prospectus: prospectusRec, codebase });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -164,7 +161,7 @@ export default function SeedDetail({ seed, filings, prospectus, open, onClose, o
             )}
           </div>
           {busy === 'pack' && (
-            <p className="text-xs text-muted-foreground">Drafting any missing filings and the prospectus, then assembling the PDF pack. This can take a few minutes.</p>
+            <p className="text-xs text-muted-foreground">Drafting any missing filings and the prospectus, rebuilding the codebase, then assembling the pack. This can take a few minutes.</p>
           )}
 
           {codebase?.onboarding_guide && (

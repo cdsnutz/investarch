@@ -137,6 +137,24 @@ export default async function(req) {
     const created = await db.GateVerdict.bulkCreate(verdicts);
     await db.LogicGate.bulkUpdate(updates);
 
+    // Enforcement feedback: any flag or block is logged for the Genesis pod, so the next
+    // self-upgrade cycle designs the capability that closes the breach.
+    const breaches = verdicts.filter((v) => v.verdict === 'flag' || v.verdict === 'blocked');
+    let feedback_logged = 0;
+    if (breaches.length) {
+      const constPage = await base44.asServiceRole.entities.LogicConstant.filter({}, { sort: '-defined_date', limit: 1, fields: ['version'] });
+      await base44.asServiceRole.entities.EvolutionLog.create({
+        version: constPage.items?.[0]?.version || 'Ω',
+        capability_name: 'Axiom Logic Gate Enforcement',
+        bottleneck_addressed: `${breaches.length} gate breach(es): ${breaches.map((b) => `${b.gate_name} (${b.verdict})`).join('; ')}`,
+        upgrade_design: 'Design the capability or data path that brings each breached metric back inside its gate threshold, then re-run the enforcement pod.',
+        pod_targets: ['Gate-Architect', 'Omega-Code'],
+        autonomous_note: 'Logged automatically by runAxiomGates on enforcement breach.',
+        log_date: t
+      });
+      feedback_logged = 1;
+    }
+
     const passed = verdicts.filter((v) => v.verdict === 'pass').length;
     const flagged = verdicts.filter((v) => v.verdict === 'flag').length;
     const blocked = verdicts.filter((v) => v.verdict === 'blocked').length;
@@ -147,7 +165,8 @@ export default async function(req) {
       flagged,
       blocked,
       not_measurable: unmeasurable,
-      verdicts_recorded: (created || []).length || verdicts.length
+      verdicts_recorded: (created || []).length || verdicts.length,
+      feedback_logged
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

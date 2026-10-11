@@ -1,0 +1,66 @@
+{
+  "name": "Heuristic",
+  "type": "object",
+  "properties": {
+    "category": {
+      "type": "string"
+    },
+    "insight": {
+      "type": "string"
+    },
+    "directive": {
+      "type": "string"
+    },
+    "weight": {
+      "type": "number"
+    },
+    "generated_date": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "insight",
+    "directive"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,14 +1,28 @@
 {
   "name": "Sovereign IP Hunt",
-  "description": "Daily run of the Signal Miner and Synthesizer: harvests market pain-signals, yields 20 IP-seeds, and assigns the Hold/Flip/Build wealth strategy",
+  "description": "Daily sovereign cycle: Metamorphosis learns from the portfolio, the hunt yields 20 IP-seeds, War-Room maps disruptions, Ghost Validation tests demand, Treasury prices the portfolio, and the Execution Order is issued",
   "definition": {
     "document": {
       "dsl": "1.0.0",
       "name": "sovereign_ip_hunt",
-      "version": "1.0",
+      "version": "2.0",
       "namespace": "base44"
     },
     "do": [
+      {
+        "learn": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runMetamorphosis",
+            "args": {}
+          },
+          "then": "run_hunt",
+          "x-base44": {
+            "title": "Metamorphosis",
+            "description": "Extract learned heuristics"
+          }
+        }
+      },
       {
         "run_hunt": {
           "call": "invoke_backend_function",
@@ -30,10 +44,66 @@
             "function_name": "ipWealthStrategy",
             "args": {}
           },
-          "then": "end",
+          "then": "war_room",
           "x-base44": {
             "title": "Assign wealth strategy",
             "description": "Hold / Flip / Build verdicts"
+          }
+        }
+      },
+      {
+        "war_room": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runWarRoom",
+            "args": {}
+          },
+          "then": "ghost_validate",
+          "x-base44": {
+            "title": "War-Room",
+            "description": "Disruption blueprints"
+          }
+        }
+      },
+      {
+        "ghost_validate": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runGhostValidation",
+            "args": {}
+          },
+          "then": "price_portfolio",
+          "x-base44": {
+            "title": "Ghost Validation",
+            "description": "Amplifier demand reads"
+          }
+        }
+      },
+      {
+        "price_portfolio": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runTreasury",
+            "args": {}
+          },
+          "then": "issue_order",
+          "x-base44": {
+            "title": "Treasury",
+            "description": "Price the portfolio"
+          }
+        }
+      },
+      {
+        "issue_order": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runExecutionOrder",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Execution Order",
+            "description": "Build / Protect / Liquidate / Leverage"
           }
         }
       }

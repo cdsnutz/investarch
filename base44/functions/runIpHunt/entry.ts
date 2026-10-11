@@ -58,6 +58,15 @@ export default async function(req) {
     const user = await base44.auth.me();
     const db = user ? base44.entities : base44.asServiceRole.entities;
 
+    // V6.0: heuristics learned by the Metamorphosis Pod steer the Synthesizer
+    let heuristicsBlock = '';
+    try {
+      const heuristics = await base44.asServiceRole.entities.Heuristic.filter({}, { sort: '-created_date', limit: 6 });
+      if ((heuristics.items || []).length) {
+        heuristicsBlock = `\n\nLEARNED HEURISTICS from previous cycles (obey these when shaping seeds):\n${(heuristics.items || []).map((h, i) => `${i + 1}. [${h.category || 'general'}] ${h.directive}`).join('\n')}`;
+      }
+    } catch { /* heuristics entity not yet populated */ }
+
     // --- Stage 1: The Signal Miner — live market SIGINT for pain-signals ---
     const signalPrompt = `You are a market SIGINT operator running live reconnaissance across consumer and developer channels (Reddit threads, X posts, app-store reviews, patent filings, niche forums).
 
@@ -83,7 +92,7 @@ Rules: no invented quotes attributed to real people. If evidence is inferential 
     const seedPrompt = `You are the Synthesizer of an IP Factory. Below are 12 live market pain-signals from the Signal Miner. Convert them into EXACTLY 20 IP-SEEDS by applying Asymmetric Innovation: do not merely solve the stated problem — position each solution as the category-owning answer ("Category King") that makes incumbents look obsolete.
 
 PAIN-SIGNALS:
-${JSON.stringify(signals)}
+${JSON.stringify(signals)}${heuristicsBlock}
 
 For each seed return:
 1. title — a sharp asset name (product-grade, trademarkable feel).

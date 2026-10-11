@@ -16,9 +16,10 @@ const CODEBASE_SCHEMA = {
       }
     },
     onboarding_guide: { type: "string" },
-    user_manual: { type: "string" }
+    user_manual: { type: "string" },
+    ecosystem_interlocks: { type: "string" }
   },
-  required: ["repo_name", "files", "onboarding_guide", "user_manual"]
+  required: ["repo_name", "files", "onboarding_guide", "user_manual", "ecosystem_interlocks"]
 };
 
 export default async function(req) {
@@ -34,6 +35,10 @@ export default async function(req) {
     const seed = await base44.entities.IpSeed.get(seedId);
     if (!seed) return Response.json({ error: 'Seed not found.' }, { status: 404 });
 
+    // V6.0 Omni-Build: sibling repos for cross-app synergy
+    const siblings = await base44.entities.IpSeed.filter({ status: 'built' }, { limit: 20, fields: ['title', 'repo_name'] });
+    const siblingList = (siblings.items || []).filter((s) => s.id !== seedId).map((s) => `${s.title} (${s.repo_name || 'unnamed'})`).join('; ') || 'none yet';
+
     const prompt = `You are the Architect of an IP Factory: you convert an IP-seed into a TANGIBLE, EXPORTABLE ASSET — a working full-stack monorepo skeleton.
 
 IP-SEED:
@@ -45,7 +50,8 @@ Rules: every file must be internally consistent (imports resolve, ports and env 
 
 Also produce:
 - onboarding_guide — 300 to 450 words for a developer taking over this repository: architecture map, env setup, how the core logic module works, extension points.
-- user_manual — 200 to 300 words explaining the product to an operator: what it does, the primary workflow, and the differentiating capability.`;
+- user_manual — 200 to 300 words explaining the product to an operator: what it does, the primary workflow, and the differentiating capability.
+- ecosystem_interlocks — the cross-app synergy contract: name the shared "Core Neural Layer" (a common core/ package: shared DB client, shared auth/session model, shared event bus) that must stay identical across sibling repos so the ecosystem interlocks, then specify which sibling repos this app exchanges data or users with (${siblingList}) and how, so owning one app creates pull toward the others. 120 to 200 words. No filler.`;
 
     const codebase = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt,
@@ -53,7 +59,7 @@ Also produce:
     });
     if (!codebase?.files?.length) return Response.json({ error: 'Architect returned no files.' }, { status: 502 });
 
-    await base44.entities.IpSeed.update(seedId, { status: 'built', repo_name: codebase.repo_name });
+    await base44.entities.IpSeed.update(seedId, { status: 'built', repo_name: codebase.repo_name, ecosystem_interlocks: codebase.ecosystem_interlocks || '' });
     return Response.json(codebase);
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

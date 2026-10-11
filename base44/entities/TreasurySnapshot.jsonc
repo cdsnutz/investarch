@@ -1,0 +1,118 @@
+{
+  "name": "TreasurySnapshot",
+  "type": "object",
+  "properties": {
+    "snapshot_date": {
+      "type": "string"
+    },
+    "total_valuation": {
+      "type": "number"
+    },
+    "asset_count": {
+      "type": "number"
+    },
+    "built_count": {
+      "type": "number"
+    },
+    "protected_count": {
+      "type": "number"
+    },
+    "validated_count": {
+      "type": "number"
+    },
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "seed_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "hard_score": {
+            "type": "number"
+          },
+          "demand_score": {
+            "type": "number"
+          },
+          "value": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "leverage_matrix": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "collateral": {
+            "type": "string"
+          },
+          "ltv": {
+            "type": "string"
+          },
+          "loan_amount": {
+            "type": "number"
+          },
+          "rationale": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "snapshot_date",
+    "total_valuation"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

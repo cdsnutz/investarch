@@ -63,6 +63,9 @@
     "repo_name": {
       "type": "string"
     },
+    "ecosystem_interlocks": {
+      "type": "string"
+    },
     "yield_date": {
       "type": "string"
     }

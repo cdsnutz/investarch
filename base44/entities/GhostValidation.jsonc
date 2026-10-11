@@ -1,0 +1,91 @@
+{
+  "name": "GhostValidation",
+  "type": "object",
+  "properties": {
+    "seed_id": {
+      "type": "string"
+    },
+    "hook": {
+      "type": "string"
+    },
+    "landing_headline": {
+      "type": "string"
+    },
+    "landing_copy": {
+      "type": "string"
+    },
+    "variants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "angle": {
+            "type": "string"
+          },
+          "copy": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "demand_score": {
+      "type": "number"
+    },
+    "projected_waitlist": {
+      "type": "number"
+    },
+    "verdict": {
+      "type": "string"
+    },
+    "generated_date": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "seed_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -13,6 +13,18 @@
         "deed"
       ]
     },
+    "status": {
+      "type": "string",
+      "enum": [
+        "drafted",
+        "filed",
+        "granted"
+      ],
+      "default": "drafted"
+    },
+    "ser_value": {
+      "type": "number"
+    },
     "abstract": {
       "type": "string"
     },

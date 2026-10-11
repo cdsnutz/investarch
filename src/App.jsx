@@ -19,7 +19,18 @@ import NewAnalysis from '@/pages/NewAnalysis';
 import ProjectDetail from '@/pages/ProjectDetail';
 import IpFactory from '@/pages/IpFactory';
 import PrecisionSimulator from '@/pages/PrecisionSimulator';
-// Add page imports here
+import StrategyVault from '@/pages/StrategyVault';
+import AssetManagement from '@/pages/AssetManagement';
+import SignalMonitoring from '@/pages/SignalMonitoring';
+import AccountSettings from '@/pages/AccountSettings';
+import SynthesisLogs from '@/pages/SynthesisLogs';
+import MarketIntel from '@/pages/MarketIntel';
+import ProspectusManager from '@/pages/ProspectusManager';
+import ExecutionOrders from '@/pages/ExecutionOrders';
+import PersonaManager from '@/pages/PersonaManager';
+import InvestorMatchmaker from '@/pages/InvestorMatchmaker';
+import SynthesisArchive from '@/pages/SynthesisArchive';
+import StrategyBlueprint from '@/pages/StrategyBlueprint';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -59,6 +70,18 @@ const AuthenticatedApp = () => {
           <Route path="/projects/:id" element={<ProjectDetail />} />
           <Route path="/ip-factory" element={<IpFactory />} />
           <Route path="/simulator" element={<PrecisionSimulator />} />
+          <Route path="/strategy-vault" element={<StrategyVault />} />
+          <Route path="/asset-management" element={<AssetManagement />} />
+          <Route path="/signal-monitoring" element={<SignalMonitoring />} />
+          <Route path="/account-settings" element={<AccountSettings />} />
+          <Route path="/synthesis-logs" element={<SynthesisLogs />} />
+          <Route path="/market-intel" element={<MarketIntel />} />
+          <Route path="/prospectus-manager" element={<ProspectusManager />} />
+          <Route path="/execution-orders" element={<ExecutionOrders />} />
+          <Route path="/persona-manager" element={<PersonaManager />} />
+          <Route path="/investor-matchmaker" element={<InvestorMatchmaker />} />
+          <Route path="/synthesis-archive" element={<SynthesisArchive />} />
+          <Route path="/strategy-blueprint" element={<StrategyBlueprint />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

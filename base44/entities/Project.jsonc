@@ -20,6 +20,12 @@
       ],
       "default": "analyzing"
     },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "value_proposition": {
       "type": "string"
     },

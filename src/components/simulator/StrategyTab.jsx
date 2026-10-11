@@ -6,7 +6,7 @@ import RunButton from "@/components/simulator/RunButton";
 const DECISION_LABEL = { scale: 'Scale', patent: 'Protect', acquire: 'Acquire', hold: 'Hold' };
 
 export default function StrategyTab({ data, onLoad, fmtUsd }) {
-  const { sims, treasury, decisions, plans, orders } = data;
+  const { sims = [], treasury, decisions = [], plans = [], orders = [] } = data || {};
   const latestSim = sims[0] || null;
 
   return (

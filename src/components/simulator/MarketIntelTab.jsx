@@ -6,7 +6,7 @@ import RunButton from "@/components/simulator/RunButton";
 const STATUS_LABEL = { observed: 'Observed', actionable: 'Actionable', struck: 'Struck', predicted: 'Predicted', staked: 'Staked', foundation_building: 'Foundation building', operational: 'Operational' };
 
 export default function MarketIntelTab({ data, onLoad, fmtUsd }) {
-  const { signals, vectors, grip } = data;
+  const { signals = [], vectors = [], grip } = data || {};
 
   return (
     <div className="space-y-6">

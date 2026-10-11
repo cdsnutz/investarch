@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, Radar, Crosshair, BrainCircuit } from 'lucide-react';
-import SeedCard from '@/components/ipFactory/SeedCard';
-import SeedDetail from '@/components/ipFactory/SeedDetail';
+import { SeedBody } from '@/components/ipFactory/SeedDetail';
+import { Badge } from '@/components/ui/badge';
 
 const STAGES = [
   'Signal Miner: sweeping Reddit, X, app stores, patents, forums…',
@@ -19,7 +19,6 @@ export default function IpFactory() {
   const [filings, setFilings] = useState([]);
   const [prospectuses, setProspectuses] = useState([]);
   const [filter, setFilter] = useState('all');
-  const [openSeed, setOpenSeed] = useState(null);
   const [running, setRunning] = useState(false);
   const [stage, setStage] = useState('');
   const [error, setError] = useState('');
@@ -67,7 +66,6 @@ export default function IpFactory() {
   const today = new Date().toISOString().slice(0, 10);
   const todaysCount = (seeds || []).filter((s) => s.yield_date === today).length;
   const strategyCount = (k) => (seeds || []).filter((s) => s.strategy === k).length;
-  const openSeedObj = (seeds || []).find((s) => s.id === openSeed);
 
   return (
     <div className="p-6 md:p-12 max-w-6xl mx-auto">
@@ -125,36 +123,29 @@ export default function IpFactory() {
       {error && <p className="text-sm text-destructive mb-4">{error}</p>}
 
       {seeds === null ? (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-40 rounded-xl" />)}
+        <div className="space-y-6">
+          {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-96 rounded-xl" />)}
         </div>
       ) : visible.length === 0 ? (
         <div className="rounded-xl border bg-card p-10 text-center text-sm text-muted-foreground">
           No seeds{filter !== 'all' ? ` on the ${filter} ledger` : ''} yet. Run the hunt to harvest the market.
         </div>
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="space-y-6">
           {visible.map((s) => (
-            <SeedCard
-              key={s.id}
-              seed={s}
-              filings={filingsBySeed[s.id] || []}
-              prospectus={prospectusBySeed[s.id]}
-              onOpen={() => setOpenSeed(s.id)}
-            />
+            <div key={s.id} className="rounded-xl border bg-card p-6">
+              <div className="mb-4">
+                <h3 className="text-xl font-semibold leading-snug">{s.title}</h3>
+                <div className="flex flex-wrap items-center gap-2 mt-2">
+                  <Badge variant="secondary" className="bg-slate-100">Asym {s.asymmetric_score}/10</Badge>
+                  <Badge variant="secondary" className="bg-slate-100">{s.strategy}</Badge>
+                  {s.yield_date && <span className="text-xs text-muted-foreground">Yield: {s.yield_date}</span>}
+                </div>
+              </div>
+              <SeedBody seed={s} filings={filingsBySeed[s.id] || []} prospectus={prospectusBySeed[s.id]} onRefresh={load} />
+            </div>
           ))}
         </div>
-      )}
-
-      {openSeedObj && (
-        <SeedDetail
-          seed={openSeedObj}
-          filings={filingsBySeed[openSeedObj.id] || []}
-          prospectus={prospectusBySeed[openSeedObj.id]}
-          open={true}
-          onClose={() => setOpenSeed(null)}
-          onRefresh={load}
-        />
       )}
     </div>
   );

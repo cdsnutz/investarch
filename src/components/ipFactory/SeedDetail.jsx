@@ -40,7 +40,7 @@ function FilingView({ filing }) {
   return <Block title="Deed of Ownership">{filing.deed_text}</Block>;
 }
 
-export default function SeedDetail({ seed, filings, prospectus, open, onClose, onRefresh }) {
+export function SeedBody({ seed, filings, prospectus, onRefresh }) {
   const [busy, setBusy] = useState('');
   const [codebase, setCodebase] = useState(null);
 
@@ -106,6 +106,92 @@ export default function SeedDetail({ seed, filings, prospectus, open, onClose, o
   const bp = seed.blueprint || {};
 
   return (
+    <div className="space-y-5">
+      <div className="space-y-3">
+        <Block title="The Gap">{seed.gap}</Block>
+        {seed.pain_signal && <Block title="Pain-Signal">{seed.pain_signal}</Block>}
+        <Block title="The Solution">{seed.solution}</Block>
+      </div>
+
+      {seed.mini_plan && <Block title="Mini-Plan">{seed.mini_plan}</Block>}
+
+      {(bp.tech_stack?.length || bp.db_schema || bp.core_logic) && (
+        <div className="rounded-lg border bg-muted/40 p-4 space-y-3">
+          <div className="flex items-center gap-2"><Wrench className="size-3.5 text-muted-foreground" /><h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Blueprint</h4></div>
+          {bp.tech_stack?.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">{bp.tech_stack.map((t, i) => <span key={i} className="text-xs rounded-md bg-background border px-2 py-0.5 font-mono">{t}</span>)}</div>
+          )}
+          {bp.db_schema && <Block title="Database Schema">{bp.db_schema}</Block>}
+          {bp.core_logic && <Block title="Core Logic">{bp.core_logic}</Block>}
+        </div>
+      )}
+
+      <div className="flex flex-wrap gap-2">
+        <Button size="sm" variant={seed.status === 'built' ? 'outline' : 'default'} onClick={buildCodebase} disabled={!!busy}>
+          {busy === 'build' ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <Wrench className="size-3.5 mr-1.5" />}
+          {seed.status === 'built' ? 'Rebuild codebase export' : 'Architect: build codebase'}
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => draft('patent')} disabled={!!busy}>
+          {busy === 'patent' ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <Scale className="size-3.5 mr-1.5" />} Draft patent
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => draft('trademark')} disabled={!!busy}>
+          {busy === 'trademark' ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <Tag className="size-3.5 mr-1.5" />} Trademark packet
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => draft('deed')} disabled={!!busy}>
+          {busy === 'deed' ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <FileSignature className="size-3.5 mr-1.5" />} Deed of ownership
+        </Button>
+        <Button size="sm" variant="outline" onClick={liquidate} disabled={!!busy}>
+          {busy === 'liquidate' ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <Handshake className="size-3.5 mr-1.5" />} Liquidation prospectus
+        </Button>
+        {(seed.strategy === 'flip' || seed.strategy === 'build') && (
+          <Button size="sm" onClick={buildPack} disabled={!!busy}>
+            {busy === 'pack' ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <FileArchive className="size-3.5 mr-1.5" />} Download dossier pack (PDFs)
+          </Button>
+        )}
+      </div>
+      {busy === 'pack' && (
+        <p className="text-xs text-muted-foreground">Drafting any missing filings and the prospectus, rebuilding the codebase, then assembling the pack. This can take a few minutes.</p>
+      )}
+
+      {codebase?.onboarding_guide && (
+        <Block title="Developer Onboarding">{codebase.onboarding_guide}</Block>
+      )}
+
+      {(filings || []).map((f) => (
+        <div key={f.id} className="rounded-lg border p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Scale className="size-3.5 text-muted-foreground" />
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {f.filing_type === 'patent' ? 'Patent Application Draft' : f.filing_type === 'trademark' ? 'Trademark Filing Packet' : 'IP Deed of Ownership'}
+            </h4>
+          </div>
+          <FilingView filing={f} />
+        </div>
+      ))}
+
+      {prospectus && (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <Handshake className="size-3.5 text-emerald-600" />
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Liquidation Prospectus</h4>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {(prospectus.targets || []).map((t, i) => (
+              <span key={i} className="text-xs rounded-md bg-background border px-2 py-0.5">{t.name}</span>
+            ))}
+          </div>
+          <div className="text-sm leading-relaxed whitespace-pre-wrap">{prospectus.prospectus}</div>
+          <Badge variant="secondary" className="bg-background">{prospectus.offer_type}</Badge>
+          {prospectus.lead_contact && <Block title="Lead Contact">{prospectus.lead_contact}</Block>}
+          {prospectus.offer_terms && <Block title="Offer Terms">{prospectus.offer_terms}</Block>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function SeedDetail({ seed, filings, prospectus, open, onClose, onRefresh }) {
+  return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
@@ -116,88 +202,7 @@ export default function SeedDetail({ seed, filings, prospectus, open, onClose, o
             {seed.yield_date && <span className="text-xs">Yield: {seed.yield_date}</span>}
           </DialogDescription>
         </DialogHeader>
-
-        <div className="space-y-5">
-          <div className="space-y-3">
-            <Block title="The Gap">{seed.gap}</Block>
-            {seed.pain_signal && <Block title="Pain-Signal">{seed.pain_signal}</Block>}
-            <Block title="The Solution">{seed.solution}</Block>
-          </div>
-
-          {seed.mini_plan && <Block title="Mini-Plan">{seed.mini_plan}</Block>}
-
-          {(bp.tech_stack?.length || bp.db_schema || bp.core_logic) && (
-            <div className="rounded-lg border bg-muted/40 p-4 space-y-3">
-              <div className="flex items-center gap-2"><Wrench className="size-3.5 text-muted-foreground" /><h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Blueprint</h4></div>
-              {bp.tech_stack?.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">{bp.tech_stack.map((t, i) => <span key={i} className="text-xs rounded-md bg-background border px-2 py-0.5 font-mono">{t}</span>)}</div>
-              )}
-              {bp.db_schema && <Block title="Database Schema">{bp.db_schema}</Block>}
-              {bp.core_logic && <Block title="Core Logic">{bp.core_logic}</Block>}
-            </div>
-          )}
-
-          <div className="flex flex-wrap gap-2">
-            <Button size="sm" variant={seed.status === 'built' ? 'outline' : 'default'} onClick={buildCodebase} disabled={!!busy}>
-              {busy === 'build' ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <Wrench className="size-3.5 mr-1.5" />}
-              {seed.status === 'built' ? 'Rebuild codebase export' : 'Architect: build codebase'}
-            </Button>
-            <Button size="sm" variant="outline" onClick={() => draft('patent')} disabled={!!busy}>
-              {busy === 'patent' ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <Scale className="size-3.5 mr-1.5" />} Draft patent
-            </Button>
-            <Button size="sm" variant="outline" onClick={() => draft('trademark')} disabled={!!busy}>
-              {busy === 'trademark' ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <Tag className="size-3.5 mr-1.5" />} Trademark packet
-            </Button>
-            <Button size="sm" variant="outline" onClick={() => draft('deed')} disabled={!!busy}>
-              {busy === 'deed' ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <FileSignature className="size-3.5 mr-1.5" />} Deed of ownership
-            </Button>
-            <Button size="sm" variant="outline" onClick={liquidate} disabled={!!busy}>
-              {busy === 'liquidate' ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <Handshake className="size-3.5 mr-1.5" />} Liquidation prospectus
-            </Button>
-            {(seed.strategy === 'flip' || seed.strategy === 'build') && (
-              <Button size="sm" onClick={buildPack} disabled={!!busy}>
-                {busy === 'pack' ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <FileArchive className="size-3.5 mr-1.5" />} Download dossier pack (PDFs)
-              </Button>
-            )}
-          </div>
-          {busy === 'pack' && (
-            <p className="text-xs text-muted-foreground">Drafting any missing filings and the prospectus, rebuilding the codebase, then assembling the pack. This can take a few minutes.</p>
-          )}
-
-          {codebase?.onboarding_guide && (
-            <Block title="Developer Onboarding">{codebase.onboarding_guide}</Block>
-          )}
-
-          {(filings || []).map((f) => (
-            <div key={f.id} className="rounded-lg border p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Scale className="size-3.5 text-muted-foreground" />
-                <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  {f.filing_type === 'patent' ? 'Patent Application Draft' : f.filing_type === 'trademark' ? 'Trademark Filing Packet' : 'IP Deed of Ownership'}
-                </h4>
-              </div>
-              <FilingView filing={f} />
-            </div>
-          ))}
-
-          {prospectus && (
-            <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 p-4 space-y-3">
-              <div className="flex items-center gap-2">
-                <Handshake className="size-3.5 text-emerald-600" />
-                <h4 className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Liquidation Prospectus</h4>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {(prospectus.targets || []).map((t, i) => (
-                  <span key={i} className="text-xs rounded-md bg-background border px-2 py-0.5">{t.name}</span>
-                ))}
-              </div>
-              <div className="text-sm leading-relaxed whitespace-pre-wrap">{prospectus.prospectus}</div>
-              <Badge variant="secondary" className="bg-background">{prospectus.offer_type}</Badge>
-              {prospectus.lead_contact && <Block title="Lead Contact">{prospectus.lead_contact}</Block>}
-              {prospectus.offer_terms && <Block title="Offer Terms">{prospectus.offer_terms}</Block>}
-            </div>
-          )}
-        </div>
+        <SeedBody seed={seed} filings={filings} prospectus={prospectus} onRefresh={onRefresh} />
       </DialogContent>
     </Dialog>
   );

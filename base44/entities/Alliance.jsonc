@@ -1,0 +1,97 @@
+{
+  "name": "Alliance",
+  "type": "object",
+  "properties": {
+    "layer_id": {
+      "type": "string"
+    },
+    "partner_name": {
+      "type": "string"
+    },
+    "alliance_type": {
+      "type": "string",
+      "enum": [
+        "distribution",
+        "data_sharing",
+        "dependency",
+        "partnership",
+        "acquisition_target"
+      ],
+      "default": "partnership"
+    },
+    "leverage_note": {
+      "type": "string"
+    },
+    "terms": {
+      "type": "string"
+    },
+    "opening_pitch": {
+      "type": "string"
+    },
+    "partner_strength": {
+      "type": "number"
+    },
+    "dependency_score": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "proposed",
+        "negotiating",
+        "secured",
+        "dependency_locked",
+        "acquired"
+      ],
+      "default": "proposed"
+    },
+    "alliance_date": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "layer_id",
+    "partner_name"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

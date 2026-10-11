@@ -1,0 +1,101 @@
+{
+  "name": "HegemonySnapshot",
+  "type": "object",
+  "properties": {
+    "snapshot_date": {
+      "type": "string"
+    },
+    "market_grip_pct": {
+      "type": "number"
+    },
+    "hegemony_score": {
+      "type": "number"
+    },
+    "layers_live": {
+      "type": "number"
+    },
+    "layers_beta": {
+      "type": "number"
+    },
+    "vectors_staked": {
+      "type": "number"
+    },
+    "dependent_count": {
+      "type": "number"
+    },
+    "alliance_count": {
+      "type": "number"
+    },
+    "toll_run_rate": {
+      "type": "number"
+    },
+    "grip_levers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "lever": {
+            "type": "string"
+          },
+          "current": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "verdict": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "snapshot_date",
+    "market_grip_pct"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

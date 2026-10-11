@@ -18,6 +18,7 @@ import NewAnalysis from '@/pages/NewAnalysis';
 import ProjectDetail from '@/pages/ProjectDetail';
 import IpFactory from '@/pages/IpFactory';
 import Conglomerate from '@/pages/Conglomerate';
+import SovereignOS from '@/pages/SovereignOS';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -57,6 +58,7 @@ const AuthenticatedApp = () => {
           <Route path="/projects/:id" element={<ProjectDetail />} />
           <Route path="/ip-factory" element={<IpFactory />} />
           <Route path="/command" element={<Conglomerate />} />
+          <Route path="/sovereign" element={<SovereignOS />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

@@ -1,0 +1,101 @@
+{
+  "name": "Sovereign OS Cycle",
+  "description": "Daily V8.0 Singularity Loop: the Prescient Oracle predicts market vectors from leading indicators, the Infrastructure Forge engineers the toll-booth layers, the Synthetic Swarm stakes alliances and dependency loops, the Quantum Treasury hedges capital between cash-cows and moonshots, and the Hegemony Scan measures Market Grip",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "sovereign_os_cycle",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "predict_vector": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runOracle",
+            "args": {}
+          },
+          "then": "build_foundation",
+          "x-base44": {
+            "title": "Prescient Oracle",
+            "description": "Predict market vectors 6-12 months out"
+          }
+        }
+      },
+      {
+        "build_foundation": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runForge",
+            "args": {}
+          },
+          "then": "attract_ecosystem",
+          "x-base44": {
+            "title": "Infrastructure Forge",
+            "description": "Engineer the toll-booth layers"
+          }
+        }
+      },
+      {
+        "attract_ecosystem": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runSwarm",
+            "args": {}
+          },
+          "then": "collect_tax",
+          "x-base44": {
+            "title": "Synthetic Swarm",
+            "description": "Alliances and dependency loops"
+          }
+        }
+      },
+      {
+        "collect_tax": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runQuantumTreasury",
+            "args": {}
+          },
+          "then": "measure_grip",
+          "x-base44": {
+            "title": "Quantum Treasury",
+            "description": "Asymmetric hedging allocation"
+          }
+        }
+      },
+      {
+        "measure_grip": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runHegemony",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Hegemony Scan",
+            "description": "Measure Market Grip"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 6 * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}

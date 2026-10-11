@@ -1,0 +1,122 @@
+{
+  "name": "InfrastructureLayer",
+  "type": "object",
+  "properties": {
+    "vector_id": {
+      "type": "string"
+    },
+    "layer_name": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "api",
+        "protocol",
+        "platform",
+        "data_layer",
+        "payment_gateway",
+        "middleware"
+      ],
+      "default": "api"
+    },
+    "toll_thesis": {
+      "type": "string"
+    },
+    "api_surface": {
+      "type": "string"
+    },
+    "pricing_model": {
+      "type": "string"
+    },
+    "toll_rate": {
+      "type": "string"
+    },
+    "stack": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "dependents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "dependency_note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "projected_monthly_toll": {
+      "type": "number"
+    },
+    "monthly_toll_revenue": {
+      "type": "number"
+    },
+    "grip_pct": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "blueprint",
+        "beta",
+        "live"
+      ],
+      "default": "blueprint"
+    },
+    "forged_date": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "vector_id",
+    "layer_name"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

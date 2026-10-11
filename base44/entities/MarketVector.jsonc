@@ -1,0 +1,103 @@
+{
+  "name": "MarketVector",
+  "type": "object",
+  "properties": {
+    "vector_name": {
+      "type": "string"
+    },
+    "sector": {
+      "type": "string"
+    },
+    "gold_rush_thesis": {
+      "type": "string"
+    },
+    "leading_indicators": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "horizon_months": {
+      "type": "number"
+    },
+    "arrival_probability": {
+      "type": "number"
+    },
+    "conviction_score": {
+      "type": "number"
+    },
+    "staked_assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "predicted",
+        "staked",
+        "foundation_building",
+        "operational"
+      ],
+      "default": "predicted"
+    },
+    "predicted_date": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "vector_name",
+    "sector",
+    "gold_rush_thesis"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

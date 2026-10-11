@@ -1,13 +1,14 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
-import { LayoutDashboard, Plus, LogOut, Crosshair, Radar, Crown } from 'lucide-react';
+import { LayoutDashboard, Plus, LogOut, Crosshair, Radar, Crown, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const NAV = [
   { to: '/', label: 'Dossiers', icon: LayoutDashboard },
   { to: '/new', label: 'New Analysis', icon: Plus },
   { to: '/ip-factory', label: 'IP Factory', icon: Radar },
-  { to: '/command', label: 'Command', icon: Crown }
+  { to: '/command', label: 'Command', icon: Crown },
+  { to: '/sovereign', label: 'Sovereign OS', icon: Globe }
 ];
 
 export default function Layout() {
@@ -59,6 +60,7 @@ export default function Layout() {
           <Link to="/new" className="text-slate-300"><Plus className="size-5" /></Link>
           <Link to="/ip-factory" className="text-slate-300"><Radar className="size-5" /></Link>
           <Link to="/command" className="text-slate-300"><Crown className="size-5" /></Link>
+          <Link to="/sovereign" className="text-slate-300"><Globe className="size-5" /></Link>
           <button onClick={() => logout()} className="text-slate-400"><LogOut className="size-5" /></button>
         </div>
       </div>

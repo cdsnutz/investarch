@@ -1,0 +1,115 @@
+{
+  "name": "Axiom Loop",
+  "description": "Daily V11.0 Orchestration Cycle: the Axiom Pod defines the Synthetic Value Standard, the Chronos Pod plants temporal Value-Anchors, the Psionic Pod designs archetypal imprints, the Galactic Forge architects celestial claims, the Matter-Synthesis Pod manifests the physical stack, and the Omega-Code refines the pure logic constant",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "axiom_loop",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "define_axiom": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runAxiom",
+            "args": {}
+          },
+          "then": "temporal_steering",
+          "x-base44": {
+            "title": "Define Axiom",
+            "description": "Define the Synthetic Value Standard and index the ledger"
+          }
+        }
+      },
+      {
+        "temporal_steering": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runChronos",
+            "args": {}
+          },
+          "then": "imprint_consciousness",
+          "x-base44": {
+            "title": "Steer Temporal Vector",
+            "description": "Plant Value-Anchors at future inevitabilities"
+          }
+        }
+      },
+      {
+        "imprint_consciousness": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runPsionic",
+            "args": {}
+          },
+          "then": "manifest_assets",
+          "x-base44": {
+            "title": "Imprint Consciousness",
+            "description": "Design transparent archetypal positions"
+          }
+        }
+      },
+      {
+        "manifest_assets": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runGalacticForge",
+            "args": {}
+          },
+          "then": "manifest_physical",
+          "x-base44": {
+            "title": "Forge Celestial Claims",
+            "description": "Architect off-world legal and technical frameworks"
+          }
+        }
+      },
+      {
+        "manifest_physical": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runMatterSynthesis",
+            "args": {}
+          },
+          "then": "pure_logic",
+          "x-base44": {
+            "title": "Manifest Physical/Digital",
+            "description": "Anchor digital layers to physical designs"
+          }
+        }
+      },
+      {
+        "pure_logic": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runOmegaCode",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Redefine Axiom",
+            "description": "Refine the pure logic constant"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 9 * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}

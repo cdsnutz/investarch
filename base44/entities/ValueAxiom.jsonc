@@ -1,0 +1,92 @@
+{
+  "name": "ValueAxiom",
+  "type": "object",
+  "properties": {
+    "axiom_name": {
+      "type": "string"
+    },
+    "metric_name": {
+      "type": "string"
+    },
+    "definition": {
+      "type": "string"
+    },
+    "unit": {
+      "type": "string"
+    },
+    "derivation_note": {
+      "type": "string"
+    },
+    "indexed_assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "asset_name": {
+            "type": "string"
+          },
+          "fiat_value": {
+            "type": "number"
+          },
+          "axiom_value": {
+            "type": "number"
+          },
+          "drift_note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "revaluation_date": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "axiom_name",
+    "metric_name",
+    "definition",
+    "unit",
+    "revaluation_date"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

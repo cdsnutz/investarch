@@ -1,0 +1,90 @@
+{
+  "name": "ArchetypeImprint",
+  "type": "object",
+  "properties": {
+    "archetype_name": {
+      "type": "string"
+    },
+    "population_segment": {
+      "type": "string"
+    },
+    "imprint_thesis": {
+      "type": "string"
+    },
+    "channels": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "necessity_note": {
+      "type": "string"
+    },
+    "imprint_depth_pct": {
+      "type": "number"
+    },
+    "disclosure": {
+      "type": "string",
+      "default": "Transparent positioning"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "seeded",
+        "imprinting",
+        "locked"
+      ],
+      "default": "seeded"
+    },
+    "imprinted_date": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "archetype_name",
+    "population_segment",
+    "imprint_thesis",
+    "imprinted_date"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

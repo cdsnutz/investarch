@@ -21,6 +21,7 @@ import Conglomerate from '@/pages/Conglomerate';
 import SovereignOS from '@/pages/SovereignOS';
 import HegemonyVault from '@/pages/HegemonyVault';
 import OmegaDashboard from '@/pages/OmegaDashboard';
+import AxiomCommand from '@/pages/AxiomCommand';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -63,6 +64,7 @@ const AuthenticatedApp = () => {
           <Route path="/sovereign" element={<SovereignOS />} />
           <Route path="/vault" element={<HegemonyVault />} />
           <Route path="/omega" element={<OmegaDashboard />} />
+          <Route path="/axiom" element={<AxiomCommand />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

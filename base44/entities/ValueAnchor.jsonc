@@ -1,0 +1,87 @@
+{
+  "name": "ValueAnchor",
+  "type": "object",
+  "properties": {
+    "anchor_name": {
+      "type": "string"
+    },
+    "inevitability": {
+      "type": "string"
+    },
+    "anchor_year": {
+      "type": "number"
+    },
+    "target_state": {
+      "type": "string"
+    },
+    "steering_design": {
+      "type": "string"
+    },
+    "current_progress_pct": {
+      "type": "number"
+    },
+    "toll_note": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "identified",
+        "anchored",
+        "manifesting"
+      ],
+      "default": "anchored"
+    },
+    "anchored_date": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "anchor_name",
+    "inevitability",
+    "anchor_year",
+    "steering_design",
+    "anchored_date"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

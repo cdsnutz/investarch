@@ -1,0 +1,78 @@
+{
+  "name": "LogicConstant",
+  "type": "object",
+  "properties": {
+    "constant_name": {
+      "type": "string"
+    },
+    "axiom_text": {
+      "type": "string"
+    },
+    "solves_for": {
+      "type": "string"
+    },
+    "efficiency_note": {
+      "type": "string"
+    },
+    "self_correction_note": {
+      "type": "string"
+    },
+    "supersedes": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "defined_date": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "constant_name",
+    "axiom_text",
+    "solves_for",
+    "version",
+    "defined_date"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "name": "CelestialClaim",
+  "type": "object",
+  "properties": {
+    "claim_name": {
+      "type": "string"
+    },
+    "realm": {
+      "type": "string",
+      "enum": [
+        "orbital",
+        "lunar",
+        "asteroid",
+        "deep_space"
+      ],
+      "default": "orbital"
+    },
+    "legal_framework": {
+      "type": "string"
+    },
+    "trade_protocol": {
+      "type": "string"
+    },
+    "infrastructure_plan": {
+      "type": "string"
+    },
+    "monopoly_note": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "framework_drafted",
+        "registered",
+        "anchored"
+      ],
+      "default": "framework_drafted"
+    },
+    "registered_date": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "claim_name",
+    "realm",
+    "legal_framework",
+    "registered_date"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

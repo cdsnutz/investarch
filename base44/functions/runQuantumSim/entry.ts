@@ -61,14 +61,14 @@ export default async function(req) {
 
 ${subjectCtx}
 
-Run 8 DISTINCT simulation branches. For each:
+Run 16 DISTINCT simulation branches. For each:
 - scenario: the named adverse or favorable branch, e.g. "A well-funded incumbent clones the core layer in 90 days", "Regulator freezes the category for 12 months", "Adoption outpaces supply".
 - outcome: what happens to the subject in that branch, in 1-2 sentences.
-- probability: 0-100, your honest estimate. The eight probabilities must be internally coherent (they should roughly partition the outcome space, no branch claiming >60%).
+- probability: 0-100, your honest estimate. Convergence rule: the sixteen probabilities must partition the outcome space (sum between 90 and 110), no branch claiming >40%, and the set must include at least two competitor-countermove branches, at least one macro-crash branch, and at least one black-swan branch.
 
 Then produce:
 - optimal_path: the single execution sequence that maximizes success across the branches — 3-4 concrete moves in order, each referencing which branches it neutralizes.
-- success_probability: 0-100, your honest overall estimate if the optimal path is executed; never above the best single-branch probability.
+- success_probability: 0-100, computed as the probability-weighted share of branches whose outcome is favorable under the optimal path (sum the probabilities of surviving branches); never above the best single-branch probability.
 - failure_modes: 3-4 ways the optimal path itself fails, stated plainly.
 
 Truth rule: these are structured expert simulations, not measured parallel universes. Probabilities are reasoned estimates; where the model is weakest, widen the failure_modes and lower the probabilities. Never round up to please.`,
@@ -78,15 +78,16 @@ Truth rule: these are structured expert simulations, not measured parallel unive
       return Response.json({ error: 'The Quantum-Simulation Pod returned no scenarios.' }, { status: 500 });
     }
 
+    const branches = res.scenarios.slice(0, 16).map((s) => ({
+      scenario: s.scenario || '',
+      outcome: s.outcome || '',
+      probability: typeof s.probability === 'number' ? s.probability : 0
+    }));
     const created = await db.SimulationRun.create({
       subject_name: res.subject_name || subject.asset_name || subject.narrative_name,
       subject_type: ['narrative', 'hybrid', 'layer', 'seed'].includes(res.subject_type) ? res.subject_type : subjectType,
-      scenario_count: res.scenarios.length,
-      scenarios: res.scenarios.slice(0, 10).map((s) => ({
-        scenario: s.scenario || '',
-        outcome: s.outcome || '',
-        probability: typeof s.probability === 'number' ? s.probability : 0
-      })),
+      scenario_count: branches.length,
+      scenarios: branches,
       optimal_path: res.optimal_path || '',
       success_probability: typeof res.success_probability === 'number' ? res.success_probability : 0,
       failure_modes: Array.isArray(res.failure_modes) ? res.failure_modes : [],

@@ -143,11 +143,9 @@ export function SeedBody({ seed, filings, prospectus, onRefresh }) {
         <Button size="sm" variant="outline" onClick={liquidate} disabled={!!busy}>
           {busy === 'liquidate' ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <Handshake className="size-3.5 mr-1.5" />} Liquidation prospectus
         </Button>
-        {(seed.strategy === 'flip' || seed.strategy === 'build') && (
-          <Button size="sm" onClick={buildPack} disabled={!!busy}>
-            {busy === 'pack' ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <FileArchive className="size-3.5 mr-1.5" />} Download dossier pack (PDFs)
-          </Button>
-        )}
+        <Button size="sm" onClick={buildPack} disabled={!!busy}>
+          {busy === 'pack' ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <FileArchive className="size-3.5 mr-1.5" />} Download dossier pack (PDFs)
+        </Button>
       </div>
       {busy === 'pack' && (
         <p className="text-xs text-muted-foreground">Drafting any missing filings and the prospectus, rebuilding the codebase, then assembling the pack. This can take a few minutes.</p>

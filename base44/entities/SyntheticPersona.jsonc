@@ -1,0 +1,94 @@
+{
+  "name": "SyntheticPersona",
+  "type": "object",
+  "properties": {
+    "persona_name": {
+      "type": "string"
+    },
+    "role_title": {
+      "type": "string"
+    },
+    "niche": {
+      "type": "string"
+    },
+    "platform": {
+      "type": "string"
+    },
+    "positioning": {
+      "type": "string"
+    },
+    "content_pillars": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "audience_estimate": {
+      "type": "number"
+    },
+    "trust_note": {
+      "type": "string"
+    },
+    "disclosure": {
+      "type": "string",
+      "default": "Disclosed AI persona"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "designed",
+        "launched",
+        "scaled"
+      ],
+      "default": "designed"
+    },
+    "designed_date": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "persona_name",
+    "niche"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

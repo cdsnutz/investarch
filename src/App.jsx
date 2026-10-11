@@ -19,6 +19,7 @@ import ProjectDetail from '@/pages/ProjectDetail';
 import IpFactory from '@/pages/IpFactory';
 import Conglomerate from '@/pages/Conglomerate';
 import SovereignOS from '@/pages/SovereignOS';
+import HegemonyVault from '@/pages/HegemonyVault';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -59,6 +60,7 @@ const AuthenticatedApp = () => {
           <Route path="/ip-factory" element={<IpFactory />} />
           <Route path="/command" element={<Conglomerate />} />
           <Route path="/sovereign" element={<SovereignOS />} />
+          <Route path="/vault" element={<HegemonyVault />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

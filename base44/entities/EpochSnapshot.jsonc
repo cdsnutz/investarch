@@ -1,0 +1,93 @@
+{
+  "name": "EpochSnapshot",
+  "type": "object",
+  "properties": {
+    "epoch_name": {
+      "type": "string"
+    },
+    "projection_date": {
+      "type": "string"
+    },
+    "total_absorption_pct": {
+      "type": "number"
+    },
+    "narrative_count": {
+      "type": "number"
+    },
+    "hybrid_count": {
+      "type": "number"
+    },
+    "persona_count": {
+      "type": "number"
+    },
+    "lever_count": {
+      "type": "number"
+    },
+    "years": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "year": {
+            "type": "number"
+          },
+          "absorption_pct": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "verdict": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "epoch_name",
+    "projection_date",
+    "total_absorption_pct"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

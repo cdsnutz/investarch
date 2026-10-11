@@ -1,0 +1,98 @@
+{
+  "name": "HybridAsset",
+  "type": "object",
+  "properties": {
+    "asset_name": {
+      "type": "string"
+    },
+    "sectors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "synthesis_thesis": {
+      "type": "string"
+    },
+    "value_lock": {
+      "type": "string"
+    },
+    "interlock_layers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "dependency_note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "monopoly_score": {
+      "type": "number"
+    },
+    "dismantle_difficulty": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "concept",
+        "prototyping",
+        "live"
+      ],
+      "default": "concept"
+    },
+    "synthesized_date": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "asset_name",
+    "synthesis_thesis"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

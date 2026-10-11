@@ -1,0 +1,93 @@
+{
+  "name": "NarrativeVector",
+  "type": "object",
+  "properties": {
+    "narrative_name": {
+      "type": "string"
+    },
+    "target_market": {
+      "type": "string"
+    },
+    "narrative_thesis": {
+      "type": "string"
+    },
+    "cultural_shift": {
+      "type": "string"
+    },
+    "trigger_events": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "demand_vacuum": {
+      "type": "string"
+    },
+    "pull_levers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "adoption_forecast_pct": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "seeding",
+        "amplifying",
+        "locked"
+      ],
+      "default": "seeding"
+    },
+    "seeded_date": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "narrative_name",
+    "narrative_thesis"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

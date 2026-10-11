@@ -8,6 +8,7 @@ import TemporalMap from '@/components/axiom/TemporalMap';
 import ConsciousnessHeatmap from '@/components/axiom/ConsciousnessHeatmap';
 import ForgeRegistry from '@/components/axiom/ForgeRegistry';
 import OmegaCodeView from '@/components/axiom/OmegaCodeView';
+import GateMatrix from '@/components/axiom/GateMatrix';
 
 const PODS = [
   { key: 'axiom', label: 'Axiom', fn: 'runAxiom' },
@@ -15,6 +16,8 @@ const PODS = [
   { key: 'psionic', label: 'Psionic', fn: 'runPsionic' },
   { key: 'forge', label: 'Galactic Forge', fn: 'runGalacticForge' },
   { key: 'matter', label: 'Matter-Synthesis', fn: 'runMatterSynthesis' },
+  { key: 'gateRules', label: 'Gate Rules', fn: 'runGateDefine' },
+  { key: 'gates', label: 'Gate Enforcement', fn: 'runAxiomGates' },
   { key: 'omega', label: 'Omega-Code', fn: 'runOmegaCode' }
 ];
 
@@ -24,6 +27,8 @@ export default function AxiomCommand() {
   const [imprints, setImprints] = useState([]);
   const [claims, setClaims] = useState([]);
   const [constants, setConstants] = useState([]);
+  const [gates, setGates] = useState([]);
+  const [verdicts, setVerdicts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [runningPod, setRunningPod] = useState(null);
   const [runningLoop, setRunningLoop] = useState(false);
@@ -31,18 +36,22 @@ export default function AxiomCommand() {
 
   const loadAll = async () => {
     try {
-      const [axPage, anPage, imPage, clPage, lcPage] = await Promise.all([
+      const [axPage, anPage, imPage, clPage, lcPage, gtPage, vdPage] = await Promise.all([
         base44.entities.ValueAxiom.filter({}, { sort: '-revaluation_date', limit: 5 }),
         base44.entities.ValueAnchor.filter({}, { sort: 'anchor_year', limit: 50 }),
         base44.entities.ArchetypeImprint.filter({}, { sort: '-imprint_depth_pct', limit: 50 }),
         base44.entities.CelestialClaim.filter({}, { sort: '-registered_date', limit: 50 }),
-        base44.entities.LogicConstant.filter({}, { sort: '-defined_date', limit: 10 })
+        base44.entities.LogicConstant.filter({}, { sort: '-defined_date', limit: 10 }),
+        base44.entities.LogicGate.filter({}, { sort: 'scope', limit: 50 }),
+        base44.entities.GateVerdict.filter({}, { sort: '-verdict_date', limit: 20 })
       ]);
       setAxioms(axPage.items || []);
       setAnchors(anPage.items || []);
       setImprints(imPage.items || []);
       setClaims(clPage.items || []);
       setConstants(lcPage.items || []);
+      setGates(gtPage.items || []);
+      setVerdicts(vdPage.items || []);
     } catch { /* ignore */ }
     setLoading(false);
   };
@@ -71,7 +80,7 @@ export default function AxiomCommand() {
         setRunningPod(pod.key);
         await base44.functions.invoke(pod.fn, {});
       }
-      setMessage('Axiom Loop complete: standard defined, inevitabilities anchored, archetypes imprinted, claims forged, matter synthesized, constant refined.');
+      setMessage('Axiom Loop complete: standard defined, gates derived, inevitabilities anchored, archetypes imprinted, claims forged, matter synthesized, value flow validated, constant refined.');
       await loadAll();
     } catch (e) {
       setMessage(e?.response?.data?.error || e?.message || 'The loop broke mid-axiom.');
@@ -132,6 +141,7 @@ export default function AxiomCommand() {
           <TabsTrigger value="consciousness">Consciousness Heatmap</TabsTrigger>
           <TabsTrigger value="forge">Forge Registry</TabsTrigger>
           <TabsTrigger value="omega">Omega-Code</TabsTrigger>
+          <TabsTrigger value="gates">Logic Gates</TabsTrigger>
         </TabsList>
         <TabsContent value="standard" className="pt-4">
           <ValueStandardIndex axiom={axioms[0]} />
@@ -147,6 +157,9 @@ export default function AxiomCommand() {
         </TabsContent>
         <TabsContent value="omega" className="pt-4">
           <OmegaCodeView constants={constants} />
+        </TabsContent>
+        <TabsContent value="gates" className="pt-4">
+          <GateMatrix gates={gates} verdicts={verdicts} />
         </TabsContent>
       </Tabs>
     </div>

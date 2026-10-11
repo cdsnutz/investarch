@@ -1,6 +1,6 @@
 {
   "name": "Axiom Loop",
-  "description": "Daily V11.0 Orchestration Cycle: the Axiom Pod defines the Synthetic Value Standard, the Chronos Pod plants temporal Value-Anchors, the Psionic Pod designs archetypal imprints, the Galactic Forge architects celestial claims, the Matter-Synthesis Pod manifests the physical stack, and the Omega-Code refines the pure logic constant",
+  "description": "Daily V11.0 Orchestration Cycle: the Axiom Pod defines the Synthetic Value Standard, the Chronos Pod plants temporal Value-Anchors, the Psionic Pod designs archetypal imprints, the Galactic Forge architects celestial claims, the Matter-Synthesis Pod manifests the physical stack, the Axiom Logic Gates derive and enforce the market rules, and the Omega-Code refines the pure logic constant",
   "definition": {
     "document": {
       "dsl": "1.0.0",
@@ -16,10 +16,24 @@
             "function_name": "runAxiom",
             "args": {}
           },
-          "then": "temporal_steering",
+          "then": "rule_gates",
           "x-base44": {
             "title": "Define Axiom",
             "description": "Define the Synthetic Value Standard and index the ledger"
+          }
+        }
+      },
+      {
+        "rule_gates": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runGateDefine",
+            "args": {}
+          },
+          "then": "temporal_steering",
+          "x-base44": {
+            "title": "Gate the Rules",
+            "description": "Derive logic gates from the axiom"
           }
         }
       },
@@ -72,10 +86,24 @@
             "function_name": "runMatterSynthesis",
             "args": {}
           },
-          "then": "pure_logic",
+          "then": "value_flow_validation",
           "x-base44": {
             "title": "Manifest Physical/Digital",
             "description": "Anchor digital layers to physical designs"
+          }
+        }
+      },
+      {
+        "value_flow_validation": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runAxiomGates",
+            "args": {}
+          },
+          "then": "pure_logic",
+          "x-base44": {
+            "title": "Validate Value Flow",
+            "description": "Evaluate every logic gate against live data"
           }
         }
       },

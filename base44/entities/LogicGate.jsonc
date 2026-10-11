@@ -1,0 +1,121 @@
+{
+  "name": "LogicGate",
+  "type": "object",
+  "properties": {
+    "gate_name": {
+      "type": "string"
+    },
+    "scope": {
+      "type": "string",
+      "enum": [
+        "value_flow",
+        "temporal",
+        "consciousness",
+        "forge",
+        "simulation",
+        "axiom"
+      ],
+      "default": "value_flow"
+    },
+    "rule_text": {
+      "type": "string"
+    },
+    "metric_key": {
+      "type": "string"
+    },
+    "comparator": {
+      "type": "string",
+      "enum": [
+        "gte",
+        "lte",
+        "between"
+      ],
+      "default": "gte"
+    },
+    "threshold": {
+      "type": "number"
+    },
+    "threshold_upper": {
+      "type": "number"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "observe",
+        "flag",
+        "block"
+      ],
+      "default": "flag"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "paused"
+      ],
+      "default": "active"
+    },
+    "last_verdict": {
+      "type": "string"
+    },
+    "last_checked_date": {
+      "type": "string"
+    },
+    "enforcement_count": {
+      "type": "number",
+      "default": 0
+    },
+    "defined_date": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "gate_name",
+    "rule_text",
+    "metric_key",
+    "comparator",
+    "threshold",
+    "defined_date"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

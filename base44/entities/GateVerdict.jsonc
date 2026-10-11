@@ -1,0 +1,90 @@
+{
+  "name": "GateVerdict",
+  "type": "object",
+  "properties": {
+    "gate_id": {
+      "type": "string"
+    },
+    "gate_name": {
+      "type": "string"
+    },
+    "scope": {
+      "type": "string"
+    },
+    "metric_value": {
+      "type": "number"
+    },
+    "comparator": {
+      "type": "string"
+    },
+    "threshold": {
+      "type": "number"
+    },
+    "threshold_upper": {
+      "type": "number"
+    },
+    "verdict": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "flag",
+        "blocked",
+        "not_measurable"
+      ],
+      "default": "pass"
+    },
+    "enforcement_note": {
+      "type": "string"
+    },
+    "verdict_date": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "gate_id",
+    "gate_name",
+    "verdict",
+    "verdict_date"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

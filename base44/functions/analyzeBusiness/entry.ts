@@ -100,13 +100,16 @@ export default async function(req: Request): Promise<Response> {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
-    const url = (body?.url || '').trim();
+    const input = (body?.url || '').trim();
     const companyName = (body?.companyName || '').trim();
-    if (!url) return Response.json({ error: 'A URL is required.' }, { status: 400 });
+    if (!input) return Response.json({ error: 'A company URL or business idea is required.' }, { status: 400 });
+    const isIdea = !/^https?:\/\//i.test(input);
 
     // --- Stage 1: Intelligence Extraction + Capital Mapping (web-enabled) ---
-    const researchPrompt = `You are a senior investment analyst and market researcher. A user has submitted a target company for analysis.
-URL: ${url}${companyName ? `\nProvided company name: ${companyName}` : ''}
+    const researchPrompt = `You are a senior investment analyst and market researcher.${isIdea
+      ? ` The user has submitted a RAW BUSINESS IDEA, not an existing company. First distill it into a well-defined venture: give it a company_name, define the core product and target customer. Then proceed with the full analysis below.`
+      : ' A user has submitted a target company for analysis.'}
+${isIdea ? `BUSINESS IDEA: ${input}` : `URL: ${input}`}${companyName ? `\nProvided company name: ${companyName}` : ''}
 
 Using live web context, perform a rigorous, TRUTHFUL analysis. Do not invent facts; where information is unavailable, say so plainly rather than fabricating.
 

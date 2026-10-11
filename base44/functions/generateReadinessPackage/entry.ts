@@ -93,6 +93,88 @@ const EXIT_SCHEMA = {
   required: ["title", "acquirers", "sections"]
 };
 
+const CODEBASE_SCHEMA = {
+  type: "object",
+  properties: {
+    repo_name: { type: "string" },
+    files: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          path: { type: "string" },
+          content: { type: "string" }
+        },
+        required: ["path", "content"]
+      }
+    },
+    user_manual: { type: "string" },
+    onboarding_guide: { type: "string" }
+  },
+  required: ["repo_name", "files", "user_manual", "onboarding_guide"]
+};
+
+const CREDIT_SCHEMA = {
+  type: "object",
+  properties: {
+    loan_request: { type: "number" },
+    dscr: { type: "number" },
+    collateral_basis: { type: "string" },
+    calculation_sections: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          heading: { type: "string" },
+          body: { type: "string" }
+        },
+        required: ["heading", "body"]
+      }
+    },
+    application_sections: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          heading: { type: "string" },
+          body: { type: "string" }
+        },
+        required: ["heading", "body"]
+      }
+    }
+  },
+  required: ["loan_request", "dscr", "collateral_basis", "calculation_sections", "application_sections"]
+};
+
+const DAYDREAM_SCHEMA = {
+  type: "object",
+  properties: {
+    ideas: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          name: { type: "string" },
+          thesis: { type: "string" },
+          sections: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                heading: { type: "string" },
+                body: { type: "string" }
+              },
+              required: ["heading", "body"]
+            }
+          }
+        },
+        required: ["name", "thesis", "sections"]
+      }
+    }
+  },
+  required: ["ideas"]
+};
+
 const AUDIT_SCHEMA = {
   type: "object",
   properties: {
@@ -179,7 +261,7 @@ export default async function(req: Request): Promise<Response> {
       funding_sources: funding.items.map(f => ({ name: f.name, type: f.type, focus_area: f.focus_area, stage: f.stage }))
     };
 
-    const rules = `\nDOSSIER:\n${JSON.stringify(dossier)}\nRules: ground every claim in the dossier; where data is missing, state the assumption explicitly instead of inventing facts. Never present a modeled number as verified; label every modeled figure with its assumption. Plain text only, no markdown syntax. No em dashes. No filler adjectives. Every sentence must carry information.`;
+    const rules = `\nDOSSIER:\n${JSON.stringify(dossier)}\nRules: ground every claim in the dossier; where data is missing, state the assumption explicitly instead of inventing facts. Never present a modeled number as verified; label every modeled figure with its assumption. Plain text only, no markdown syntax unless the output is code. No em dashes. No filler adjectives. Every sentence must carry information.`;
 
     const prdPrompt = `You are a principal product architect (SPEC POD). Convert the business dossier into a formal Product Requirements Document for the company's core product, answering "what" is being built and "why".
 
@@ -260,6 +342,23 @@ Produce 6 to 8 sections, in this order:
 Every synergy and milestone must be grounded in the dossier; assumptions stated explicitly.
 ${rules}`;
 
+    const creditPrompt = `You are a commercial credit architect (CREDIT-SENTY POD). Engineer the maximum justifiable loan request from projected cash flow and asset-based lending, not personal credit history. Commercial underwriting keys on Debt Service Coverage Ratio (DSCR) and collateral, not FICO.
+
+Compute from the dossier's forecast, stating every assumption (rate, amortization term, margin):
+- Annual debt service at a stated commercial rate and amortization.
+- DSCR per projected year: net operating income (EBITDA) divided by annual debt service. Output dscr as the tightest coverage across the forecast window.
+- loan_request: the maximum principal in USD such that the tightest-year DSCR stays at or above 1.25. Justify the math in the first calculation section.
+- collateral_basis: one dense paragraph framing the collateral: projected revenue, contractual receivables, and proprietary IP. Label modeled IP values as modeled and note explicitly that unregistered IP frames as value, not as a perfected security interest, until registered and pledged.
+
+calculation_sections: 4 to 6 sections, in this order: Loan Request Summary; Debt Service and DSCR Calculation; Asset-Based Lending Analysis; Collateral Basis; Assumption Register.
+application_sections: 4 to 6 sections written for commercial bank underwriters, formal and authoritative, using Black's Law terminology where defensible (covenant, instrument, indemnification, fiduciary stewardship), in this order: Position of the Applicant; Purpose of the Financing; Projected Cash Flow and Debt Service; Collateral and Security; Requested Terms and Covenants. Do not assert existing credit history, existing registrations, or perfected liens; state what the applicant commits to.
+${rules}`;
+
+    const daydreamPrompt = `You are a strategic innovation architect (DAYDREAM POD). Run recursive future-state generation: analyze the current business and produce exactly 3 adjacent, revolutionary IP ideas that expand its moat. These are the next logical monopolies in this space, built on the current business's own data, users, or workflows.
+
+Each idea: name (a product-like name), thesis (2 sentences on the gap it closes), sections: 5 sections in this order: Market Gap; The Innovation; Monetization Strategy; Moat Expansion; 18-Month Roadmap. Each section 1 to 2 tight paragraphs. Ground every idea in the current business's assets and market; label speculative assumptions explicitly.
+${rules}`;
+
     const auditPrompt = `You are a rigorous institutional readiness auditor (SCORING POD). Score the dossier's Investment Readiness (IRS) out of 100 using exactly four dimensions, 25 points each, in this order: Market Size (quality of the TAM/SAM/SOM analysis), Defensibility Moat, Scalability Vector (growth potential), Legal Hardness (compliance posture and IP protection).
 
 Score truthfully, not generously: a dossier without quantified market sizing loses points on Market Size; an entity without registrations, IP protection, or compliance posture loses points on Legal Hardness. Each dimension gets note: one specific sentence naming what earned or lost points. Then produce 4 to 6 enhancements: surgical, concrete moves that raise the score, each with title and action describing exactly what to change and the expected score lift (for example, from 65 to 78).
@@ -270,20 +369,37 @@ Then produce a Growth Blueprint of 6 items, two per lever, each with title and a
 - lever "IP Fortressing": which assets to patent, trademark, or otherwise protect to raise Legal Hardness and enterprise value.
 ${rules}`;
 
-    const [prd, legal, valuation, moat] = await Promise.all([
+    const codebasePrompt = `You are a staff full-stack engineer (BUILD POD). Using the product requirements and technical specification for this business, generate a complete monorepo codebase: a working directory structure, not snippets.
+
+Output files: 12 to 18 files covering:
+- README.md (what this is, how to run it)
+- Root configuration: package.json (with real dependencies), docker-compose.yml, .env.template
+- frontend/: React application shell (App.jsx, main entry, one or two core pages or components, API client)
+- backend/: API server (Node with Express, or Python with FastAPI), main entrypoint, routes matching the API surface, one or two core service modules
+- database/: schema file(s) implementing the data schemas
+Every file must be complete and internally consistent: imports match real paths, endpoints match routes, schema matches models. No placeholders, no TODO, no lorem, no stub functions. Keep each file focused and under 150 lines.
+Also produce:
+- user_manual: a plain-text end-user manual describing how the product operates, page by page.
+- onboarding_guide: a plain-text developer onboarding guide: clone, environment setup, run locally, deploy, and where each module lives.
+${rules}`;
+
+    const [prd, legal, valuation, moat, exit] = await Promise.all([
       base44.asServiceRole.integrations.Core.InvokeLLM({ prompt: prdPrompt, response_json_schema: DOC_SCHEMA }),
       base44.asServiceRole.integrations.Core.InvokeLLM({ prompt: legalPrompt, response_json_schema: DOC_SCHEMA }),
       base44.asServiceRole.integrations.Core.InvokeLLM({ prompt: valuationPrompt, response_json_schema: VALUATION_SCHEMA }),
-      base44.asServiceRole.integrations.Core.InvokeLLM({ prompt: moatPrompt, response_json_schema: MOAT_SCHEMA })
+      base44.asServiceRole.integrations.Core.InvokeLLM({ prompt: moatPrompt, response_json_schema: MOAT_SCHEMA }),
+      base44.asServiceRole.integrations.Core.InvokeLLM({ prompt: exitPrompt, response_json_schema: EXIT_SCHEMA })
     ]);
 
-    const [spec, exit, audit] = await Promise.all([
+    const [spec, audit, credit, daydream, codebase] = await Promise.all([
       base44.asServiceRole.integrations.Core.InvokeLLM({ prompt: specPrompt, response_json_schema: DOC_SCHEMA }),
-      base44.asServiceRole.integrations.Core.InvokeLLM({ prompt: exitPrompt, response_json_schema: EXIT_SCHEMA }),
-      base44.asServiceRole.integrations.Core.InvokeLLM({ prompt: auditPrompt, response_json_schema: AUDIT_SCHEMA })
+      base44.asServiceRole.integrations.Core.InvokeLLM({ prompt: auditPrompt, response_json_schema: AUDIT_SCHEMA }),
+      base44.asServiceRole.integrations.Core.InvokeLLM({ prompt: creditPrompt, response_json_schema: CREDIT_SCHEMA }),
+      base44.asServiceRole.integrations.Core.InvokeLLM({ prompt: daydreamPrompt, response_json_schema: DAYDREAM_SCHEMA }),
+      base44.asServiceRole.integrations.Core.InvokeLLM({ prompt: codebasePrompt, model: 'claude-sonnet-5', response_json_schema: CODEBASE_SCHEMA })
     ]);
 
-    return Response.json({ prd, spec, legal, valuation, moat, exit, irs: audit });
+    return Response.json({ prd, spec, legal, valuation, moat, exit, credit, daydream, codebase, irs: audit });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

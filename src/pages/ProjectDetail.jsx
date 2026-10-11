@@ -114,11 +114,13 @@ export default function ProjectDetail() {
         <h1 className="text-2xl md:text-4xl font-semibold tracking-tight">{project.company_name || 'Untitled analysis'}</h1>
         <div className="flex flex-wrap items-center gap-3 mt-3 text-sm text-muted-foreground">
           {project.industry && <Badge variant="secondary" className="bg-slate-100">{project.industry}</Badge>}
-          {project.url && (
+          {project.url && (/^https?:\/\//i.test(project.url) ? (
             <a href={project.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:text-slate-900">
               <ExternalLink className="size-3.5" /> {project.url}
             </a>
-          )}
+          ) : (
+            <span className="italic">Concept: {project.url}</span>
+          ))}
         </div>
       </div>
 

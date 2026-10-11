@@ -73,7 +73,7 @@ export default function NewAnalysis() {
     <div className="p-6 md:p-12 max-w-2xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">New Analysis</h1>
-        <p className="text-sm text-muted-foreground mt-1">Enter a company URL. The engine researches the market, maps competitors, identifies funding sources, models forecasts, and writes the dossier.</p>
+        <p className="text-sm text-muted-foreground mt-1">Enter a company URL or describe your raw idea. The engine distills the concept, researches the market, maps competitors, identifies funding sources, models forecasts, and writes the dossier.</p>
       </div>
 
       {loading ? (
@@ -89,10 +89,10 @@ export default function NewAnalysis() {
       ) : (
         <form onSubmit={handleSubmit} className="rounded-xl border bg-white p-6 md:p-8 space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="url">Company URL</Label>
+            <Label htmlFor="url">Company URL or business idea</Label>
             <div className="relative">
               <Globe className="size-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
-              <Input id="url" type="url" required placeholder="https://example.com" value={url} onChange={(e) => setUrl(e.target.value)} className="pl-9" />
+              <Input id="url" required placeholder="https://example.com or your raw idea" value={url} onChange={(e) => setUrl(e.target.value)} className="pl-9" />
             </div>
           </div>
           <div className="space-y-2">

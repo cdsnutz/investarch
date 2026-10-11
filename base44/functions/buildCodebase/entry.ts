@@ -53,13 +53,13 @@ export default async function(req: Request): Promise<Response> {
 
     const codebasePrompt = `You are a staff full-stack engineer (BUILD POD). Below is a business brief. Generate a complete monorepo codebase for this business's core product: a working directory structure, not snippets.
 
-Output files: 10 to 14 files covering:
+Output files: 8 to 12 files covering:
 - README.md (what this is, how to run it)
 - Root configuration: package.json (with real dependencies), docker-compose.yml, .env.template
 - frontend/: React application shell (App.jsx, main entry, one or two core pages or components, API client)
 - backend/: API server (Node with Express, or Python with FastAPI), main entrypoint, routes for the core operations, one or two core service modules
 - database/: schema file(s) implementing the main data entities
-Every file must be complete and internally consistent: imports match real paths, endpoints match routes, schema matches models. No placeholders, no TODO, no lorem, no stub functions. Keep each file focused and under 120 lines.
+Every file must be complete and internally consistent: imports match real paths, endpoints match routes, schema matches models. No placeholders, no TODO, no lorem, no stub functions. Keep each file focused and under 100 lines.
 Also produce:
 - user_manual: a plain-text end-user manual describing how the product operates, page by page (maximum 700 words).
 - onboarding_guide: a plain-text developer onboarding guide: clone, environment setup, run locally, deploy, and where each module lives (maximum 500 words).
@@ -70,7 +70,6 @@ ${JSON.stringify(brief)}`;
 
     const codebase = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt: codebasePrompt,
-      model: 'claude-sonnet-5',
       response_json_schema: CODEBASE_SCHEMA
     });
 

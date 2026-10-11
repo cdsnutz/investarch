@@ -4,17 +4,20 @@ import { today, norm } from '../../shared/v9Core.ts';
 // Deterministic metric computations — each returns a number, or null when not yet measurable.
 async function computeMetric(base44, key) {
   switch (key) {
+    // Blueprint-stage truth: toll configuration is checkable against every defined layer,
+    // and with zero live layers no live layer can have stalled revenue (vacuously 0).
     case 'toll_config_coverage': {
-      const page = await base44.asServiceRole.entities.InfrastructureLayer.filter({}, { limit: 200, fields: ['toll_rate', 'status'] });
-      const live = (page.items || []).filter((l) => l.status === 'live');
-      if (!live.length) return null;
-      const withRate = live.filter((l) => String(l.toll_rate || '').trim() !== '');
-      return (withRate.length / live.length) * 100;
+      const page = await base44.asServiceRole.entities.InfrastructureLayer.filter({}, { limit: 200, fields: ['toll_rate'] });
+      const layers = page.items || [];
+      if (!layers.length) return null;
+      const withRate = layers.filter((l) => String(l.toll_rate || '').trim() !== '');
+      return (withRate.length / layers.length) * 100;
     }
     case 'value_flow_stall': {
       const page = await base44.asServiceRole.entities.InfrastructureLayer.filter({}, { limit: 200, fields: ['monthly_toll_revenue', 'status'] });
-      const live = (page.items || []).filter((l) => l.status === 'live');
-      if (!live.length) return null;
+      const layers = page.items || [];
+      if (!layers.length) return null;
+      const live = layers.filter((l) => l.status === 'live');
       return live.filter((l) => !(Number(l.monthly_toll_revenue) > 0)).length;
     }
     case 'axiom_index_coverage': {

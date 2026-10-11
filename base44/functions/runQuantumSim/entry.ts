@@ -34,23 +34,22 @@ export default async function(req) {
 
     // The Quantum-Simulation Pod picks the highest-stakes untested asset and stress-tests it.
     const [hybPage, narPage, simPage] = await Promise.all([
-      base44.asServiceRole.entities.HybridAsset.filter({}, { sort: '-monopoly_score', limit: 1, fields: ['asset_name', 'sectors', 'synthesis_thesis', 'value_lock', 'monopoly_score'] }),
-      base44.asServiceRole.entities.NarrativeVector.filter({}, { sort: '-adoption_forecast_pct', limit: 1, fields: ['narrative_name', 'narrative_thesis', 'adoption_forecast_pct'] }),
-      base44.asServiceRole.entities.SimulationRun.filter({}, { sort: '-simulated_date', limit: 20, fields: ['subject_name', 'simulated_date'] })
+      base44.asServiceRole.entities.HybridAsset.filter({}, { sort: '-monopoly_score', limit: 10, fields: ['asset_name', 'sectors', 'synthesis_thesis', 'value_lock', 'monopoly_score'] }),
+      base44.asServiceRole.entities.NarrativeVector.filter({}, { sort: '-adoption_forecast_pct', limit: 10, fields: ['narrative_name', 'narrative_thesis', 'adoption_forecast_pct'] }),
+      base44.asServiceRole.entities.SimulationRun.filter({}, { sort: '-simulated_date', limit: 100, fields: ['subject_name', 'simulated_date'] })
     ]);
 
-    const hybrid = hybPage.items?.[0];
-    const narrative = narPage.items?.[0];
+    // Walk the ranked candidate list until an untested subject is found.
+    const sim = new Set((simPage.items || []).map((r) => String(r.subject_name || '').trim().toLowerCase()));
+    const isUntested = (name) => !sim.has(String(name || '').trim().toLowerCase());
+    const hybrid = (hybPage.items || []).find((h) => isUntested(h.asset_name));
+    const narrative = hybrid ? undefined : (narPage.items || []).find((n) => isUntested(n.narrative_name));
     if (!hybrid && !narrative) {
-      return Response.json({ error: 'Nothing to simulate: no hybrid assets or narratives exist yet.' }, { status: 400 });
+      return Response.json({ note: 'Every ranked hybrid asset and narrative has already been simulated. Nothing new to test.' });
     }
 
     const subject = hybrid || narrative;
     const subjectType = hybrid ? 'hybrid' : 'narrative';
-    const sim = new Set((simPage.items || []).map((r) => String(r.subject_name || '').trim().toLowerCase()));
-    if (sim.has(String(subject.asset_name || subject.narrative_name || '').trim().toLowerCase())) {
-      return Response.json({ note: `Highest-stakes subject "${subject.asset_name || subject.narrative_name}" was already simulated. Nothing new to test.` });
-    }
 
     const subjectCtx = hybrid
       ? `Subject: hybrid super-asset "${hybrid.asset_name}" spanning [${(hybrid.sectors || []).join(', ')}]. Thesis: ${hybrid.synthesis_thesis} Value-lock: ${hybrid.value_lock} Monopoly score: ${hybrid.monopoly_score}.`

@@ -1,0 +1,77 @@
+{
+  "name": "EvolutionLog",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "capability_name": {
+      "type": "string"
+    },
+    "bottleneck_addressed": {
+      "type": "string"
+    },
+    "upgrade_design": {
+      "type": "string"
+    },
+    "pod_targets": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "autonomous_note": {
+      "type": "string"
+    },
+    "log_date": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "version",
+    "capability_name",
+    "bottleneck_addressed",
+    "upgrade_design"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

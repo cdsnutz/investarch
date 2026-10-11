@@ -1,0 +1,81 @@
+{
+  "name": "TalentAlignment",
+  "type": "object",
+  "properties": {
+    "node_name": {
+      "type": "string"
+    },
+    "objective": {
+      "type": "string"
+    },
+    "incentive_design": {
+      "type": "string"
+    },
+    "alignment_metric": {
+      "type": "string"
+    },
+    "retention_note": {
+      "type": "string"
+    },
+    "risk_note": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "proposed",
+        "active",
+        "integrated"
+      ],
+      "default": "proposed"
+    },
+    "designed_date": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "node_name",
+    "objective"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "name": "LiveSignal",
+  "type": "object",
+  "properties": {
+    "signal_name": {
+      "type": "string"
+    },
+    "domain": {
+      "type": "string"
+    },
+    "observation": {
+      "type": "string"
+    },
+    "pre_emptive_gap": {
+      "type": "string"
+    },
+    "action_window_days": {
+      "type": "number"
+    },
+    "confidence": {
+      "type": "number"
+    },
+    "signal_sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "recommended_strike": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "observed",
+        "actionable",
+        "struck"
+      ],
+      "default": "observed"
+    },
+    "observed_date": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "signal_name",
+    "observation"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

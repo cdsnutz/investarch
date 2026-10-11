@@ -1,0 +1,95 @@
+{
+  "name": "PhysicalAsset",
+  "type": "object",
+  "properties": {
+    "asset_name": {
+      "type": "string"
+    },
+    "realm": {
+      "type": "string",
+      "enum": [
+        "hardware",
+        "biotech",
+        "energy",
+        "infrastructure",
+        "robotics"
+      ],
+      "default": "hardware"
+    },
+    "vertical_thesis": {
+      "type": "string"
+    },
+    "supply_chain_plan": {
+      "type": "string"
+    },
+    "ip_claims": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "capex_estimate": {
+      "type": "number"
+    },
+    "integration_note": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "blueprint",
+        "sourcing",
+        "built"
+      ],
+      "default": "blueprint"
+    },
+    "registered_date": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "asset_name",
+    "vertical_thesis"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

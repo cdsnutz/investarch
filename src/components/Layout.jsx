@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
-import { LayoutDashboard, Plus, LogOut, Crosshair, Radar, Crown, Globe, Brain } from 'lucide-react';
+import { LayoutDashboard, Plus, LogOut, Crosshair, Radar, Crown, Globe, Brain, Infinity as InfinityIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const NAV = [
@@ -9,7 +9,8 @@ const NAV = [
   { to: '/ip-factory', label: 'IP Factory', icon: Radar },
   { to: '/command', label: 'Command', icon: Crown },
   { to: '/sovereign', label: 'Sovereign OS', icon: Globe },
-  { to: '/vault', label: 'Hegemony Vault', icon: Brain }
+  { to: '/vault', label: 'Hegemony Vault', icon: Brain },
+  { to: '/omega', label: 'Omega Dashboard', icon: InfinityIcon }
 ];
 
 export default function Layout() {
@@ -63,6 +64,7 @@ export default function Layout() {
           <Link to="/command" className="text-slate-300"><Crown className="size-5" /></Link>
           <Link to="/sovereign" className="text-slate-300"><Globe className="size-5" /></Link>
           <Link to="/vault" className="text-slate-300"><Brain className="size-5" /></Link>
+          <Link to="/omega" className="text-slate-300"><InfinityIcon className="size-5" /></Link>
           <button onClick={() => logout()} className="text-slate-400"><LogOut className="size-5" /></button>
         </div>
       </div>

@@ -20,6 +20,7 @@ import IpFactory from '@/pages/IpFactory';
 import Conglomerate from '@/pages/Conglomerate';
 import SovereignOS from '@/pages/SovereignOS';
 import HegemonyVault from '@/pages/HegemonyVault';
+import OmegaDashboard from '@/pages/OmegaDashboard';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -61,6 +62,7 @@ const AuthenticatedApp = () => {
           <Route path="/command" element={<Conglomerate />} />
           <Route path="/sovereign" element={<SovereignOS />} />
           <Route path="/vault" element={<HegemonyVault />} />
+          <Route path="/omega" element={<OmegaDashboard />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

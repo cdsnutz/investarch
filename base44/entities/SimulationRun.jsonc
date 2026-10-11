@@ -1,0 +1,100 @@
+{
+  "name": "SimulationRun",
+  "type": "object",
+  "properties": {
+    "subject_name": {
+      "type": "string"
+    },
+    "subject_type": {
+      "type": "string",
+      "enum": [
+        "narrative",
+        "hybrid",
+        "layer",
+        "seed"
+      ],
+      "default": "hybrid"
+    },
+    "scenario_count": {
+      "type": "number"
+    },
+    "scenarios": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "scenario": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "probability": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "optimal_path": {
+      "type": "string"
+    },
+    "success_probability": {
+      "type": "number"
+    },
+    "failure_modes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "simulated_date": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "subject_name",
+    "optimal_path",
+    "success_probability"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

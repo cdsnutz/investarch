@@ -4,7 +4,6 @@ import { base44 } from '@/api/base44Client';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Radio, ArrowUpRight } from 'lucide-react';
 import moment from 'moment';
 
 export default function SignalFeed() {
@@ -17,15 +16,10 @@ export default function SignalFeed() {
   }, []);
 
   return (
-    <Card className="p-5">
+    <Card className="p-5 rounded-md">
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <Radio className="size-4 text-emerald-600" />
-          <h2 className="text-sm font-semibold uppercase tracking-wide">Live Signal Feed</h2>
-        </div>
-        <Link to="/simulator" className="text-xs text-muted-foreground hover:text-slate-900 inline-flex items-center gap-1">
-          Simulator <ArrowUpRight className="size-3" />
-        </Link>
+        <h2 className="font-heading text-lg tracking-tight">Live Signal Feed</h2>
+        <Link to="/simulator" className="text-xs text-bottle hover:underline">Simulator</Link>
       </div>
 
       {signals === null ? (
@@ -46,7 +40,7 @@ export default function SignalFeed() {
                 </div>
                 <div className="flex flex-col items-end gap-1.5 shrink-0">
                   <Badge variant={s.status === 'actionable' ? 'default' : 'outline'}
-                    className={s.status === 'actionable' ? 'bg-emerald-600' : s.status === 'struck' ? 'bg-slate-200 text-slate-700' : ''}>
+                    className={s.status === 'actionable' ? 'bg-bottle text-bottle-foreground border-transparent' : s.status === 'struck' ? 'bg-secondary text-secondary-foreground' : ''}>
                     {s.status}
                   </Badge>
                   {s.confidence != null && <span className="text-[11px] text-muted-foreground tabular-nums">{s.confidence}/10 conf.</span>}

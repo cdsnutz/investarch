@@ -4,7 +4,6 @@ import { base44 } from '@/api/base44Client';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Lightbulb, ArrowUpRight } from 'lucide-react';
 import moment from 'moment';
 
 export default function SeedFeed() {
@@ -17,15 +16,10 @@ export default function SeedFeed() {
   }, []);
 
   return (
-    <Card className="p-5">
+    <Card className="p-5 rounded-md">
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <Lightbulb className="size-4 text-amber-500" />
-          <h2 className="text-sm font-semibold uppercase tracking-wide">Latest IP Seeds</h2>
-        </div>
-        <Link to="/ip-factory" className="text-xs text-muted-foreground hover:text-slate-900 inline-flex items-center gap-1">
-          IP Factory <ArrowUpRight className="size-3" />
-        </Link>
+        <h2 className="font-heading text-lg tracking-tight">Latest IP Seeds</h2>
+        <Link to="/ip-factory" className="text-xs text-bottle hover:underline">IP Factory</Link>
       </div>
 
       {seeds === null ? (

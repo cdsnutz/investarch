@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
+import { pickSeedTargets, normTitle } from "../../shared/seedTargets.ts";
 
 const PLANS_SCHEMA = {
   type: "object",
@@ -33,19 +34,7 @@ export default async function(req) {
     const db = user ? base44.entities : base44.asServiceRole.entities;
 
     const body = await req.json().catch(() => ({}));
-    const seedId = (body?.seedId || '').trim();
-
-    const [seedPage, planPage] = await Promise.all([
-      base44.asServiceRole.entities.IpSeed.filter({}, { sort: '-asymmetric_score', limit: 60 }),
-      base44.asServiceRole.entities.DisruptionPlan.filter({}, { limit: 300, fields: ['seed_id'] })
-    ]);
-    const covered = new Set((planPage.items || []).map((p) => p.seed_id));
-    let targets = (seedPage.items || []).filter((s) => !covered.has(s.id));
-    if (seedId) {
-      const explicit = (seedPage.items || []).find((s) => s.id === seedId);
-      if (explicit) targets = [explicit];
-    }
-    targets = targets.slice(0, 4);
+    const targets = await pickSeedTargets(base44, 'DisruptionPlan', (body?.seedId || '').trim(), 4);
     if (!targets.length) return Response.json({ plans_created: 0, note: 'Top seeds already carry disruption plans.' });
 
     const prompt = `You are the War-Room Pod of a sovereign IP conglomerate: a competitive-intelligence unit whose mandate is to make incumbents obsolete, not to out-feature them politely.
@@ -76,11 +65,10 @@ Truth over theater: name real competitors and real, verifiable failure modes. Ne
     const plans = (res?.plans || []).slice(0, targets.length);
     if (!plans.length) return Response.json({ error: 'War-Room returned no plans.' }, { status: 502 });
 
-    const norm = (t) => String(t || '').trim().toLowerCase();
-    const byTitle = new Map(targets.map((t) => [norm(t.title), t.id]));
+    const byTitle = new Map(targets.map((t) => [normTitle(t.title), t.id]));
     const records = plans
       .map((p) => ({
-        seed_id: byTitle.get(norm(p.seed_title)) || '',
+        seed_id: byTitle.get(normTitle(p.seed_title)) || '',
         target_competitor: p.target_competitor,
         domain: p.domain || '',
         churn_analysis: p.churn_analysis || '',

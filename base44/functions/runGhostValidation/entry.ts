@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
+import { pickSeedTargets, normTitle } from "../../shared/seedTargets.ts";
 
 const VALIDATIONS_SCHEMA = {
   type: "object",
@@ -43,19 +44,7 @@ export default async function(req) {
     const db = user ? base44.entities : base44.asServiceRole.entities;
 
     const body = await req.json().catch(() => ({}));
-    const seedId = (body?.seedId || '').trim();
-
-    const [seedPage, valPage] = await Promise.all([
-      base44.asServiceRole.entities.IpSeed.filter({}, { sort: '-asymmetric_score', limit: 60 }),
-      base44.asServiceRole.entities.GhostValidation.filter({}, { limit: 300, fields: ['seed_id'] })
-    ]);
-    const validated = new Set((valPage.items || []).map((v) => v.seed_id));
-    let targets = (seedPage.items || []).filter((s) => !validated.has(s.id));
-    if (seedId) {
-      const explicit = (seedPage.items || []).find((s) => s.id === seedId);
-      if (explicit) targets = [explicit];
-    }
-    targets = targets.slice(0, 4);
+    const targets = await pickSeedTargets(base44, 'GhostValidation', (body?.seedId || '').trim(), 4);
     if (!targets.length) return Response.json({ validations_created: 0, note: 'Top seeds already carry ghost validations.' });
 
     const prompt = `You are the Amplifier Pod of a sovereign IP conglomerate: the distribution engine that proves demand BEFORE a cent is spent on development or patenting. This is the Lean-Sovereign method.
@@ -85,11 +74,10 @@ Zero filler. Every sentence carries utility.`;
     const vals = (res?.validations || []).slice(0, targets.length);
     if (!vals.length) return Response.json({ error: 'Amplifier returned no validations.' }, { status: 502 });
 
-    const norm = (t) => String(t || '').trim().toLowerCase();
-    const byTitle = new Map(targets.map((t) => [norm(t.title), t.id]));
+    const byTitle = new Map(targets.map((t) => [normTitle(t.title), t.id]));
     const records = vals
       .map((v) => ({
-        seed_id: byTitle.get(norm(v.seed_title)) || '',
+        seed_id: byTitle.get(normTitle(v.seed_title)) || '',
         hook: v.hook || '',
         landing_headline: v.landing_headline || '',
         landing_copy: v.landing_copy || '',

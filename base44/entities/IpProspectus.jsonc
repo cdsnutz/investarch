@@ -31,6 +31,9 @@
     },
     "offer_terms": {
       "type": "string"
+    },
+    "lead_contact": {
+      "type": "string"
     }
   },
   "required": [

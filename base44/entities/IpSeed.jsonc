@@ -66,6 +66,9 @@
     "ecosystem_interlocks": {
       "type": "string"
     },
+    "onboarding_guide": {
+      "type": "string"
+    },
     "yield_date": {
       "type": "string"
     }

@@ -59,7 +59,7 @@ Also produce:
     });
     if (!codebase?.files?.length) return Response.json({ error: 'Architect returned no files.' }, { status: 502 });
 
-    await base44.entities.IpSeed.update(seedId, { status: 'built', repo_name: codebase.repo_name, ecosystem_interlocks: codebase.ecosystem_interlocks || '' });
+    await base44.entities.IpSeed.update(seedId, { status: 'built', repo_name: codebase.repo_name, ecosystem_interlocks: codebase.ecosystem_interlocks || '', onboarding_guide: codebase.onboarding_guide || '' });
     return Response.json(codebase);
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

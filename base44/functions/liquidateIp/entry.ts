@@ -16,9 +16,10 @@ const PROSPECTUS_SCHEMA = {
     },
     prospectus: { type: "string" },
     offer_type: { type: "string" },
-    offer_terms: { type: "string" }
+    offer_terms: { type: "string" },
+    lead_contact: { type: "string" }
   },
-  required: ["targets", "prospectus", "offer_type", "offer_terms"]
+  required: ["targets", "prospectus", "offer_type", "offer_terms", "lead_contact"]
 };
 
 export default async function(req) {
@@ -43,7 +44,8 @@ Produce:
 1. targets — 5 real corporations, each with a rationale naming the specific product line, market position, or strategic pressure that makes them the right buyer. Truthful: if a target is speculative, say what the diligence would confirm.
 2. prospectus — a high-pressure but factual sales prospectus (350 to 500 words): the asset, the market failure it monetizes, the defensive and offensive value to the buyer, the cost of ignoring it (freedom-to-operate risk), and the ask. Institutional tone; persuasion through specificity, never hyperbole.
 3. offer_type — "licensing" or "acquisition" — whichever converts faster for this asset, with the reasoning embedded in offer_terms.
-4. offer_terms — the concrete structure: for licensing, royalty base and rate band with exclusivity terms; for acquisition, an indicative price band with its valuation logic and what diligence the buyer gets. Every number labeled as an indicative opening position.`;
+4. offer_terms — the concrete structure: for licensing, royalty base and rate band with exclusivity terms; for acquisition, an indicative price band with its valuation logic and what diligence the buyer gets. Every number labeled as an indicative opening position.
+5. lead_contact — the contact channel for the LEAD target (targets[0]): its publicly listed corporate development / M&A contact, business development email, or main website URL. If no public channel is known, write exactly: "Contact via corporate development office. Verify on the target's official website." Do not invent personal names or private emails.`;
 
     const res = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt,
@@ -56,7 +58,8 @@ Produce:
       targets: (res.targets || []).slice(0, 5),
       prospectus: res.prospectus,
       offer_type: res.offer_type === 'acquisition' ? 'acquisition' : 'licensing',
-      offer_terms: res.offer_terms || ''
+      offer_terms: res.offer_terms || '',
+      lead_contact: res.lead_contact || 'Contact via corporate development office. Verify on the target\'s official website.'
     };
     const created = await base44.entities.IpProspectus.create(record);
     return Response.json({ prospectus: created });

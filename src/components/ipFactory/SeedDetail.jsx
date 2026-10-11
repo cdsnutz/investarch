@@ -3,8 +3,9 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Loader2, Download, Scale, Tag, FileSignature, Handshake, Wrench } from 'lucide-react';
+import { Loader2, Download, Scale, Tag, FileSignature, Handshake, Wrench, FileArchive } from 'lucide-react';
 import JSZip from 'jszip';
+import { buildDossierPack } from '@/lib/dossierPack';
 
 function Block({ title, children }) {
   return (
@@ -78,6 +79,33 @@ export default function SeedDetail({ seed, filings, prospectus, open, onClose, o
     await base44.functions.invoke('liquidateIp', { seedId: seed.id });
   });
 
+  const buildPack = () => run('pack', async () => {
+    for (const t of ['patent', 'trademark', 'deed']) {
+      if (!(filings || []).some((f) => f.filing_type === t)) {
+        await base44.functions.invoke('draftIpFiling', { seedId: seed.id, filingType: t });
+      }
+    }
+    let prospectusRec = prospectus;
+    if (!prospectusRec) {
+      const res = await base44.functions.invoke('liquidateIp', { seedId: seed.id });
+      prospectusRec = res.data?.prospectus;
+    }
+    let guide = seed.onboarding_guide || '';
+    if (!guide) {
+      const res = await base44.functions.invoke('architectSeed', { seedId: seed.id });
+      guide = res.data?.onboarding_guide || '';
+    }
+    const fresh = await base44.entities.IpFiling.filter({ seed_id: seed.id }, { limit: 20 });
+    const blob = await buildDossierPack({ seed, filings: fresh.items || [], prospectus: prospectusRec, onboardingGuide: guide });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${seed.title.replace(/[^\w\s-]/g, '').trim() || 'IP-Asset'} Dossier Pack.zip`;
+    a.click();
+    URL.revokeObjectURL(url);
+    onRefresh();
+  });
+
   const bp = seed.blueprint || {};
 
   return (
@@ -129,7 +157,15 @@ export default function SeedDetail({ seed, filings, prospectus, open, onClose, o
             <Button size="sm" variant="outline" onClick={liquidate} disabled={!!busy}>
               {busy === 'liquidate' ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <Handshake className="size-3.5 mr-1.5" />} Liquidation prospectus
             </Button>
+            {(seed.strategy === 'flip' || seed.strategy === 'build') && (
+              <Button size="sm" onClick={buildPack} disabled={!!busy}>
+                {busy === 'pack' ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <FileArchive className="size-3.5 mr-1.5" />} Download dossier pack (PDFs)
+              </Button>
+            )}
           </div>
+          {busy === 'pack' && (
+            <p className="text-xs text-muted-foreground">Drafting any missing filings and the prospectus, then assembling the PDF pack. This can take a few minutes.</p>
+          )}
 
           {codebase?.onboarding_guide && (
             <Block title="Developer Onboarding">{codebase.onboarding_guide}</Block>
@@ -160,6 +196,7 @@ export default function SeedDetail({ seed, filings, prospectus, open, onClose, o
               </div>
               <div className="text-sm leading-relaxed whitespace-pre-wrap">{prospectus.prospectus}</div>
               <Badge variant="secondary" className="bg-background">{prospectus.offer_type}</Badge>
+              {prospectus.lead_contact && <Block title="Lead Contact">{prospectus.lead_contact}</Block>}
               {prospectus.offer_terms && <Block title="Offer Terms">{prospectus.offer_terms}</Block>}
             </div>
           )}

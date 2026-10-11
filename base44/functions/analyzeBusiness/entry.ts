@@ -102,6 +102,7 @@ export default async function(req: Request): Promise<Response> {
     const body = await req.json();
     const input = (body?.url || '').trim();
     const companyName = (body?.companyName || '').trim();
+    const quick = body?.intensity === 'quick';
     if (!input) return Response.json({ error: 'A company URL or business idea is required.' }, { status: 400 });
     const isIdea = !/^https?:\/\//i.test(input);
 
@@ -123,14 +124,14 @@ Produce all of the following:
 7. company_radar — the target company scored 0 to 10 on the SAME five dimensions (Market Reach, Product Differentiation, Traction, Team Strength, Pricing Power). Score truthfully against the real competitors you identified; do not inflate.
 8. funding_sources — 4 to 6 REAL funding sources whose investment thesis aligns with this business (grants, venture firms, angel groups, or loan programs). For each: name, type (one of: grant, vc, angel, loan), focus_area, alignment_rationale (why this is a fit), stage (the stage they invest at), and contact_info (website or application portal — if unknown, write "verify").
 
-Ground everything in real data. Quality and specificity over quantity.`;
+Ground everything in real data. Quality and specificity over quantity.${quick ? '\n\nCONDENSED QUICK-SCAN MODE: keep every written section to 2-3 sharp sentences, limit competitors to exactly 3, and funding_sources to exactly 4.' : ''}`;
 
     const research = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt: isIdea
         ? `${researchPrompt}\nNote: the target is a raw idea with no existing web presence, so web context is not used here. Ground market sizing, competitor scores, and funding sources in industry-standard benchmarks, and label every modeled figure as an analyst estimate with its assumption stated.`
         : researchPrompt,
       add_context_from_internet: !isIdea,
-      model: isIdea ? 'automatic' : "gemini_3_8_flash",
+      model: quick || isIdea ? 'automatic' : "gemini_3_8_flash",
       response_json_schema: RESEARCH_SCHEMA
     });
 
@@ -149,9 +150,13 @@ Produce all of the following:
 
 CRITIQUE LOOP (mandatory): Before finalizing, review each section for generic filler, vague adjectives, and templated AI phrasing ("revolutionary", "game-changing", "synergy", "disruptive", etc.). Rewrite any sentence that is not specific and grounded. The output must read like it was written by a top-tier analyst, never a template.`;
 
+    const finalSynthesisPrompt = quick
+      ? `${synthesisPrompt}\n\nQUICK-SCAN MODE: executive_summary max 2 paragraphs, investor_narrative max 3 paragraphs, key_milestones exactly 4. Write tight, specific prose; skip the critique loop.`
+      : synthesisPrompt;
+
     const synthesis = await base44.asServiceRole.integrations.Core.InvokeLLM({
-      prompt: synthesisPrompt,
-      model: "claude-sonnet-5",
+      prompt: finalSynthesisPrompt,
+      model: quick ? 'automatic' : "claude-sonnet-5",
       response_json_schema: SYNTHESIS_SCHEMA
     });
 

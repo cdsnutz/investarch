@@ -19,6 +19,7 @@ const STAGES = [
 export default function NewAnalysis() {
   const [url, setUrl] = useState('');
   const [companyName, setCompanyName] = useState('');
+  const [intensity, setIntensity] = useState('quick');
   const [loading, setLoading] = useState(false);
   const [stage, setStage] = useState('');
   const navigate = useNavigate();
@@ -39,7 +40,7 @@ export default function NewAnalysis() {
     let project = null;
     try {
       project = await base44.entities.Project.create({ url: url.trim(), company_name: companyName.trim(), status: 'analyzing' });
-      const res = await base44.functions.invoke('analyzeBusiness', { url: url.trim(), companyName: companyName.trim() });
+      const res = await base44.functions.invoke('analyzeBusiness', { url: url.trim(), companyName: companyName.trim(), intensity });
       const d = res.data;
       await base44.entities.Project.update(project.id, {
         company_name: d.company_name || companyName.trim(),
@@ -98,6 +99,25 @@ export default function NewAnalysis() {
           <div className="space-y-2">
             <Label htmlFor="name">Company name <span className="text-muted-foreground font-normal">(optional)</span></Label>
             <Input id="name" placeholder="Acme Corp" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label>Research intensity</Label>
+            <div className="grid grid-cols-2 rounded-md border border-input overflow-hidden">
+              {[
+                { value: 'quick', label: 'Quick Scan', sub: 'Lower credit cost' },
+                { value: 'deep', label: 'Deep Research', sub: 'Premium models, critique loop' }
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setIntensity(opt.value)}
+                  className={`px-4 py-3 text-center transition ${intensity === opt.value ? 'bg-bottle text-bottle-foreground' : 'bg-white text-muted-foreground hover:bg-secondary/60'}`}
+                >
+                  <span className="block text-sm font-medium">{opt.label}</span>
+                  <span className="block text-xs opacity-70 mt-0.5">{opt.sub}</span>
+                </button>
+              ))}
+            </div>
           </div>
           <Button type="submit" className="w-full" size="lg">
             <Crosshair className="size-4 mr-2" /> Generate dossier

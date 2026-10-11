@@ -70,7 +70,9 @@ export default function ProjectDetail() {
   const runEngine = async () => {
     setRunning(true);
     try {
-      await base44.functions.invoke('buildPlanAndScan', { projectId: id });
+      await base44.functions.invoke('buildPlanPoints', { projectId: id });
+      await base44.functions.invoke('runValueScan', { projectId: id });
+      await base44.functions.invoke('draftFundingLetters', { projectId: id });
       const [p, fund] = await Promise.all([
         base44.entities.Project.get(id),
         base44.entities.FundingSource.filter({ project_id: id }, { limit: 50 })

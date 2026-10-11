@@ -78,11 +78,26 @@ Truth rule: these are structured expert simulations, not measured parallel unive
       return Response.json({ error: 'The Quantum-Simulation Pod returned no scenarios.' }, { status: 500 });
     }
 
-    const branches = res.scenarios.slice(0, 16).map((s) => ({
+    const raw = res.scenarios.slice(0, 16).map((s) => ({
       scenario: s.scenario || '',
       outcome: s.outcome || '',
-      probability: typeof s.probability === 'number' ? s.probability : 0
+      probability: typeof s.probability === 'number' ? Math.max(0, s.probability) : 0
     }));
+    // Convergence pass: the branch probabilities must partition the outcome space.
+    // Normalize deterministically to sum exactly 100 (the convergence gate's 90-110 band, tightened to 100).
+    const rawSum = raw.reduce((acc, b) => acc + b.probability, 0);
+    let branches;
+    if (rawSum <= 0) {
+      const even = Math.floor((100 / raw.length) * 10) / 10;
+      branches = raw.map((b) => ({ ...b, probability: even }));
+    } else {
+      branches = raw.map((b) => ({
+        ...b,
+        probability: Math.round((b.probability / rawSum) * 1000) / 10
+      }));
+      const drift = Math.round((100 - branches.reduce((acc, b) => acc + b.probability, 0)) * 10) / 10;
+      if (drift !== 0 && branches.length) branches[0].probability = Math.round((branches[0].probability + drift) * 10) / 10;
+    }
     const created = await db.SimulationRun.create({
       subject_name: res.subject_name || subject.asset_name || subject.narrative_name,
       subject_type: ['narrative', 'hybrid', 'layer', 'seed'].includes(res.subject_type) ? res.subject_type : subjectType,

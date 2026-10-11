@@ -72,8 +72,22 @@ Truth rule: open, public data only — no surveillance, no non-public or persona
     const signals = (res?.signals || []).slice(0, 4);
     if (!signals.length) return Response.json({ error: 'The Omni-Sense Pod returned no signals.' }, { status: 500 });
 
-    const fresh = signals.filter((s) => !claimed.has(norm(s.signal_name)));
-    if (!fresh.length) return Response.json({ signals_created: 0, note: 'All live signals are already on the value-stream.' });
+    // Accuracy pass: every stored signal must carry at least 2 named corroborating sources,
+    // and no near-duplicate of a prior signal (token overlap over the last recorded names).
+    const overlap = (a, b) => {
+      const at = new Set(norm(a).split(/\s+/).filter((w) => w.length > 3));
+      const bt = new Set(norm(b).split(/\s+/).filter((w) => w.length > 3));
+      if (!at.size || !bt.size) return 0;
+      let shared = 0;
+      for (const w of at) if (bt.has(w)) shared++;
+      return shared / Math.min(at.size, bt.size);
+    };
+    const fresh = signals.filter((s) =>
+      !claimed.has(norm(s.signal_name)) &&
+      Array.isArray(s.signal_sources) && s.signal_sources.filter(Boolean).length >= 2 &&
+      !(priorPage.items || []).some((p) => overlap(s.signal_name, p.signal_name) >= 0.6)
+    );
+    if (!fresh.length) return Response.json({ signals_created: 0, note: 'No signals cleared the corroboration and novelty bar.' });
 
     const t = today();
     const records = fresh.map((s) => ({

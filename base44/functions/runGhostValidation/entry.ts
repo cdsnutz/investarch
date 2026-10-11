@@ -39,15 +39,15 @@ const VALIDATIONS_SCHEMA = {
 export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
-    // Scheduled runs arrive without a user session; manual runs carry one.
     const user = await base44.auth.me();
-    const db = user ? base44.entities : base44.asServiceRole.entities;
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const db = base44.entities;
 
     const body = await req.json().catch(() => ({}));
     const targets = await pickSeedTargets(base44, 'GhostValidation', (body?.seedId || '').trim(), 4);
     if (!targets.length) return Response.json({ validations_created: 0, note: 'Top seeds already carry ghost validations.' });
 
-    const prompt = `You are the Amplifier Pod of a sovereign IP conglomerate: the distribution engine that proves demand BEFORE a cent is spent on development or patenting. This is the Lean-Sovereign method.
+    const prompt = `You are the demand-validation engine inside InvestArch: you prove demand BEFORE a cent is spent on development or patenting.
 
 Below are ${targets.length} IP-seeds. For EACH seed, produce a complete Ghost Validation package plus a demand read grounded in live market signals (adjacent launches, community interest, search behavior, competitor pricing):
 
@@ -68,7 +68,6 @@ Zero filler. Every sentence carries utility.`;
     const res = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt,
       add_context_from_internet: true,
-      model: 'gemini_3_8_flash',
       response_json_schema: VALIDATIONS_SCHEMA
     });
     const vals = (res?.validations || []).slice(0, targets.length);

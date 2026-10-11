@@ -1,17 +1,13 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
-import { LayoutDashboard, Plus, LogOut, Crosshair, Radar, Crown, Globe, Brain, Infinity as InfinityIcon, Sigma } from 'lucide-react';
+import { LayoutDashboard, Plus, LogOut, Crosshair, Radar, FlaskConical } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const NAV = [
   { to: '/', label: 'Dossiers', icon: LayoutDashboard },
   { to: '/new', label: 'New Analysis', icon: Plus },
   { to: '/ip-factory', label: 'IP Factory', icon: Radar },
-  { to: '/command', label: 'Command', icon: Crown },
-  { to: '/sovereign', label: 'Sovereign OS', icon: Globe },
-  { to: '/vault', label: 'Hegemony Vault', icon: Brain },
-  { to: '/omega', label: 'Omega Dashboard', icon: InfinityIcon },
-  { to: '/axiom', label: 'Axiom Command', icon: Sigma }
+  { to: '/simulator', label: 'Precision Simulator', icon: FlaskConical }
 ];
 
 export default function Layout() {
@@ -27,8 +23,8 @@ export default function Layout() {
             <Crosshair className="size-4 text-slate-950" />
           </div>
           <div>
-            <div className="text-sm font-semibold tracking-tight text-white">ARCHITECT OMNI</div>
-            <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Investment Intelligence</div>
+            <div className="text-sm font-semibold tracking-tight text-white">INVESTARCH</div>
+            <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Wealth &amp; Business Dossiers</div>
           </div>
         </div>
         <nav className="flex-1 px-3 py-5 space-y-1">
@@ -56,17 +52,13 @@ export default function Layout() {
           <div className="size-7 rounded-md bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">
             <Crosshair className="size-4 text-slate-950" />
           </div>
-          <span className="text-sm font-semibold tracking-tight">ARCHITECT OMNI</span>
+          <span className="text-sm font-semibold tracking-tight">INVESTARCH</span>
         </div>
         <div className="flex items-center gap-4">
           <Link to="/" className="text-slate-300"><LayoutDashboard className="size-5" /></Link>
           <Link to="/new" className="text-slate-300"><Plus className="size-5" /></Link>
           <Link to="/ip-factory" className="text-slate-300"><Radar className="size-5" /></Link>
-          <Link to="/command" className="text-slate-300"><Crown className="size-5" /></Link>
-          <Link to="/sovereign" className="text-slate-300"><Globe className="size-5" /></Link>
-          <Link to="/vault" className="text-slate-300"><Brain className="size-5" /></Link>
-          <Link to="/omega" className="text-slate-300"><InfinityIcon className="size-5" /></Link>
-          <Link to="/axiom" className="text-slate-300"><Sigma className="size-5" /></Link>
+          <Link to="/simulator" className="text-slate-300"><FlaskConical className="size-5" /></Link>
           <button onClick={() => logout()} className="text-slate-400"><LogOut className="size-5" /></button>
         </div>
       </div>

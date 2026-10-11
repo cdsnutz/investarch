@@ -1,28 +1,14 @@
 {
   "name": "Sovereign IP Hunt",
-  "description": "Daily sovereign cycle V7: Metamorphosis learns, the hunt yields 20 IP-seeds, War-Room maps disruptions, Ghost Validation tests demand, Treasury prices the portfolio, Deployment and Traffic kits are cut, the Synergy loop cross-pollinates, the Governance Nexus scans for infringement, the Neural-CFO allocates capital, and the Execution Order is issued",
+  "description": "Daily InvestArch IP cycle: the hunt yields 20 IP-seeds, strategy verdicts are assigned, War-Room maps disruptions, Ghost Validation tests demand, Treasury prices the portfolio, deployment kits are cut, the IP-protection watchdog scans for infringement, the capital allocator rebalances, and the execution order is issued",
   "definition": {
     "document": {
       "dsl": "1.0.0",
       "name": "sovereign_ip_hunt",
-      "version": "3.0",
+      "version": "4.0",
       "namespace": "base44"
     },
     "do": [
-      {
-        "learn": {
-          "call": "invoke_backend_function",
-          "with": {
-            "function_name": "runMetamorphosis",
-            "args": {}
-          },
-          "then": "run_hunt",
-          "x-base44": {
-            "title": "Metamorphosis",
-            "description": "Extract learned heuristics"
-          }
-        }
-      },
       {
         "run_hunt": {
           "call": "invoke_backend_function",
@@ -75,7 +61,7 @@
           "then": "price_portfolio",
           "x-base44": {
             "title": "Ghost Validation",
-            "description": "Amplifier demand reads"
+            "description": "Demand reads before a cent is spent"
           }
         }
       },
@@ -100,38 +86,10 @@
             "function_name": "runDeploymentKit",
             "args": {}
           },
-          "then": "traffic_siphon",
-          "x-base44": {
-            "title": "Deployment Pod",
-            "description": "Zero-touch deploy kits"
-          }
-        }
-      },
-      {
-        "traffic_siphon": {
-          "call": "invoke_backend_function",
-          "with": {
-            "function_name": "runTrafficSiphon",
-            "args": {}
-          },
-          "then": "synergy_sync",
-          "x-base44": {
-            "title": "Traffic-Siphon",
-            "description": "Distribution kits"
-          }
-        }
-      },
-      {
-        "synergy_sync": {
-          "call": "invoke_backend_function",
-          "with": {
-            "function_name": "runSynergySync",
-            "args": {}
-          },
           "then": "governance_scan",
           "x-base44": {
-            "title": "Synergy-Core",
-            "description": "Cross-pollination upsells"
+            "title": "Deployment engine",
+            "description": "Zero-touch deploy kits"
           }
         }
       },
@@ -144,7 +102,7 @@
           },
           "then": "neural_cfo",
           "x-base44": {
-            "title": "Governance Nexus",
+            "title": "IP-protection watchdog",
             "description": "Infringement scan + C&D drafts"
           }
         }
@@ -158,8 +116,8 @@
           },
           "then": "issue_order",
           "x-base44": {
-            "title": "Neural-CFO",
-            "description": "Capital allocation"
+            "title": "Capital allocator",
+            "description": "Reinvestment decisions"
           }
         }
       },

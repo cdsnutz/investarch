@@ -3,16 +3,16 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
-    // Scheduled runs arrive without a user session; manual runs carry one.
     const user = await base44.auth.me();
-    const db = user ? base44.entities : base44.asServiceRole.entities;
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const db = base44.entities;
 
     const [ledgerPage, decisionPage, seedPage, filingPage, valPage] = await Promise.all([
-      base44.asServiceRole.entities.LedgerEntry.filter({}, { limit: 500, fields: ['entry_type', 'amount'] }),
-      base44.asServiceRole.entities.ReinvestmentDecision.filter({}, { limit: 500, fields: ['allocation'] }),
-      base44.asServiceRole.entities.IpSeed.filter({}, { sort: '-asymmetric_score', limit: 300, fields: ['title', 'asymmetric_score', 'status', 'strategy'] }),
-      base44.asServiceRole.entities.IpFiling.filter({}, { limit: 500, fields: ['seed_id'] }),
-      base44.asServiceRole.entities.GhostValidation.filter({}, { limit: 500, fields: ['seed_id', 'demand_score'] })
+      base44.entities.LedgerEntry.filter({}, { limit: 500, fields: ['entry_type', 'amount'] }),
+      base44.entities.ReinvestmentDecision.filter({}, { limit: 500, fields: ['allocation'] }),
+      base44.entities.IpSeed.filter({}, { sort: '-asymmetric_score', limit: 300, fields: ['title', 'asymmetric_score', 'status', 'strategy'] }),
+      base44.entities.IpFiling.filter({}, { limit: 500, fields: ['seed_id'] }),
+      base44.entities.GhostValidation.filter({}, { limit: 500, fields: ['seed_id', 'demand_score'] })
     ]);
 
     const entries = ledgerPage.items || [];
@@ -37,7 +37,7 @@ export default async function(req) {
         decision: 'hold',
         target_title: 'Corporate Treasury',
         allocation: 0,
-        rationale: `No unallocated capital: revenue ${Math.round(revenue)} against ${Math.round(spent)} spent and ${Math.round(previouslyAllocated)} already committed. The organism holds until live assets produce revenue.`,
+        rationale: `No unallocated capital: revenue ${Math.round(revenue)} against ${Math.round(spent)} spent and ${Math.round(previouslyAllocated)} already committed. The portfolio holds until live assets produce revenue.`,
         decision_date: today
       });
     } else {

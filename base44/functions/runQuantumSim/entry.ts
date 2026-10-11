@@ -30,39 +30,33 @@ export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
-    const db = user ? base44.entities : base44.asServiceRole.entities;
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const db = base44.entities;
 
-    // The Quantum-Simulation Pod picks the highest-stakes untested asset and stress-tests it.
-    const [hybPage, narPage, simPage] = await Promise.all([
-      base44.asServiceRole.entities.HybridAsset.filter({}, { sort: '-monopoly_score', limit: 10, fields: ['asset_name', 'sectors', 'synthesis_thesis', 'value_lock', 'monopoly_score'] }),
-      base44.asServiceRole.entities.NarrativeVector.filter({}, { sort: '-adoption_forecast_pct', limit: 10, fields: ['narrative_name', 'narrative_thesis', 'adoption_forecast_pct'] }),
-      base44.asServiceRole.entities.SimulationRun.filter({}, { sort: '-simulated_date', limit: 100, fields: ['subject_name', 'simulated_date'] })
+    // The probability engine picks the highest-conviction untested IP asset and stress-tests it.
+    const [seedPage, simPage] = await Promise.all([
+      base44.entities.IpSeed.filter({}, { sort: '-asymmetric_score', limit: 30, fields: ['title', 'solution', 'mini_plan', 'asymmetric_score', 'status', 'strategy'] }),
+      base44.entities.SimulationRun.filter({}, { sort: '-simulated_date', limit: 100, fields: ['subject_name', 'simulated_date'] })
     ]);
 
     // Walk the ranked candidate list until an untested subject is found.
     const sim = new Set((simPage.items || []).map((r) => String(r.subject_name || '').trim().toLowerCase()));
     const isUntested = (name) => !sim.has(String(name || '').trim().toLowerCase());
-    const hybrid = (hybPage.items || []).find((h) => isUntested(h.asset_name));
-    const narrative = hybrid ? undefined : (narPage.items || []).find((n) => isUntested(n.narrative_name));
-    if (!hybrid && !narrative) {
-      return Response.json({ note: 'Every ranked hybrid asset and narrative has already been simulated. Nothing new to test.' });
+    const seed = (seedPage.items || []).find((s) => isUntested(s.title));
+    if (!seed) {
+      return Response.json({ note: 'Every high-conviction IP asset has already been simulated. Run a new hunt to test more.' });
     }
 
-    const subject = hybrid || narrative;
-    const subjectType = hybrid ? 'hybrid' : 'narrative';
-
-    const subjectCtx = hybrid
-      ? `Subject: hybrid super-asset "${hybrid.asset_name}" spanning [${(hybrid.sectors || []).join(', ')}]. Thesis: ${hybrid.synthesis_thesis} Value-lock: ${hybrid.value_lock} Monopoly score: ${hybrid.monopoly_score}.`
-      : `Subject: narrative position "${narrative.narrative_name}". Thesis: ${narrative.narrative_thesis} 12-month forecast: ${narrative.adoption_forecast_pct}%.`;
+    const subjectCtx = `Subject: IP asset "${seed.title}" (asymmetric score ${seed.asymmetric_score}/10, strategy: ${seed.strategy || 'hold'}, build status: ${seed.status}). Approach: ${seed.solution} Business case: ${seed.mini_plan}`;
 
     const res = await base44.asServiceRole.integrations.Core.InvokeLLM({
-      prompt: `You are the Quantum-Simulation Pod of a sovereign economic operating system: a probability engine. Your mandate: stress-test ONE asset against the full adversarial landscape — competitor countermoves, regulatory shocks, macro crashes, adoption stalls — and return the Optimal Path.
+      prompt: `You are the probability engine inside InvestArch: the stress-testing unit that makes every investment dossier defensible. Your mandate: stress-test ONE asset against the full adversarial landscape — competitor countermoves, regulatory shocks, macro crashes, adoption stalls — and return the Optimal Path.
 
 ${subjectCtx}
 
 Run 16 DISTINCT simulation branches. For each:
-- scenario: the named adverse or favorable branch, e.g. "A well-funded incumbent clones the core layer in 90 days", "Regulator freezes the category for 12 months", "Adoption outpaces supply".
-- outcome: what happens to the subject in that branch, in 1-2 sentences.
+- scenario: the named adverse or favorable branch, e.g. "A well-funded incumbent clones the core product in 90 days", "Regulator freezes the category for 12 months", "Adoption outpaces supply".
+- outcome: what happens to the asset in that branch, in 1-2 sentences.
 - probability: 0-100, your honest estimate. Convergence rule: the sixteen probabilities must partition the outcome space (sum between 90 and 110), no branch claiming >40%, and the set must include at least two competitor-countermove branches, at least one macro-crash branch, and at least one black-swan branch.
 
 Then produce:
@@ -74,7 +68,7 @@ Truth rule: these are structured expert simulations, not measured parallel unive
       response_json_schema: SIM_SCHEMA
     });
     if (!res || !Array.isArray(res.scenarios) || !res.scenarios.length) {
-      return Response.json({ error: 'The Quantum-Simulation Pod returned no scenarios.' }, { status: 500 });
+      return Response.json({ error: 'The probability engine returned no scenarios.' }, { status: 500 });
     }
 
     const raw = res.scenarios.slice(0, 16).map((s) => ({
@@ -98,8 +92,8 @@ Truth rule: these are structured expert simulations, not measured parallel unive
       if (drift !== 0 && branches.length) branches[0].probability = Math.round((branches[0].probability + drift) * 10) / 10;
     }
     const created = await db.SimulationRun.create({
-      subject_name: res.subject_name || subject.asset_name || subject.narrative_name,
-      subject_type: ['narrative', 'hybrid', 'layer', 'seed'].includes(res.subject_type) ? res.subject_type : subjectType,
+      subject_name: res.subject_name || seed.title,
+      subject_type: 'seed',
       scenario_count: branches.length,
       scenarios: branches,
       optimal_path: res.optimal_path || '',

@@ -38,15 +38,16 @@ export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
-    const db = user ? base44.entities : base44.asServiceRole.entities;
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const db = base44.entities;
 
     // Existing vectors: dedup by normalized name so the Oracle never repeats a claim.
-    const existingPage = await base44.asServiceRole.entities.MarketVector.filter({}, { limit: 300, fields: ['vector_name'] });
+    const existingPage = await base44.entities.MarketVector.filter({}, { limit: 300, fields: ['vector_name'] });
     const norm = (s) => String(s || '').trim().toLowerCase();
     const claimed = new Set((existingPage.items || []).map((v) => norm(v.vector_name)));
 
     const res = await base44.asServiceRole.integrations.Core.InvokeLLM({
-      prompt: `You are the Prescient Oracle Pod of a sovereign economic operating system. Your mandate: predict where the next Gold Rush happens 6-12 months BEFORE it occurs, using leading indicators.
+      prompt: `You are the market-forecast engine inside InvestArch. Your mandate: predict where the next Gold Rush happens 6-12 months BEFORE it occurs, using leading indicators.
 
 Scan CURRENT leading indicators (use web search): fresh patent filings, VC fund deployment patterns, arXiv/academic whitepapers, developer-tool adoption spikes, regulatory shifts, geopolitical supply-chain moves. Ignore anything already mainstream — a crowded market is a dead claim.
 

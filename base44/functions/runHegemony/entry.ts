@@ -26,42 +26,37 @@ export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
-    const db = user ? base44.entities : base44.asServiceRole.entities;
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const db = base44.entities;
 
-    const [layerPage, alliancePage, vectorPage] = await Promise.all([
-      base44.asServiceRole.entities.InfrastructureLayer.filter({}, { limit: 100 }),
-      base44.asServiceRole.entities.Alliance.filter({}, { limit: 300 }),
-      base44.asServiceRole.entities.MarketVector.filter({}, { limit: 100, fields: ['status'] })
+    const [seedPage, filingPage, vectorPage, treasPage] = await Promise.all([
+      base44.entities.IpSeed.filter({}, { sort: '-asymmetric_score', limit: 300, fields: ['title', 'status', 'asymmetric_score'] }),
+      base44.entities.IpFiling.filter({}, { limit: 500, fields: ['seed_id'] }),
+      base44.entities.MarketVector.filter({}, { limit: 100, fields: ['status'] }),
+      base44.entities.TreasurySnapshot.filter({}, { sort: '-created_date', limit: 1, fields: ['total_valuation'] })
     ]);
-    const layers = layerPage.items || [];
-    const alliances = alliancePage.items || [];
+    const seeds = seedPage.items || [];
     const vectors = vectorPage.items || [];
-    if (!layers.length) return Response.json({ snapshot_created: false, note: 'No foundational layers forged yet — grip cannot be measured.' });
+    if (!seeds.length && !vectors.length) return Response.json({ snapshot_created: false, note: 'No assets or market positions yet — grip cannot be measured.' });
 
-    // Deterministic floor: live-layer grip plus locked dependencies, capped at 95.
-    const dependentCount = layers.reduce((s, l) => s + ((l.dependents || []).length), 0);
-    const locked = alliances.filter((a) => a.status === 'dependency_locked' || a.status === 'secured').length;
-    const liveLayers = layers.filter((l) => l.status === 'live');
-    const floor = Math.min(
-      95,
-      Math.round(
-        liveLayers.reduce((s, l) => s + (l.grip_pct || 0), 0) +
-        dependentCount * 0.5 +
-        locked * 1.5
-      )
-    );
+    const built = seeds.filter((s) => s.status === 'built').length;
+    const hardened = new Set((filingPage.items || []).map((f) => f.seed_id));
+    const protectedCount = seeds.filter((s) => hardened.has(s.id)).length;
+    const staked = vectors.filter((v) => v.status !== 'predicted').length;
+    const portfolioValue = (treasPage.items || [])[0]?.total_valuation || 0;
+
+    // Deterministic floor: verifiable structure only — built products, hardened claims, staked vectors — capped at 95.
+    const floor = Math.min(95, Math.round(built * 6 + protectedCount * 10 + staked * 4));
 
     const res = await base44.asServiceRole.integrations.Core.InvokeLLM({
-      prompt: `You are the Sovereign OS Interface: the unified nervous system of an economic operating system. Compute the HEGEMONY SCORE — what share of this sector cannot function without our infrastructure.
+      prompt: `You are the consolidation-strategy engine inside InvestArch. Compute the MARKET GRIP score: what share of a target market cannot function without this portfolio's assets.
 
-Honesty doctrine: the number below is a floor computed from verifiable structure (live layers, dependents, locked alliances). Assess the realistic CURRENT grip and the 24-month target, name 4 grip levers with a current/target/action each, and give a 2-sentence verdict. If grip is near zero, say "the board is still being built" — never inflate.
+Honesty doctrine: the number below is a floor computed from verifiable structure (built products, hardened legal claims, staked market vectors). Assess the realistic CURRENT grip and the 24-month target, name 4 grip levers with a current/target/action each, and give a 2-sentence verdict. If grip is near zero, say "the board is still being built" — never inflate.
 
 DETERMINISTIC FLOOR: ${floor}%
-Live layers: ${JSON.stringify(liveLayers.map((l) => ({ name: l.layer_name, rate: l.toll_rate, projected_monthly_toll: l.projected_monthly_toll, actual_monthly_toll: l.monthly_toll_revenue, grip: l.grip_pct })))}
-Blueprint/beta layers: ${layers.length - liveLayers.length}
-Total dependents mapped: ${dependentCount}
-Alliances: ${alliances.length} total, ${locked} secured/dependency-locked
-Vectors staked: ${vectors.filter((v) => v.status !== 'predicted').length} of ${vectors.length}`,
+Portfolio: ${seeds.length} IP assets (${built} built, ${protectedCount} legally hardened)
+Staked market vectors: ${staked} of ${vectors.length} predicted
+Appraised portfolio value: ${portfolioValue}`,
       response_json_schema: HEGEMONY_SCHEMA
     });
     const grip = typeof res?.market_grip_pct === 'number' ? Math.max(floor, Math.min(res.market_grip_pct, 100)) : floor;
@@ -69,21 +64,18 @@ Vectors staked: ${vectors.filter((v) => v.status !== 'predicted').length} of ${v
     const snapshot = await db.HegemonySnapshot.create({
       snapshot_date: new Date().toISOString().slice(0, 10),
       market_grip_pct: grip,
-      hegemony_score: grip,
-      layers_live: liveLayers.length,
-      layers_beta: layers.length - liveLayers.length,
-      vectors_staked: vectors.filter((v) => v.status !== 'predicted').length,
-      dependent_count: dependentCount,
-      alliance_count: alliances.length,
-      toll_run_rate: layers.reduce((s, l) => s + (l.status === 'live' ? (l.monthly_toll_revenue || 0) : 0), 0),
+      built_assets: built,
+      protected_assets: protectedCount,
+      vectors_staked: staked,
+      portfolio_value: portfolioValue,
       grip_levers: Array.isArray(res?.grip_levers) ? res.grip_levers.slice(0, 4) : [],
       verdict: res?.verdict || ''
     });
     return Response.json({
       snapshot_created: !!snapshot,
       market_grip_pct: grip,
-      layers_live: liveLayers.length,
-      dependents: dependentCount
+      built_assets: built,
+      vectors_staked: staked
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

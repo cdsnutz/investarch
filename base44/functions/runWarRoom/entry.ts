@@ -29,15 +29,15 @@ const PLANS_SCHEMA = {
 export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
-    // Scheduled runs arrive without a user session; manual runs carry one.
     const user = await base44.auth.me();
-    const db = user ? base44.entities : base44.asServiceRole.entities;
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const db = base44.entities;
 
     const body = await req.json().catch(() => ({}));
     const targets = await pickSeedTargets(base44, 'DisruptionPlan', (body?.seedId || '').trim(), 4);
     if (!targets.length) return Response.json({ plans_created: 0, note: 'Top seeds already carry disruption plans.' });
 
-    const prompt = `You are the War-Room Pod of a sovereign IP conglomerate: a competitive-intelligence unit whose mandate is to make incumbents obsolete, not to out-feature them politely.
+    const prompt = `You are the competitive-intelligence engine inside InvestArch: a war-room unit whose mandate is to map how incumbents become obsolete, not to out-feature them politely.
 
 Below are ${targets.length} IP-seeds. For EACH seed, identify the single most exposed TARGET COMPETITOR currently holding the market that seed attacks (a real, named company or product — use live web knowledge). Then produce the Disruption Blueprint:
 
@@ -59,7 +59,6 @@ Truth over theater: name real competitors and real, verifiable failure modes. Ne
     const res = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt,
       add_context_from_internet: true,
-      model: 'gemini_3_8_flash',
       response_json_schema: PLANS_SCHEMA
     });
     const plans = (res?.plans || []).slice(0, targets.length);

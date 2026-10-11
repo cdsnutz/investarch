@@ -33,15 +33,15 @@ const KIT_SCHEMA = {
 export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
-    // Scheduled runs arrive without a user session; manual runs carry one.
     const user = await base44.auth.me();
-    const db = user ? base44.entities : base44.asServiceRole.entities;
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const db = base44.entities;
 
     const body = await req.json().catch(() => ({}));
     const targets = await pickSeedTargets(base44, 'Deployment', (body?.seedId || '').trim(), 3, { status: 'built' });
     if (!targets.length) return Response.json({ kits_created: 0, note: 'No built assets awaiting a deployment kit.' });
 
-    const prompt = `You are the Deployment Pod of a sovereign IP conglomerate: the DevOps engine. For each built asset below, produce a ZERO-TOUCH DEPLOYMENT KIT — the exact infrastructure package an engineer (or a CI pipeline) applies to push the repo live.
+    const prompt = `You are the deployment engine inside InvestArch. For each built asset below, produce a ZERO-TOUCH DEPLOYMENT KIT — the exact infrastructure package an engineer (or a CI pipeline) applies to push the repo live.
 
 For EACH asset:
 1. seed_title — copy the asset's title exactly.

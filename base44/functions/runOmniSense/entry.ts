@@ -29,31 +29,30 @@ export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
-    const db = user ? base44.entities : base44.asServiceRole.entities;
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const db = base44.entities;
 
     const claimed = await existingNames(base44, 'LiveSignal', 'signal_name');
 
-    // Correlation pass: prior signals + already-staked vectors + seeded narratives, so new
+    // Correlation pass: prior signals + already-staked market vectors, so new
     // signals extend known intelligence instead of restating it.
-    const [priorPage, vectorPage, narrativePage] = await Promise.all([
-      base44.asServiceRole.entities.LiveSignal.filter({}, { sort: '-observed_date', limit: 12, fields: ['signal_name', 'domain', 'observation'] }),
-      base44.asServiceRole.entities.MarketVector.filter({}, { sort: '-conviction_score', limit: 12, fields: ['vector_name', 'sector'] }),
-      base44.asServiceRole.entities.NarrativeVector.filter({}, { sort: '-created_date', limit: 8, fields: ['narrative_name', 'target_market'] })
+    const [priorPage, vectorPage] = await Promise.all([
+      base44.entities.LiveSignal.filter({}, { sort: '-observed_date', limit: 12, fields: ['signal_name', 'domain', 'observation'] }),
+      base44.entities.MarketVector.filter({}, { sort: '-conviction_score', limit: 12, fields: ['vector_name', 'sector'] })
     ]);
     const priorCtx = (priorPage.items || []).map((s) => `- ${s.signal_name} [${s.domain}]`).join('\n');
     const vectorCtx = (vectorPage.items || []).map((v) => `- ${v.vector_name} [${v.sector}]`).join('\n');
-    const narrativeCtx = (narrativePage.items || []).map((n) => `- ${n.narrative_name} [${n.target_market || ''}]`).join('\n');
 
     const res = await base44.asServiceRole.integrations.Core.InvokeLLM({
-      prompt: `You are the Omni-Sense Pod of a sovereign economic operating system: a real-time intelligence feed. Your mandate: surface what is happening RIGHT NOW in open markets — signals manifesting this week, not long-horizon predictions — and name the pre-emptive gap each one exposes.
+      prompt: `You are the live market-intelligence engine inside InvestArch: a real-time signal feed that sharpens every investment dossier. Your mandate: surface what is happening RIGHT NOW in open markets — signals manifesting this week, not long-horizon predictions — and name the pre-emptive gap each one exposes.
 
 Scan LIVE public sources (use web search, prioritize the last 7-14 days): market moves, funding rounds announced this week, product launches, standards-body updates, policy dockets, developer-platform changelogs, shipping/port and commodity data that is public, job-posting surges by named companies.
 
-${priorCtx ? `ALREADY ON THE VALUE-STREAM (do not re-report these; a new signal must add a genuinely new dimension, a different domain, or a materially tighter pre-emptive gap):\n${priorCtx}\n\n` : ''}${vectorCtx ? `VECTORS ALREADY STAKED (correlate against these: report only the live confirmation or the divergence since staking, never the vector itself):\n${vectorCtx}\n\n` : ''}${narrativeCtx ? `NARRATIVES ALREADY SEEDED:\n${narrativeCtx}\n\n` : ''}
+${priorCtx ? `ALREADY ON THE SIGNAL FEED (do not re-report these; a new signal must add a genuinely new dimension, a different domain, or a materially tighter pre-emptive gap):\n${priorCtx}\n\n` : ''}${vectorCtx ? `MARKET VECTORS ALREADY TRACKED (correlate against these: report only the live confirmation or the divergence since tracking, never the vector itself):\n${vectorCtx}\n\n` : ''}
 Correlation rules (deep-scan pass):
 - Each signal must be corroborated by at least 2 independent public sources; set confidence strictly in proportion to corroboration count and recency (5 = two sources, 10 = four or more across distinct outlets).
 - Where two candidate events are the same underlying story, MERGE them into one stronger signal rather than reporting duplicates.
-- If a live event confirms or contradicts an already-staked vector above, report only what is NEW since that vector was staked.
+- If a live event confirms or contradicts an already-tracked vector above, report only what is NEW since that vector was recorded.
 
 Output 4 DISTINCT live signals, each from a different domain. For each:
 - signal_name: specific and dated, e.g. "Chip-leasing demand spikes after X's fab announcement".
@@ -63,14 +62,14 @@ Output 4 DISTINCT live signals, each from a different domain. For each:
 - action_window_days: your honest estimate of how long the window stays open.
 - confidence: 1-10, weighted by how many independent sources corroborate.
 - signal_sources: 3-4 named, public sources you actually found (outlets, filings, official pages).
-- recommended_strike: the single fastest lawful move the empire can make inside the window (file, register, publish, ship, partner).
+- recommended_strike: the single fastest lawful move a portfolio owner can make inside the window (file, register, publish, ship, partner).
 
 Truth rule: open, public data only — no surveillance, no non-public or personal data, no fabricated observations. If corroboration is thin, say so and lower the confidence.`,
       response_json_schema: SIGNAL_SCHEMA,
       add_context_from_internet: true
     });
     const signals = (res?.signals || []).slice(0, 4);
-    if (!signals.length) return Response.json({ error: 'The Omni-Sense Pod returned no signals.' }, { status: 500 });
+    if (!signals.length) return Response.json({ error: 'The market-intelligence engine returned no signals.' }, { status: 500 });
 
     // Accuracy pass: every stored signal must carry at least 2 named corroborating sources,
     // and no near-duplicate of a prior signal (token overlap over the last recorded names).

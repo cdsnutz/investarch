@@ -17,11 +17,7 @@ import Dashboard from '@/pages/Dashboard';
 import NewAnalysis from '@/pages/NewAnalysis';
 import ProjectDetail from '@/pages/ProjectDetail';
 import IpFactory from '@/pages/IpFactory';
-import Conglomerate from '@/pages/Conglomerate';
-import SovereignOS from '@/pages/SovereignOS';
-import HegemonyVault from '@/pages/HegemonyVault';
-import OmegaDashboard from '@/pages/OmegaDashboard';
-import AxiomCommand from '@/pages/AxiomCommand';
+import PrecisionSimulator from '@/pages/PrecisionSimulator';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -60,11 +56,7 @@ const AuthenticatedApp = () => {
           <Route path="/new" element={<NewAnalysis />} />
           <Route path="/projects/:id" element={<ProjectDetail />} />
           <Route path="/ip-factory" element={<IpFactory />} />
-          <Route path="/command" element={<Conglomerate />} />
-          <Route path="/sovereign" element={<SovereignOS />} />
-          <Route path="/vault" element={<HegemonyVault />} />
-          <Route path="/omega" element={<OmegaDashboard />} />
-          <Route path="/axiom" element={<AxiomCommand />} />
+          <Route path="/simulator" element={<PrecisionSimulator />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

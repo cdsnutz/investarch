@@ -27,12 +27,13 @@ export default async function(req) {
     const base44 = createClientFromRequest(req);
     // Scheduled runs arrive without a user session; manual runs carry one.
     const user = await base44.auth.me();
-    const db = user ? base44.entities : base44.asServiceRole.entities;
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const db = base44.entities;
 
     const [filingPage, alertPage, seedPage] = await Promise.all([
-      base44.asServiceRole.entities.IpFiling.filter({}, { limit: 500, fields: ['seed_id', 'filing_type', 'brand_name'] }),
-      base44.asServiceRole.entities.InfringementAlert.filter({}, { limit: 300, fields: ['seed_id'] }),
-      base44.asServiceRole.entities.IpSeed.filter({}, { limit: 300, fields: ['title'] })
+      base44.entities.IpFiling.filter({}, { limit: 500, fields: ['seed_id', 'filing_type', 'brand_name'] }),
+      base44.entities.InfringementAlert.filter({}, { limit: 300, fields: ['seed_id'] }),
+      base44.entities.IpSeed.filter({}, { limit: 300, fields: ['title'] })
     ]);
 
     const hardened = new Set((filingPage.items || []).map((f) => f.seed_id));
@@ -44,7 +45,7 @@ export default async function(req) {
       .map((f) => ({ id: f.seed_id, title: titleById.get(f.seed_id) || 'Unnamed asset', brand_name: f.brand_name || '', filing_type: f.filing_type }));
     if (!targets.length) return Response.json({ alerts_created: 0, note: 'Every hardened asset is already under watch.' });
 
-    const prompt = `You are the Governance Nexus of a sovereign IP conglomerate: the legal guard-dog. Continuously hunt for infringement of the conglomerate's protected IP and convert breaches into licensing revenue.
+    const prompt = `You are the IP-protection watchdog inside InvestArch. Continuously hunt for infringement of the portfolio's protected IP and convert breaches into licensing revenue.
 
 Below are ${targets.length} protected assets (patent drafts filed / trademarks drafted). Search the live web for infringement signals: brand or mark misuse, confusingly similar names or products, cloned core mechanics, copycat landing pages.
 
@@ -63,7 +64,6 @@ ${JSON.stringify(targets)}`;
     const res = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt,
       add_context_from_internet: true,
-      model: 'gemini_3_8_flash',
       response_json_schema: SCAN_SCHEMA
     });
     const findings = (res?.findings || []).slice(0, targets.length);

@@ -35,7 +35,7 @@ export default async function(req) {
     const seed = await base44.entities.IpSeed.get(seedId);
     if (!seed) return Response.json({ error: 'Seed not found.' }, { status: 404 });
 
-    // V6.0 Omni-Build: sibling repos for cross-app synergy
+    // Omni-build: sibling repos for cross-app synergy
     const siblings = await base44.entities.IpSeed.filter({ status: 'built' }, { limit: 20, fields: ['title', 'repo_name'] });
     const siblingList = (siblings.items || []).filter((s) => s.id !== seedId).map((s) => `${s.title} (${s.repo_name || 'unnamed'})`).join('; ') || 'none yet';
 

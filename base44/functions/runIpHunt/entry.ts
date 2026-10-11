@@ -54,18 +54,9 @@ const SEEDS_SCHEMA = {
 export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
-    // Manual runs arrive with a user session; the scheduled daily hunt runs without one.
     const user = await base44.auth.me();
-    const db = user ? base44.entities : base44.asServiceRole.entities;
-
-    // V6.0: heuristics learned by the Metamorphosis Pod steer the Synthesizer
-    let heuristicsBlock = '';
-    try {
-      const heuristics = await base44.asServiceRole.entities.Heuristic.filter({}, { sort: '-created_date', limit: 6 });
-      if ((heuristics.items || []).length) {
-        heuristicsBlock = `\n\nLEARNED HEURISTICS from previous cycles (obey these when shaping seeds):\n${(heuristics.items || []).map((h, i) => `${i + 1}. [${h.category || 'general'}] ${h.directive}`).join('\n')}`;
-      }
-    } catch { /* heuristics entity not yet populated */ }
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const db = base44.entities;
 
     // --- Stage 1: The Signal Miner — live market SIGINT for pain-signals ---
     const signalPrompt = `You are a market SIGINT operator running live reconnaissance across consumer and developer channels (Reddit threads, X posts, app-store reviews, patent filings, niche forums).
@@ -82,7 +73,6 @@ Rules: no invented quotes attributed to real people. If evidence is inferential 
     const signalsRes = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt: signalPrompt,
       add_context_from_internet: true,
-      model: 'gemini_3_8_flash',
       response_json_schema: SIGNALS_SCHEMA
     });
     const signals = (signalsRes?.signals || []).slice(0, 12);
@@ -92,7 +82,7 @@ Rules: no invented quotes attributed to real people. If evidence is inferential 
     const seedPrompt = `You are the Synthesizer of an IP Factory. Below are 12 live market pain-signals from the Signal Miner. Convert them into EXACTLY 20 IP-SEEDS by applying Asymmetric Innovation: do not merely solve the stated problem — position each solution as the category-owning answer ("Category King") that makes incumbents look obsolete.
 
 PAIN-SIGNALS:
-${JSON.stringify(signals)}${heuristicsBlock}
+${JSON.stringify(signals)}
 
 For each seed return:
 1. title — a sharp asset name (product-grade, trademarkable feel).

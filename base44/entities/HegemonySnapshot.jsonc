@@ -8,25 +8,16 @@
     "market_grip_pct": {
       "type": "number"
     },
-    "hegemony_score": {
+    "built_assets": {
       "type": "number"
     },
-    "layers_live": {
-      "type": "number"
-    },
-    "layers_beta": {
+    "protected_assets": {
       "type": "number"
     },
     "vectors_staked": {
       "type": "number"
     },
-    "dependent_count": {
-      "type": "number"
-    },
-    "alliance_count": {
-      "type": "number"
-    },
-    "toll_run_rate": {
+    "portfolio_value": {
       "type": "number"
     },
     "grip_levers": {

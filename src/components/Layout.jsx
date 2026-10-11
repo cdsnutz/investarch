@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
-import { LayoutDashboard, Plus, LogOut, Radar, FlaskConical, Radio, TrendingUp, History, Archive, BookOpen, Vault, FileText, ClipboardList, Users, Compass, HeartHandshake, Settings } from 'lucide-react';
+import { LayoutDashboard, Plus, LogOut, Radar, FlaskConical, Radio, TrendingUp, History, Archive, BookOpen, Vault, FileText, ClipboardList, Users, Compass, HeartHandshake, Settings, ShieldCheck, Network, PenLine, Timer, Coins, KanbanSquare, LineChart, Landmark, Waves, Zap, CalendarRange } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const NAV_GROUPS = [
@@ -11,23 +11,36 @@ const NAV_GROUPS = [
   { label: 'Intelligence', items: [
     { to: '/signal-monitoring', label: 'Signal Monitoring', icon: Radio },
     { to: '/market-intel', label: 'Market Intel', icon: TrendingUp },
+    { to: '/market-resonance', label: 'Market Resonance', icon: Waves },
     { to: '/synthesis-logs', label: 'Synthesis Logs', icon: History },
     { to: '/synthesis-archive', label: 'Synthesis Archive', icon: Archive },
+    { to: '/simulation-archive', label: 'Simulation Archive', icon: Timer },
     { to: '/strategy-vault', label: 'Strategy Vault', icon: BookOpen }
   ]},
   { label: 'Assets', items: [
     { to: '/asset-management', label: 'Asset Management', icon: Vault },
+    { to: '/intellectual-assets', label: 'Intellectual Assets', icon: Coins },
     { to: '/prospectus-manager', label: 'Prospectus Manager', icon: FileText },
     { to: '/execution-orders', label: 'Execution Orders', icon: ClipboardList },
     { to: '/ip-factory', label: 'IP Factory', icon: Radar },
     { to: '/persona-manager', label: 'Persona Manager', icon: Users }
   ]},
-  { label: 'Strategy', items: [
+  { label: 'Capital', items: [
     { to: '/strategy-blueprint', label: 'Strategy Blueprint', icon: Compass },
     { to: '/investor-matchmaker', label: 'Investor Matchmaker', icon: HeartHandshake },
+    { to: '/investor-pipeline', label: 'Investor Pipeline', icon: KanbanSquare },
+    { to: '/capital-readiness', label: 'Capital Readiness', icon: Landmark },
     { to: '/simulator', label: 'Precision Simulator', icon: FlaskConical }
   ]},
-  { label: null, items: [
+  { label: 'Workshop', items: [
+    { to: '/dossier-workshop', label: 'Dossier Workshop', icon: PenLine },
+    { to: '/execution-timeline', label: 'Execution Timeline', icon: CalendarRange },
+    { to: '/entity-nexus', label: 'Entity Nexus', icon: Network },
+    { to: '/disruption-log', label: 'Disruption Log', icon: Zap }
+  ]},
+  { label: 'Operations', items: [
+    { to: '/compliance-audit', label: 'Compliance Audit', icon: ShieldCheck },
+    { to: '/synthesis-metrics', label: 'Synthesis Metrics', icon: LineChart },
     { to: '/account-settings', label: 'Account Settings', icon: Settings }
   ]}
 ];

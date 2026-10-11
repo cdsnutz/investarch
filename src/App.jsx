@@ -31,6 +31,17 @@ import PersonaManager from '@/pages/PersonaManager';
 import InvestorMatchmaker from '@/pages/InvestorMatchmaker';
 import SynthesisArchive from '@/pages/SynthesisArchive';
 import StrategyBlueprint from '@/pages/StrategyBlueprint';
+import ComplianceAudit from '@/pages/ComplianceAudit';
+import EntityNexus from '@/pages/EntityNexus';
+import DossierWorkshop from '@/pages/DossierWorkshop';
+import SimulationArchive from '@/pages/SimulationArchive';
+import IntellectualAssets from '@/pages/IntellectualAssets';
+import InvestorPipeline from '@/pages/InvestorPipeline';
+import SynthesisMetrics from '@/pages/SynthesisMetrics';
+import CapitalReadiness from '@/pages/CapitalReadiness';
+import MarketResonance from '@/pages/MarketResonance';
+import DisruptionLog from '@/pages/DisruptionLog';
+import ExecutionTimeline from '@/pages/ExecutionTimeline';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -82,6 +93,17 @@ const AuthenticatedApp = () => {
           <Route path="/investor-matchmaker" element={<InvestorMatchmaker />} />
           <Route path="/synthesis-archive" element={<SynthesisArchive />} />
           <Route path="/strategy-blueprint" element={<StrategyBlueprint />} />
+          <Route path="/compliance-audit" element={<ComplianceAudit />} />
+          <Route path="/entity-nexus" element={<EntityNexus />} />
+          <Route path="/dossier-workshop" element={<DossierWorkshop />} />
+          <Route path="/simulation-archive" element={<SimulationArchive />} />
+          <Route path="/intellectual-assets" element={<IntellectualAssets />} />
+          <Route path="/investor-pipeline" element={<InvestorPipeline />} />
+          <Route path="/synthesis-metrics" element={<SynthesisMetrics />} />
+          <Route path="/capital-readiness" element={<CapitalReadiness />} />
+          <Route path="/market-resonance" element={<MarketResonance />} />
+          <Route path="/disruption-log" element={<DisruptionLog />} />
+          <Route path="/execution-timeline" element={<ExecutionTimeline />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

@@ -37,6 +37,20 @@
     },
     "outreach_email": {
       "type": "string"
+    },
+    "outreach_status": {
+      "type": "string",
+      "enum": [
+        "not_contacted",
+        "contacted",
+        "replied",
+        "negotiating",
+        "closed"
+      ],
+      "default": "not_contacted"
+    },
+    "interaction_notes": {
+      "type": "string"
     }
   },
   "required": [

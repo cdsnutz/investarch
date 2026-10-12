@@ -36,7 +36,7 @@ export default function EntityNexus() {
     <div className="bg-paper min-h-[calc(100vh-3.5rem)] md:min-h-screen p-6 md:p-12 max-w-6xl mx-auto space-y-10">
       <PageHeader
         title="Entity Nexus"
-        subtitle="A live network map of analyzed competitors, funding sources, and generated dossiers. Solid lines mark direct relationships; dashed lines mark shared markets. Hover to trace a node, click to lock focus."
+        subtitle="A live network map of analyzed competitors, funding sources, and generated dossiers. Brick lines mark direct competition, blue lines mark funding, dashed lines mark shared markets. Hover to trace a node, click to lock focus."
       />
 
       {total === 0 ? (

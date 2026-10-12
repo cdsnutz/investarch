@@ -37,10 +37,11 @@ function computeLayout(nodes, edges) {
       }
     }
     e.forEach(({ s, t, kind }) => {
-      const rest = kind === 'owner' ? 110 : 175;
+      const rest = kind === 'funding' ? 110 : 175;
+      const k = kind === 'funding' ? 0.02 : 0.005;
       const dx = pts[t].x - pts[s].x, dy = pts[t].y - pts[s].y;
       const d = Math.sqrt(dx * dx + dy * dy) || 1;
-      const f = (d - rest) * (kind === 'owner' ? 0.02 : 0.005);
+      const f = (d - rest) * k;
       const fx = (dx / d) * f, fy = (dy / d) * f;
       pts[s].vx += fx; pts[s].vy += fy;
       pts[t].vx -= fx; pts[t].vy -= fy;
@@ -76,10 +77,10 @@ export default function NetworkMap({ projects, competitors, funding }) {
     ];
     const edges = [];
     competitors.forEach((c) => {
-      if (c.project_id && projTerms.has(c.project_id)) edges.push({ source: c.id, target: c.project_id, kind: 'owner' });
+      if (c.project_id && projTerms.has(c.project_id)) edges.push({ source: c.id, target: c.project_id, kind: 'competition' });
     });
     funding.forEach((f) => {
-      if (f.project_id && projTerms.has(f.project_id)) edges.push({ source: f.id, target: f.project_id, kind: 'owner' });
+      if (f.project_id && projTerms.has(f.project_id)) edges.push({ source: f.id, target: f.project_id, kind: 'funding' });
     });
     // Market-overlap edges (dashed): shared industry/tags across entities.
     const fTerms = new Map(funding.map((f) => [f.id, terms([f.focus_area])]));
@@ -140,10 +141,10 @@ export default function NetworkMap({ projects, competitors, funding }) {
               <line
                 key={i}
                 x1={a.x} y1={a.y} x2={b.x} y2={b.y}
-                stroke={e.kind === 'owner' ? '#1a3c34' : '#a8a29e'}
-                strokeWidth={e.kind === 'owner' ? 1.5 : 1}
+                stroke={e.kind === 'competition' ? '#9a3b2e' : e.kind === 'funding' ? '#3d5a80' : '#a8a29e'}
+                strokeWidth={e.kind === 'market' ? 1 : 1.5}
                 strokeDasharray={e.kind === 'market' ? '4 4' : undefined}
-                opacity={lit ? (e.kind === 'owner' ? 0.55 : 0.35) : 0.06}
+                opacity={lit ? (e.kind === 'market' ? 0.35 : 0.6) : 0.06}
               />
             );
           })}
@@ -181,7 +182,10 @@ export default function NetworkMap({ projects, competitors, funding }) {
           </span>
         ))}
         <span className="inline-flex items-center gap-1.5">
-          <span className="inline-block w-4 border-t-2 border-[#1a3c34]" /> Direct relationship
+          <span className="inline-block w-4 border-t-2 border-[#9a3b2e]" /> Direct competition
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="inline-block w-4 border-t-2 border-[#3d5a80]" /> Funding relationship
         </span>
         <span className="inline-flex items-center gap-1.5">
           <span className="inline-block w-4 border-t border-dashed border-[#a8a29e]" /> Shared market (industry, tags, focus area)

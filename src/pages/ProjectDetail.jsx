@@ -13,6 +13,7 @@ import ForecastTable from '@/components/dossier/ForecastTable';
 import EngineTab from '@/components/valueEngine/EngineTab';
 import FundingDrafts from '@/components/valueEngine/FundingDrafts';
 import PackagePanel from '@/components/packagePanel/PackagePanel';
+import BuildButton from '@/components/command/BuildButton';
 
 function Section({ title, children }) {
   return (
@@ -116,6 +117,7 @@ export default function ProjectDetail() {
         <h1 className="text-2xl md:text-4xl font-semibold tracking-tight">{project.company_name || 'Untitled analysis'}</h1>
         <div className="flex flex-wrap items-center gap-3 mt-3 text-sm text-muted-foreground">
           {project.industry && <Badge variant="secondary" className="bg-slate-100">{project.industry}</Badge>}
+          {project.status === 'captured' && <Badge variant="outline">Captured draft</Badge>}
           {project.url && (/^https?:\/\//i.test(project.url) ? (
             <a href={project.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:text-slate-900">
               <ExternalLink className="size-3.5" /> {project.url}
@@ -123,6 +125,9 @@ export default function ProjectDetail() {
           ) : (
             <span className="italic">Concept: {project.url}</span>
           ))}
+        </div>
+        <div className="mt-5 print:hidden">
+          <BuildButton project={project} onComplete={() => window.location.reload()} />
         </div>
       </div>
 

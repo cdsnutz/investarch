@@ -1,10 +1,11 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
-import { LayoutDashboard, Plus, LogOut, Radar, FlaskConical, Radio, TrendingUp, History, Archive, BookOpen, Vault, FileText, ClipboardList, Users, Compass, HeartHandshake, Settings, ShieldCheck, Network, PenLine, Timer, Coins, KanbanSquare, LineChart, Landmark, Waves, Zap, CalendarRange } from 'lucide-react';
+import { LayoutDashboard, Plus, LogOut, Radar, FlaskConical, Radio, TrendingUp, History, Archive, BookOpen, Vault, FileText, ClipboardList, Users, Compass, HeartHandshake, Settings, ShieldCheck, Network, PenLine, Timer, Coins, KanbanSquare, LineChart, Landmark, Waves, Zap, CalendarRange, Gauge } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const NAV_GROUPS = [
   { label: null, items: [
+    { to: '/command-center', label: 'Command Center', icon: Gauge },
     { to: '/', label: 'Dossiers', icon: LayoutDashboard },
     { to: '/new', label: 'New Analysis', icon: Plus }
   ]},
@@ -85,6 +86,7 @@ export default function Layout() {
       <div className="md:hidden fixed top-0 inset-x-0 z-30 bg-bottle text-bottle-foreground px-4 h-14 flex items-center justify-between border-b border-white/10">
         <span className="font-heading text-lg tracking-tight">InvestArch</span>
         <div className="flex items-center gap-4">
+          <Link to="/command-center" className="text-white/70"><Gauge className="size-5" /></Link>
           <Link to="/" className="text-white/70"><LayoutDashboard className="size-5" /></Link>
           <Link to="/new" className="text-white/70"><Plus className="size-5" /></Link>
           <Link to="/ip-factory" className="text-white/70"><Radar className="size-5" /></Link>

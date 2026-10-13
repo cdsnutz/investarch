@@ -42,6 +42,7 @@ import CapitalReadiness from '@/pages/CapitalReadiness';
 import MarketResonance from '@/pages/MarketResonance';
 import DisruptionLog from '@/pages/DisruptionLog';
 import ExecutionTimeline from '@/pages/ExecutionTimeline';
+import CommandCenter from '@/pages/CommandCenter';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -78,6 +79,7 @@ const AuthenticatedApp = () => {
         <Route element={<Layout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/new" element={<NewAnalysis />} />
+          <Route path="/command-center" element={<CommandCenter />} />
           <Route path="/projects/:id" element={<ProjectDetail />} />
           <Route path="/ip-factory" element={<IpFactory />} />
           <Route path="/simulator" element={<PrecisionSimulator />} />

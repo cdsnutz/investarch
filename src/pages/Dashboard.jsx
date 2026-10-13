@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import moment from 'moment';
+import BuildButton from '@/components/command/BuildButton';
 import StatStrip from '@/components/dashboard/StatStrip';
 import SignalFeed from '@/components/dashboard/SignalFeed';
 import SeedFeed from '@/components/dashboard/SeedFeed';
@@ -30,6 +31,8 @@ export default function Dashboard() {
           <Link to="/new">New Analysis</Link>
         </Button>
       </div>
+
+      <BuildButton />
 
       <StatStrip />
 

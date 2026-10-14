@@ -1,5 +1,6 @@
 import JSZip from 'jszip';
 import { buildPdf } from '@/lib/pdfBuilder';
+import { buildAgentReadme, buildDeploymentGuide } from '@/lib/agentDocs';
 
 function splitIntoSections(text) {
   const sections = [];
@@ -67,6 +68,10 @@ export async function buildDossierPack({ seed, filings, prospectus, codebase }) 
       footer: 'Deed of Ownership — Confidential'
     }));
   }
+
+  zip.file(`${base}/Codebase/AGENTS.md`, buildAgentReadme(seed, codebase));
+  zip.file(`${base}/Codebase/README.md`, buildAgentReadme(seed, codebase));
+  zip.file(`${base}/Codebase/DEPLOYMENT.md`, buildDeploymentGuide(seed));
 
   if (codebase?.files?.length) {
     (codebase.files || []).forEach((f) => zip.file(`${base}/Codebase/${f.path}`, f.content));

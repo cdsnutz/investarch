@@ -39,8 +39,8 @@ export default async function(req) {
     const body = await req.json();
     const seedId = (body?.seedId || '').trim();
     const filingType = (body?.filingType || '').trim();
-    if (!seedId || !['patent', 'trademark', 'deed'].includes(filingType)) {
-      return Response.json({ error: 'seedId and a valid filingType (patent, trademark, deed) are required.' }, { status: 400 });
+    if (!seedId || !['patent', 'trademark', 'deed', 'copyright'].includes(filingType)) {
+      return Response.json({ error: 'seedId and a valid filingType (patent, trademark, deed, copyright) are required.' }, { status: 400 });
     }
 
     const seed = await base44.entities.IpSeed.get(seedId);
@@ -73,14 +73,34 @@ ${context}
 
 Produce:
 1. brand_name — one primary mark (and two alternates listed after a colon) with coined or suggestive character strong enough to register.
-2. trademark_classes — the specific Nice Classification classes (numbers plus class names) covering the product and its software services, with one line each on why the class applies.
-3. logo_concepts — 3 logo concepts described precisely enough to hand a designer (geometry, weight, treatment).
-4. clearance_note — the clearance protocol: which registries to search (USPTO TESS, EUIPO, WIPO Global Brand Database), common-law use risks, and the likelihood-of-confusion standard applied to this mark. State plainly that this is a draft packet, not a filed registration.
+2. trademark_classes — a complete USPTO TEAS Plus application body: Applicant ([APPLICANT LEGAL NAME], entity type, address placeholder); Mark (standard character); for EACH Nice class, the class number and an identification of goods/services worded to match the USPTO ID Manual style; Filing Basis (Section 1(b) intent-to-use, with the 1(a) alternative and dates-of-use placeholders); Specimen description; Declaration text under 18 U.S.C. §1001; signature block.
+3. logo_concepts — 3 logo concepts described precisely enough to hand a designer (geometry, weight, treatment), plus the mark description and color claim language for a special-form filing.
+4. clearance_note — the clearance protocol: which registries to search (USPTO Trademark Search, EUIPO, WIPO Global Brand Database), common-law use risks, descriptiveness (Section 2(e)) risk, and the likelihood-of-confusion (DuPont factors) analysis for this mark. State plainly that this is a draft packet for counsel review, not a filed registration.
 
 Institutional tone, zero filler.`,
         response_json_schema: TRADEMARK_SCHEMA
       });
       filing = res;
+    } else if (filingType === 'copyright') {
+      filing = await base44.asServiceRole.integrations.Core.InvokeLLM({
+        prompt: `You are copyright counsel preparing a U.S. Copyright Office registration application (Standard Application, eCO) for the software and accompanying written works of this IP-seed.
+
+${context}
+
+Produce copyright_text (600 to 900 words) in markdown with these "## " headings, each filled completely:
+## Type of Work (Literary Work: computer program, with rationale)
+## Title of Work (title, plus previous/alternative titles)
+## Completion and Publication (year of completion placeholder, publication status, nation of first publication)
+## Author (name placeholder, citizenship/domicile, work-made-for-hire status, author created: "computer program, text, and user interface text")
+## Copyright Claimant (claimant placeholder, transfer statement referencing the Deed of Ownership)
+## Limitation of Claim (material excluded: third-party open-source libraries and public-domain code; new material included)
+## Rights and Permissions Contact
+## Deposit Requirements (first 25 and last 25 pages of source code per 37 C.F.R. §202.20, trade-secret redaction option)
+## Certification (17 U.S.C. §506(e) statement, signature placeholder)
+## Copyright Notice (the exact © notice to place in the codebase and UI)
+Mark clearly: DRAFT LEGAL WORK PRODUCT for attorney review. Institutional tone, zero filler.`,
+        response_json_schema: { type: 'object', properties: { copyright_text: { type: 'string' } }, required: ['copyright_text'] }
+      });
     } else {
       const res = await base44.asServiceRole.integrations.Core.InvokeLLM({
         prompt: `You are legal counsel drafting an IP DEED OF OWNERSHIP memorializing assignment of the rights in this IP-seed to the holding entity.
@@ -105,6 +125,8 @@ Produce deed_text — a formal deed (500 to 700 words) with: parties (Assignor: 
       record.trademark_classes = filing.trademark_classes;
       record.logo_concepts = filing.logo_concepts;
       record.clearance_note = filing.clearance_note;
+    } else if (filingType === 'copyright') {
+      record.copyright_text = filing.copyright_text;
     } else {
       record.deed_text = filing.deed_text;
     }

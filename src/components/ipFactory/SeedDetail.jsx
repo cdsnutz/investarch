@@ -37,6 +37,7 @@ function FilingView({ filing }) {
       </div>
     );
   }
+  if (filing.filing_type === 'copyright') return <Block title="Copyright Registration">{filing.copyright_text}</Block>;
   return <Block title="Deed of Ownership">{filing.deed_text}</Block>;
 }
 
@@ -80,11 +81,10 @@ export function SeedBody({ seed, filings, prospectus, onRefresh }) {
   });
 
   const buildPack = () => run('pack', async () => {
-    for (const t of ['patent', 'trademark', 'deed']) {
-      if (!(filings || []).some((f) => f.filing_type === t)) {
-        await base44.functions.invoke('draftIpFiling', { seedId: seed.id, filingType: t });
-      }
-    }
+    const missing = ['patent', 'trademark', 'deed', 'copyright'].filter((t) => !(filings || []).some((f) => f.filing_type === t));
+    const capitalReq = base44.functions.invoke('draftCapitalPack', { seedId: seed.id });
+    await Promise.all(missing.map((t) => base44.functions.invoke('draftIpFiling', { seedId: seed.id, filingType: t })));
+    const capital = (await capitalReq).data;
     let prospectusRec = prospectus;
     if (!prospectusRec) {
       const res = await base44.functions.invoke('liquidateIp', { seedId: seed.id });
@@ -93,7 +93,7 @@ export function SeedBody({ seed, filings, prospectus, onRefresh }) {
     const arch = await base44.functions.invoke('architectSeed', { seedId: seed.id });
     const codebase = arch.data || {};
     const fresh = await base44.entities.IpFiling.filter({ seed_id: seed.id }, { limit: 20 });
-    const blob = await buildDossierPack({ seed, filings: fresh.items || [], prospectus: prospectusRec, codebase });
+    const blob = await buildDossierPack({ seed, filings: fresh.items || [], prospectus: prospectusRec, codebase, capital });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -148,7 +148,7 @@ export function SeedBody({ seed, filings, prospectus, onRefresh }) {
         </Button>
       </div>
       {busy === 'pack' && (
-        <p className="text-xs text-muted-foreground">Drafting any missing filings and the prospectus, rebuilding the codebase, then assembling the pack. This can take a few minutes.</p>
+        <p className="text-xs text-muted-foreground">Drafting any missing filings, grant applications, the loan proposal and the prospectus, rebuilding the codebase, then assembling the pack. This can take a few minutes.</p>
       )}
 
       {codebase?.onboarding_guide && (
@@ -160,7 +160,7 @@ export function SeedBody({ seed, filings, prospectus, onRefresh }) {
           <div className="flex items-center gap-2 mb-3">
             <Scale className="size-3.5 text-muted-foreground" />
             <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              {f.filing_type === 'patent' ? 'Patent Application Draft' : f.filing_type === 'trademark' ? 'Trademark Filing Packet' : 'IP Deed of Ownership'}
+              {f.filing_type === 'patent' ? 'Patent Application Draft' : f.filing_type === 'trademark' ? 'Trademark Filing Packet' : f.filing_type === 'copyright' ? 'Copyright Registration Application' : 'IP Deed of Ownership'}
             </h4>
           </div>
           <FilingView filing={f} />

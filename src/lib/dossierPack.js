@@ -21,7 +21,7 @@ function splitIntoSections(text) {
   return sections.map((s) => ({ heading: s.heading, body: s.body.trim() })).filter((s) => s.heading || s.body);
 }
 
-export async function buildDossierPack({ seed, filings, prospectus, codebase }) {
+export async function buildDossierPack({ seed, filings, prospectus, codebase, capital }) {
   const zip = new JSZip();
   const base = (seed.title || 'IP-Asset').replace(/[^\w\s-]/g, '').trim() || 'IP-Asset';
 
@@ -70,6 +70,38 @@ export async function buildDossierPack({ seed, filings, prospectus, codebase }) 
     }));
   }
 
+  if (byType.copyright) {
+    zip.file(`${base}/04_Copyright_Registration_Application.pdf`, buildPdf({
+      title: `Copyright Registration Application: ${seed.title}`,
+      subtitle: 'U.S. Copyright Office Standard Application, draft for counsel review',
+      sections: splitIntoSections(byType.copyright.copyright_text),
+      footer: 'Copyright Registration Application — Confidential'
+    }));
+  }
+
+  (capital?.grants || []).forEach((g, i) => {
+    const name = (g.program || `Grant ${i + 1}`).replace(/[^\w\s-]/g, '').trim();
+    zip.file(`${base}/Grants/${String(i + 1).padStart(2, '0')}_${name}.pdf`, buildPdf({
+      title: `${g.program} Application: ${seed.title}`,
+      subtitle: `${g.agency}. Award: ${g.award_range || 'see program'}. Deadline: ${g.deadline || 'see program'}`,
+      sections: [
+        { heading: 'Program Source', body: g.url },
+        { heading: 'Eligibility', body: g.eligibility },
+        ...splitIntoSections(g.application)
+      ],
+      footer: `${g.program} Application — Confidential`
+    }));
+  });
+
+  if (capital?.loan_proposal) {
+    zip.file(`${base}/07_Small_Business_Loan_Proposal.pdf`, buildPdf({
+      title: `Small Business Loan Proposal: ${seed.title}`,
+      subtitle: 'Prepared for commercial bank / SBA 7(a) lender review',
+      sections: splitIntoSections(capital.loan_proposal),
+      footer: 'Loan Proposal — Confidential'
+    }));
+  }
+
   zip.file(`${base}/Codebase/AGENTS.md`, buildAgentReadme(seed, codebase));
   zip.file(`${base}/Codebase/README.md`, buildAgentReadme(seed, codebase));
   zip.file(`${base}/Codebase/DEPLOYMENT.md`, buildDeploymentGuide(seed));
@@ -84,7 +116,7 @@ export async function buildDossierPack({ seed, filings, prospectus, codebase }) 
   }
 
   if (codebase?.onboarding_guide) {
-    zip.file(`${base}/04_Developer_Onboarding_Guide.pdf`, buildPdf({
+    zip.file(`${base}/06_Developer_Onboarding_Guide.pdf`, buildPdf({
       title: `Developer Onboarding Guide: ${seed.title}`,
       subtitle: 'Architecture, setup and extension points for the engineering team',
       sections: splitIntoSections(codebase.onboarding_guide),

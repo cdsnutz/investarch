@@ -39,7 +39,8 @@ ${tree}
 4. Build every flow end to end: UI, API, persistence, loading, empty and error states.
 5. Keep secrets in environment variables. Commit a \`.env.example\` listing every key with a one-line purpose.
 6. Write tests for the core logic in section 6. All tests must pass before deployment.
-7. Follow \`DEPLOYMENT.md\` to ship. Update this file if scope changes.
+7. Follow \`ROADMAP.md\` phase by phase. Apply the skills in \`.agent/skills/\` (antislop) to all code, UI and copy.
+8. Ship with \`./devpro-deploy/deploy.sh\` per \`DEPLOYMENT.md\`. Update this file if scope changes.
 
 ## Definition of Done
 - The app installs with one command and starts with one command.

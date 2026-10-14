@@ -1,6 +1,7 @@
 import JSZip from 'jszip';
 import { buildPdf } from '@/lib/pdfBuilder';
 import { buildAgentReadme, buildDeploymentGuide } from '@/lib/agentDocs';
+import { buildEnvExample, buildRoadmap, antislopFiles, devproDeployFiles } from '@/lib/scaffoldKit';
 
 function splitIntoSections(text) {
   const sections = [];
@@ -72,6 +73,9 @@ export async function buildDossierPack({ seed, filings, prospectus, codebase }) 
   zip.file(`${base}/Codebase/AGENTS.md`, buildAgentReadme(seed, codebase));
   zip.file(`${base}/Codebase/README.md`, buildAgentReadme(seed, codebase));
   zip.file(`${base}/Codebase/DEPLOYMENT.md`, buildDeploymentGuide(seed));
+  zip.file(`${base}/Codebase/ROADMAP.md`, buildRoadmap(seed));
+  zip.file(`${base}/Codebase/.env.example`, buildEnvExample(seed));
+  [...antislopFiles(), ...devproDeployFiles()].forEach((f) => zip.file(`${base}/Codebase/${f.path}`, f.content, f.path.endsWith('.sh') ? { unixPermissions: '755' } : undefined));
 
   if (codebase?.files?.length) {
     (codebase.files || []).forEach((f) => zip.file(`${base}/Codebase/${f.path}`, f.content));

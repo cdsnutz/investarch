@@ -44,6 +44,10 @@ export default async function(req) {
     let callerKey;
     let authed = false;
     let signedIn = false;
+    if (providedKey && !hasValidKey) {
+      return reject('Unauthorized. Provide a valid shared key header (x-market-hunter-key) or log in as an admin.', 403);
+    }
+
     if (hasValidKey) {
       // Rate-limit key: hash of the secret, never the secret itself.
       const digest = new TextEncoder().encode(sharedKey);

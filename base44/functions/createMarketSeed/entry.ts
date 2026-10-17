@@ -43,6 +43,7 @@ export default async function(req) {
 
     let callerKey;
     let authed = false;
+    let signedIn = false;
     if (hasValidKey) {
       // Rate-limit key: hash of the secret, never the secret itself.
       const digest = new TextEncoder().encode(sharedKey);
@@ -56,6 +57,7 @@ export default async function(req) {
       } catch {
         user = null;
       }
+      signedIn = Boolean(user);
       if (user && user.role === 'admin') {
         callerKey = 'user:' + user.id;
         authed = true;
@@ -66,7 +68,7 @@ export default async function(req) {
       if (providedKey && !sharedKey) {
         console.error('createMarketSeed: MARKET_HUNTER_KEY secret is not configured; shared-key access unavailable.');
       }
-      return reject('Unauthorized. Provide a valid shared key header (x-market-hunter-key) or log in as an admin.', hasValidKey ? 403 : 401);
+      return reject('Unauthorized. Provide a valid shared key header (x-market-hunter-key) or log in as an admin.', providedKey || signedIn ? 403 : 401);
     }
 
     if (!rateLimit(callerKey)) {
@@ -126,7 +128,6 @@ export default async function(req) {
 
     try {
       await base44.asServiceRole.entities.ActivityEvent.create({
-        actor_note: undefined,
         action: 'seed.create',
         detail: `actor=market-hunter seed_id=${seed.id} title="${title.slice(0, 100)}"`,
         timestamp: new Date().toISOString()

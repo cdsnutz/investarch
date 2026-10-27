@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import Panel from '@/components/command/Panel';
 import { logActivity } from '@/lib/activity';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import useDossierBuild from '@/hooks/useDossierBuild';
 import StageTrack from '@/components/command/StageTrack';
 
@@ -11,11 +11,24 @@ export default function HunterPanel({ onChange }) {
   const [seeds, setSeeds] = useState(null);
   const [busy, setBusy] = useState(null);
   const [building, setBuilding] = useState(null);
+  const [buildingId, setBuildingId] = useState(null);
   const { stages, running, start, retry } = useDossierBuild();
   const navigate = useNavigate();
 
   const load = () => base44.entities.MarketSeed.filter({ status: 'New' }, { sort: '-created_date', limit: 20 }).then((p) => setSeeds(p.items));
-  useEffect(() => { load(); }, []);
+
+  useEffect(() => {
+    load();
+    // Incoming seeds land in the feed live: create adds, any status change drops it out.
+    return base44.entities.MarketSeed.subscribe((e) => {
+      setSeeds((prev) => {
+        if (!prev) return prev;
+        const rest = prev.filter((x) => x.id !== e.data.id);
+        if (e.type === 'delete' || e.data.status !== 'New') return rest;
+        return [e.data, ...rest].slice(0, 20);
+      });
+    });
+  }, []);
 
   const capture = async (s) => {
     setBusy(s.id);
@@ -23,6 +36,7 @@ export default function HunterPanel({ onChange }) {
     await base44.entities.MarketSeed.update(s.id, { status: 'Captured' });
     await logActivity('seed_captured', s.title);
     setBuilding(s.title);
+    setBuildingId(project.id);
     load(); onChange?.();
     const done = await start({ project });
     setBusy(null); onChange?.();
@@ -37,10 +51,13 @@ export default function HunterPanel({ onChange }) {
   };
 
   return (
-    <Panel code="C" title="Market Hunter" action={<span className="text-xs text-muted-foreground">{seeds?.length ?? '–'} open</span>}>
+    <Panel code="C" title="Market Hunter" action={<span className="text-xs text-muted-foreground">{seeds?.length ?? '–'} open · live</span>}>
       {building && (
         <div className="mb-4 space-y-2">
-          <div className="text-xs text-muted-foreground">Building dossier: <span className="text-foreground">{building}</span></div>
+          <div className="flex items-start justify-between gap-3">
+            <div className="text-xs text-muted-foreground min-w-0">Building dossier: <span className="text-foreground">{building}</span></div>
+            {buildingId && <Link to={`/projects/${buildingId}`} className="text-xs text-bottle hover:underline shrink-0">Open dossier</Link>}
+          </div>
           <StageTrack stages={stages} running={running} onRetry={async (st) => { const d = await retry(st); onChange?.(); if (d) navigate(`/projects/${d.id}`); }} />
         </div>
       )}

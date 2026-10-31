@@ -1,0 +1,51 @@
+{
+  "auth": "oauth",
+  "tools": {
+    "functions": [
+      {
+        "name": "create_market_seed",
+        "title": "Create Market Seed",
+        "description": "Adds a new signal to the Market Hunter feed so it appears live in the app's Command Center. Use when a client finds a market gap, regulatory opening, or acquisition target worth pursuing. Callers must be signed in to the app; duplicate titles within 7 days return the existing seed instead of creating a new one.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "description": "Short name of the market signal. Required, 1-200 characters."
+            },
+            "vector": {
+              "type": "string",
+              "description": "Category or vector the signal belongs to, e.g. RegTech, Logistics. Max 200 characters."
+            },
+            "source": {
+              "type": "string",
+              "description": "Where the signal came from: publication, dataset, or URL. Max 500 characters."
+            },
+            "signal_score": {
+              "type": "integer",
+              "default": 7,
+              "description": "Whole-number conviction score from 1 to 10. Omit if unknown."
+            },
+            "thesis": {
+              "type": "string",
+              "description": "One-paragraph investment thesis explaining the gap and why it is actionable. Max 2000 characters. No filler."
+            },
+            "status": {
+              "type": "string",
+              "enum": ["New"],
+              "default": "New",
+              "description": "Must be exactly \"New\". Any other value is rejected."
+            }
+          },
+          "required": ["title", "status"]
+        },
+        "handler": "createMarketSeed",
+        "annotations": {
+          "read_only_hint": false,
+          "destructive_hint": false,
+          "idempotent_hint": true
+        }
+      }
+    ]
+  }
+}

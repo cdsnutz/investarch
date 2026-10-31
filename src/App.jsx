@@ -43,6 +43,7 @@ import MarketResonance from '@/pages/MarketResonance';
 import DisruptionLog from '@/pages/DisruptionLog';
 import ExecutionTimeline from '@/pages/ExecutionTimeline';
 import CommandCenter from '@/pages/CommandCenter';
+import OAuthConsent from '@/pages/OAuthConsent';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -75,6 +76,7 @@ const AuthenticatedApp = () => {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/ThankYou" element={<ThankYou />} />
+      <Route path="/oauth/consent" element={<OAuthConsent />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route element={<Layout />}>
           <Route path="/" element={<Dashboard />} />

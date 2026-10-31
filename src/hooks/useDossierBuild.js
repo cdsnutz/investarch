@@ -4,11 +4,14 @@ import { scrubDeep } from '@/lib/noSlop';
 import { logActivity } from '@/lib/activity';
 
 export const STAGES = ['intake', 'research', 'synthesis', 'render'];
-const idle = () => Object.fromEntries(STAGES.map((s) => [s, { state: 'pending', error: null }]));
+// Full builds continue past render into the value engine: plan points, value scan, funding letters, competitive radar.
+export const FULL_STAGES = [...STAGES, 'enrich'];
+const idle = (list = STAGES) => Object.fromEntries(list.map((s) => [s, { state: 'pending', error: null }]));
 
 // Runs the dossier pipeline stage by stage; a failed stage can be retried without redoing earlier ones.
 export default function useDossierBuild() {
   const [stages, setStages] = useState(idle);
+  const [stageList, setStageList] = useState(STAGES);
   const [running, setRunning] = useState(false);
   const ctx = useRef({});
 
@@ -58,19 +61,28 @@ export default function useDossierBuild() {
     },
     render: async () => {
       await base44.entities.Project.update(ctx.current.project.id, { status: 'complete' });
+    },
+    enrich: async () => {
+      const { id } = ctx.current.project;
+      await base44.functions.invoke('buildPlanPoints', { projectId: id });
+      await base44.functions.invoke('runValueScan', { projectId: id });
+      await base44.functions.invoke('draftFundingLetters', { projectId: id });
+      await base44.functions.invoke('scoreCompetition', { projectId: id });
     }
   };
 
   async function runFrom(start) {
+    const list = ctx.current.list;
     setRunning(true);
-    for (const s of STAGES.slice(STAGES.indexOf(start))) {
+    for (const s of list.slice(list.indexOf(start))) {
       set(s, 'running');
       try {
         await steps[s]();
         set(s, 'done');
       } catch (err) {
         set(s, 'failed', err?.response?.data?.error || err.message || 'Stage failed');
-        if (ctx.current.project) await base44.entities.Project.update(ctx.current.project.id, { status: 'failed' }).catch(() => {});
+        // An enrichment failure must not flag an already-complete dossier as failed.
+        if (ctx.current.project && s !== 'enrich') await base44.entities.Project.update(ctx.current.project.id, { status: 'failed' }).catch(() => {});
         logActivity('build_failed', `${s}: ${ctx.current.project?.company_name || ctx.current.project?.url || ''}`);
         setRunning(false);
         return null;
@@ -81,14 +93,16 @@ export default function useDossierBuild() {
     return ctx.current.project;
   }
 
-  function start({ project, url, companyName = '', intensity = 'quick' }) {
-    ctx.current = { project: project || null, rebuild: !!project, input: { url, companyName, intensity } };
-    setStages(idle());
+  function start({ project, url, companyName = '', intensity = 'quick', full = false }) {
+    const list = full ? FULL_STAGES : STAGES;
+    ctx.current = { project: project || null, rebuild: !!project, list, input: { url, companyName, intensity } };
+    setStageList(list);
+    setStages(idle(list));
     logActivity('build_started', project?.company_name || url);
     return runFrom('intake');
   }
 
   const retry = (s) => { logActivity('build_retry', s); return runFrom(s); };
 
-  return { stages, running, start, retry };
+  return { stages, stageList, running, start, retry };
 }

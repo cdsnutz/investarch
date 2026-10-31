@@ -2,10 +2,10 @@ import { Check, Loader2, X, RotateCcw } from 'lucide-react';
 import { STAGES } from '@/hooks/useDossierBuild';
 import { cn } from '@/lib/utils';
 
-export default function StageTrack({ stages, running, onRetry }) {
+export default function StageTrack({ stages, running, onRetry, list = STAGES }) {
   return (
     <ol className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-border border border-border">
-      {STAGES.map((s, i) => {
+      {list.map((s, i) => {
         const { state, error } = stages[s];
         return (
           <li key={s} className={cn('bg-white px-3 py-2.5 text-xs', state === 'failed' && 'bg-destructive/5')}>

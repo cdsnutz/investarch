@@ -12,7 +12,7 @@ export default function HunterPanel({ onChange }) {
   const [busy, setBusy] = useState(null);
   const [building, setBuilding] = useState(null);
   const [buildingId, setBuildingId] = useState(null);
-  const { stages, running, start, retry } = useDossierBuild();
+  const { stages, stageList, running, start, retry } = useDossierBuild();
   const navigate = useNavigate();
 
   const load = () => base44.entities.MarketSeed.filter({ status: 'New' }, { sort: '-created_date', limit: 20 }).then((p) => setSeeds(p.items));
@@ -38,7 +38,8 @@ export default function HunterPanel({ onChange }) {
     setBuilding(s.title);
     setBuildingId(project.id);
     load(); onChange?.();
-    const done = await start({ project });
+    // Accepting a seed runs the full pipeline: research through value engine, no extra clicks.
+    const done = await start({ project, full: true });
     setBusy(null); onChange?.();
     if (done) navigate(`/projects/${done.id}`);
   };
@@ -58,7 +59,7 @@ export default function HunterPanel({ onChange }) {
             <div className="text-xs text-muted-foreground min-w-0">Building dossier: <span className="text-foreground">{building}</span></div>
             {buildingId && <Link to={`/projects/${buildingId}`} className="text-xs text-bottle hover:underline shrink-0">Open dossier</Link>}
           </div>
-          <StageTrack stages={stages} running={running} onRetry={async (st) => { const d = await retry(st); onChange?.(); if (d) navigate(`/projects/${d.id}`); }} />
+          <StageTrack stages={stages} list={stageList} running={running} onRetry={async (st) => { const d = await retry(st); onChange?.(); if (d) navigate(`/projects/${d.id}`); }} />
         </div>
       )}
       {!seeds ? <p className="text-xs text-muted-foreground">Loading…</p>

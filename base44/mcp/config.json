@@ -1,5 +1,5 @@
 {
-  "auth": "oauth",
+  "auth": "none",
   "tools": {
     "functions": [
       {
@@ -44,7 +44,8 @@
           "read_only_hint": false,
           "destructive_hint": false,
           "idempotent_hint": true
-        }
+        },
+        "disabled": true
       }
     ]
   }

@@ -44,6 +44,7 @@ import DisruptionLog from '@/pages/DisruptionLog';
 import ExecutionTimeline from '@/pages/ExecutionTimeline';
 import CommandCenter from '@/pages/CommandCenter';
 import OAuthConsent from '@/pages/OAuthConsent';
+import Connect from '@/pages/Connect';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -82,6 +83,7 @@ const AuthenticatedApp = () => {
           <Route path="/" element={<Dashboard />} />
           <Route path="/new" element={<NewAnalysis />} />
           <Route path="/command-center" element={<CommandCenter />} />
+          <Route path="/connect" element={<Connect />} />
           <Route path="/projects/:id" element={<ProjectDetail />} />
           <Route path="/ip-factory" element={<IpFactory />} />
           <Route path="/simulator" element={<PrecisionSimulator />} />

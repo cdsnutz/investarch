@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
-import { LayoutDashboard, Plus, LogOut, Radar, FlaskConical, Radio, TrendingUp, History, Archive, BookOpen, Vault, FileText, ClipboardList, Users, Compass, HeartHandshake, Settings, ShieldCheck, Network, PenLine, Timer, Coins, KanbanSquare, LineChart, Landmark, Waves, Zap, CalendarRange, Gauge } from 'lucide-react';
+import { LayoutDashboard, Plus, LogOut, Radar, FlaskConical, Radio, TrendingUp, History, Archive, BookOpen, Vault, FileText, ClipboardList, Users, Compass, HeartHandshake, Settings, ShieldCheck, Network, PenLine, Timer, Coins, KanbanSquare, LineChart, Landmark, Waves, Zap, CalendarRange, Gauge, Plug } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const NAV_GROUPS = [
@@ -42,7 +42,8 @@ const NAV_GROUPS = [
   { label: 'Operations', items: [
     { to: '/compliance-audit', label: 'Compliance Audit', icon: ShieldCheck },
     { to: '/synthesis-metrics', label: 'Synthesis Metrics', icon: LineChart },
-    { to: '/account-settings', label: 'Account Settings', icon: Settings }
+    { to: '/account-settings', label: 'Account Settings', icon: Settings },
+    { to: '/connect', label: 'Connect Assistant', icon: Plug }
   ]}
 ];
 

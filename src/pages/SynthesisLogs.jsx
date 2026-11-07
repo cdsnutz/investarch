@@ -9,6 +9,7 @@ import moment from 'moment';
 const statusClasses = {
   analyzing: '',
   complete: 'bg-bottle/10 text-bottle border-transparent',
+  ready_for_review: 'bg-bottle/10 text-bottle border-transparent',
   failed: 'bg-destructive/10 text-destructive border-transparent'
 };
 

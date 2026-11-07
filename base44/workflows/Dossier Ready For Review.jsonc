@@ -1,0 +1,40 @@
+{
+  "name": "Dossier Ready For Review",
+  "description": "The moment an AI dossier build finishes (status moves to complete), the dossier is advanced to Ready for Review so the Command Center pipeline reflects it.",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "Project",
+      "events": [
+        "update"
+      ]
+    },
+    "condition": "${ .trigger.data.status == \"complete\" and .trigger.old_data.status != \"complete\" }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "dossier_ready_for_review",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "mark_ready_for_review": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "markDossierReadyForReview",
+            "args": {
+              "project_id": "${ .trigger.entity_id }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Mark ready for review",
+            "description": "Complete \u2192 Ready for Review"
+          }
+        }
+      }
+    ]
+  }
+}

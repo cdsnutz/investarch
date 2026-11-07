@@ -35,7 +35,7 @@ export default function CapitalReadiness() {
   const [dossiers, setDossiers] = useState(null);
 
   useEffect(() => {
-    base44.entities.Project.filter({ status: 'complete' }, { sort: '-created_date', limit: 50, fields: ['company_name', 'industry', 'scan_score', 'value_scan', 'created_date'] })
+    base44.entities.Project.filter({ status: { $in: ['complete', 'ready_for_review'] } }, { sort: '-created_date', limit: 50, fields: ['company_name', 'industry', 'scan_score', 'value_scan', 'created_date'] })
       .then((p) => setDossiers(p.items)).catch(() => setDossiers([]));
   }, []);
 

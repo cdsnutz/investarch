@@ -37,7 +37,7 @@ export default function StrategyVault() {
   const [drafts, setDrafts] = useState({});
 
   useEffect(() => {
-    base44.entities.Project.filter({ status: 'complete' }, { sort: '-created_date', limit: 50 })
+    base44.entities.Project.filter({ status: { $in: ['complete', 'ready_for_review'] } }, { sort: '-created_date', limit: 50 })
       .then((p) => setDossiers(p.items)).catch(() => setDossiers([]));
     base44.entities.NarrativeVector.list({ sort: '-created_date', limit: 50 })
       .then((n) => setNarratives(n.items)).catch(() => setNarratives([]));

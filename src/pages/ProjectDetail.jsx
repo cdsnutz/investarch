@@ -118,6 +118,7 @@ export default function ProjectDetail() {
         <div className="flex flex-wrap items-center gap-3 mt-3 text-sm text-muted-foreground">
           {project.industry && <Badge variant="secondary" className="bg-slate-100">{project.industry}</Badge>}
           {project.status === 'captured' && <Badge variant="outline">Captured draft</Badge>}
+          {project.status === 'ready_for_review' && <Badge variant="secondary" className="bg-bottle/10 text-bottle border-transparent">Ready for Review</Badge>}
           {project.url && (/^https?:\/\//i.test(project.url) ? (
             <a href={project.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:text-slate-900">
               <ExternalLink className="size-3.5" /> {project.url}

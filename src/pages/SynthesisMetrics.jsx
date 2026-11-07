@@ -17,7 +17,7 @@ export default function SynthesisMetrics() {
       base44.entities.NarrativeVector.count({}),
       base44.entities.LiveSignal.count({}),
       base44.entities.FundingSource.count({}),
-      base44.entities.Project.filter({ status: 'complete' }, { sort: '-created_date', limit: 50, fields: ['created_date', 'updated_date'] }),
+      base44.entities.Project.filter({ status: { $in: ['complete', 'ready_for_review'] } }, { sort: '-created_date', limit: 50, fields: ['created_date', 'updated_date'] }),
       base44.entities.Project.aggregate({ dateBucket: { field: 'created_date', unit: 'week' }, avg: 'scan_score' }),
       base44.entities.LiveSignal.aggregate({ dateBucket: { field: 'created_date', unit: 'week' }, avg: 'confidence' })
     ]).then(([pc, nc, sc, fc, projects, scores, confs]) => {

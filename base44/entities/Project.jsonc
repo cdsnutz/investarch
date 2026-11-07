@@ -17,7 +17,15 @@
         "captured",
         "analyzing",
         "complete",
+        "ready_for_review",
         "failed"
+      ],
+      "enumColors": [
+        "gray",
+        "yellow",
+        "blue",
+        "green",
+        "red"
       ],
       "default": "analyzing"
     },

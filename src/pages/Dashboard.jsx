@@ -67,8 +67,8 @@ export default function Dashboard() {
                     <div className="text-xs text-muted-foreground mt-0.5 truncate">{p.industry || p.url}</div>
                   </div>
                   <div className="flex items-center gap-2 mt-4">
-                    <Badge variant={p.status === 'complete' ? 'secondary' : 'outline'} className={p.status === 'complete' ? 'bg-bottle/10 text-bottle border-transparent' : ''}>
-                      {p.status}
+                    <Badge variant={['complete', 'ready_for_review'].includes(p.status) ? 'secondary' : 'outline'} className={['complete', 'ready_for_review'].includes(p.status) ? 'bg-bottle/10 text-bottle border-transparent' : ''}>
+                      {p.status === 'ready_for_review' ? 'Ready for Review' : p.status}
                     </Badge>
                     {p.scan_score != null && <Badge variant="outline">Scan {p.scan_score}/100</Badge>}
                     <span className="text-xs text-muted-foreground">{moment(p.created_date).format('MMM D, YYYY')}</span>

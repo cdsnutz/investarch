@@ -45,7 +45,7 @@
           "destructive_hint": false,
           "idempotent_hint": true
         },
-        "disabled": true
+        "disabled": false
       }
     ]
   }

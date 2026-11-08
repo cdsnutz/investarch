@@ -17,7 +17,7 @@ export default async function (req) {
       const { items } = await base44.entities.IpSeed.filter({}, { sort: '-asymmetric_score', limit: 60 });
       targets = (items || []).filter(leadTarget).slice(0, MAX_PER_SWEEP);
       if (!targets.length) {
-        return Response.json({ drafted: 0, attempted: 0, results: [], note: 'Every seed already carries pitched buyer leads.' });
+        return Response.json({ drafted: 0, attempted: 0, results: [], recipient: user.email, digest: '', note: 'Every seed already carries pitched buyer leads.' });
       }
     } else {
       const seedId = typeof body?.seedId === 'string' ? body.seedId : '';
@@ -28,6 +28,8 @@ export default async function (req) {
     }
 
     const results = [];
+    const digestParts = [];
+    let leadTotal = 0;
     for (const seed of targets) {
       try {
         const drafted = await draftLeadsForSeed(base44, seed);
@@ -54,6 +56,15 @@ export default async function (req) {
           companies: drafted.leads.map((lead) => lead.company),
           coverage_note: drafted.coverage_note
         });
+
+        leadTotal += drafted.leads.length;
+        digestParts.push([
+          seed.title.toUpperCase(),
+          drafted.leads
+            .map((lead) => `• ${lead.company} — ${lead.category} · ${lead.contact_role}\n  Subject: ${lead.subject}\n  Why them: ${lead.why_fit}\n  Pitch: ${lead.pitch}`)
+            .join('\n\n'),
+          drafted.coverage_note ? `Coverage note: ${drafted.coverage_note}` : ''
+        ].filter(Boolean).join('\n'));
       } catch (error) {
         console.log('draftBuyerLeads seed failed:', seed.id, error?.message);
         results.push({ seed: seed.title, ok: false, error: error?.message });
@@ -63,7 +74,12 @@ export default async function (req) {
     return Response.json({
       drafted: results.filter((result) => result.ok).length,
       attempted: targets.length,
-      results
+      results,
+      lead_total: leadTotal,
+      seeds_line: results.filter((result) => result.ok).map((result) => result.seed).join(' · '),
+      digest: digestParts.join('\n\n\n'),
+      digest_date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+      recipient: user.email
     });
   } catch (error) {
     console.log('draftBuyerLeads failed:', error?.message);

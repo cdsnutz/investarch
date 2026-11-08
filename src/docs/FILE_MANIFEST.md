@@ -4,7 +4,7 @@ Version 1.0 · 8 November 2026 · Compiled by the Registrar.
 
 This manifest enumerates every file in the application repository, grouped by area, with the role each file plays. It is the completeness check for the Registrar's documentation: if a file is on disk and not listed here, it is undocumented; if it is listed here and not on disk, the guide describes something that no longer exists.
 
-**Totals:** 315 files — 15 root · 93 backend · 12 skills · 195 app source.
+**Totals:** 316 files — 15 root · 94 backend · 12 skills · 195 app source.
 
 **Verification.** Run `node src/docs/verify-manifest.mjs` from the repository root. It walks the working tree (ignoring `node_modules`, `.git`, `dist`), compares it against the entries below, prints any file missing from the manifest and any entry with no file behind it, and exits non-zero on drift. A clean run prints `OK` and the two matching counts.
 
@@ -28,7 +28,7 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `tailwind.config.js` — token-to-class mapping, font roles, keyframes.
 - `vite.config.js` — Vite build with the Base44 plugin, React, HMR and analytics hooks.
 
-## 2. Base44 backend (93)
+## 2. Base44 backend (94)
 
 ### 2.1 Configuration (2)
 
@@ -93,7 +93,7 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `base44/functions/completeIpSeed/entry.ts` — repairs an incomplete seed by filling tech stack, schema and core logic.
 - `base44/functions/create-checkout/entry.ts` — Base44 Payments checkout session for a product id and quantity.
 - `base44/functions/createMarketSeed/entry.ts` — keyed intake endpoint that captures a market seed and logs the event.
-- `base44/functions/draftBuyerLeads/entry.ts` — names every credible buyer for a seed and writes each company its own first-touch email; single seed or a sweep of three.
+- `base44/functions/draftBuyerLeads/entry.ts` — names every credible buyer for a seed and writes each company its own first-touch email; single seed or a sweep of three, returning the digest text for the nightly email.
 - `base44/functions/draftCapitalPack/entry.ts` — drafts grant applications and a small-business loan proposal for a seed.
 - `base44/functions/draftFundingLetters/entry.ts` — drafts outreach subject, body and application narrative per matched funder.
 - `base44/functions/draftIpFiling/entry.ts` — drafts one instrument (patent, trademark, deed, copyright) for a seed.
@@ -132,7 +132,7 @@ This manifest enumerates every file in the application repository, grouped by ar
 
 ### 2.5 Workflows (4)
 
-- `base44/workflows/Buyer Lead Sweep.jsonc` — nightly buyer-lead pass over the ledger, highest asymmetry first, three seeds per run.
+- `base44/workflows/Buyer Lead Sweep.jsonc` — nightly buyer-lead pass over the ledger, highest asymmetry first, three seeds per run, ending in the digest email to the operator.
 - `base44/workflows/Codebase Hardening Pod.jsonc` — nightly hardening sweep over the seed ledger.
 - `base44/workflows/Dossier Ready For Review.jsonc` — fires when a dossier is promoted and runs the readiness function.
 - `base44/workflows/Sovereign IP Hunt.jsonc` — scheduled hunt that runs the hunter and strategy assignment.
@@ -140,6 +140,10 @@ This manifest enumerates every file in the application repository, grouped by ar
 ### 2.6 Agents (1)
 
 - `base44/agents/codebase_hardener.jsonc` — the hardening bench: reads a seed, runs the pods, rebuilds the codebase and refreshes the funding and buyer playbooks.
+
+### 2.7 Email templates (1)
+
+- `base44/emails/BuyerLeadDigest.html` — the nightly buyer-lead digest: seeds covered, every named buyer with its subject line and pitch, and coverage notes.
 
 ## 3. Agent skills (12)
 

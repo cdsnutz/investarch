@@ -34,14 +34,57 @@
               "action": "sweep"
             }
           },
-          "then": "end",
+          "then": "any_new_leads",
           "x-base44": {
             "title": "Draft buyer leads",
             "description": "Up to three unpitched seeds per run, each with a written first-touch email"
           }
         }
+      },
+      {
+        "any_new_leads": {
+          "switch": [
+            {
+              "when": "${ .draft_buyer_leads.drafted > 0 }",
+              "then": "email_digest"
+            },
+            {
+              "when": "${ true }",
+              "then": "end"
+            }
+          ],
+          "x-base44": {
+            "title": "Anything new?",
+            "description": "Skip the email when no seed needed leads"
+          }
+        }
+      },
+      {
+        "email_digest": {
+          "call": "send_email",
+          "with": {
+            "template_name": "BuyerLeadDigest",
+            "to": "${ .draft_buyer_leads.recipient }",
+            "subject": "Buyer leads: ${ .draft_buyer_leads.drafted } seeds pitched, ${ .draft_buyer_leads.lead_total } buyers",
+            "category": "transactional",
+            "description": "Emails the sweep's named buyers and their written pitches to the operator.",
+            "variables": {
+              "digest_date": "${ .draft_buyer_leads.digest_date }",
+              "drafted": "${ .draft_buyer_leads.drafted }",
+              "attempted": "${ .draft_buyer_leads.attempted }",
+              "lead_total": "${ .draft_buyer_leads.lead_total }",
+              "seeds_line": "${ .draft_buyer_leads.seeds_line }",
+              "digest": "${ .draft_buyer_leads.digest }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Email the digest",
+            "description": "Named buyers, pitches and coverage notes to your inbox"
+          }
+        }
       }
     ]
   },
-  "description": "Nightly buyer-lead pass over the seed ledger, highest asymmetry first: names every credible buyer for a seed, writes each company its own pitch, and records both on the seed."
+  "description": "Nightly buyer-lead pass over the seed ledger, highest asymmetry first: names every credible buyer for a seed, writes each company its own pitch, records both on the seed, then emails the sweep's buyers and pitches to the operator's inbox."
 }

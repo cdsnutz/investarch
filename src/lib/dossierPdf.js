@@ -61,9 +61,11 @@ export function dossierPdf(markdown, { footer } = {}) {
 }
 
 export function renderDossierPdfs(entries, footer) {
-  return (entries || []).map((entry) => (
-    entry.path.startsWith('Dossier/') && entry.path.endsWith('.md')
+  return (entries || []).map((entry) => {
+    const printable = entry.path.endsWith('.md')
+      && (entry.path.startsWith('Dossier/') || entry.path.startsWith('Buyers/'));
+    return printable
       ? { path: entry.path.replace(/\.md$/, '.pdf'), content: dossierPdf(entry.content, { footer }) }
-      : entry
-  ));
+      : entry;
+  });
 }

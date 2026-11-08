@@ -33,11 +33,12 @@ const INTEL_PROMPT = [
   'Evidence rules, with no exceptions:',
   '- Every statement must be supportable from a public source you actually saw. Never invent a funding round, headcount, executive, mandate, contract or product name. Never invent a person, an email address, or a figure.',
   '- If public evidence on a company is thin, return only what you can support, set confidence to "thin", and say in osint_angle what is missing and where it would be found. An honest thin profile beats a confident invented one.',
+  '- "Thin" is not a shortcut for a company you have not looked into, and it is not a judgement about size. A large public company still has a specific buying trigger in its filings, earnings call, job postings, documentation or procurement record. Research every company in the list before deciding a profile is thin.',
   '- Never reuse the operator\'s own asset description as evidence about the company.',
   '',
   'Fields:',
   '- snapshot: what the company does today, in their own market terms, 40 to 70 words. Concrete: what they sell, to whom, and at what layer of the stack.',
-  '- recent_moves: two to four dated public moves that bear on whether they buy this asset now (product launches, regulatory filings, procurement notices, funding, leadership changes, partnerships, earnings language). Date each one.',
+  '- recent_moves: two to four dated public moves that bear on whether they buy this asset now (product launches, regulatory filings, procurement notices, funding, leadership changes, partnerships, earnings language). Date each one. At least one dated move is required for any profile you grade "verified" or "likely".',
   '- buying_trigger: the specific situation inside the company that makes this asset worth a budget line this quarter, tied to one of the moves above.',
   '- unique_insight: the non-obvious observation. Nothing the buyer would read on their own homepage: a structural gap in their product line, a stack or compliance constraint, an org change that moved the budget, or a customer segment they cannot serve today. One paragraph, falsifiable, and name the source you saw it in.',
   '- osint_angle: the exact public sources an operator should re-check before the first send — company filings, careers page, changelog or docs, procurement portals, patent and trademark registries, regulator dockets, conference talks.',
@@ -52,20 +53,31 @@ const clean = (value: any) => String(value ?? '').trim();
 function normalizeRow(row: any) {
   const company = clean(row?.company);
   if (!company) return null;
-  const confidence = ['verified', 'likely', 'thin'].includes(clean(row?.confidence).toLowerCase())
+  const sources = Array.isArray(row?.sources)
+    ? row.sources.map(clean).filter((url: string) => /^https?:\/\/\S+\.\S+/i.test(url)).slice(0, 5)
+    : [];
+  const moves = Array.isArray(row?.recent_moves)
+    ? row.recent_moves.map(clean).filter(Boolean).slice(0, 5)
+    : [];
+
+  // The grade has to match the evidence actually attached to the profile. A claim with no
+  // URL behind it is an assertion, not a verified finding, so the label is lowered rather
+  // than published as if it were checked.
+  let grade = ['verified', 'likely', 'thin'].includes(clean(row?.confidence).toLowerCase())
     ? clean(row?.confidence).toLowerCase()
     : 'thin';
+  if (!sources.length) grade = 'thin';
+  else if (grade === 'verified' && !moves.length) grade = 'likely';
+
   return {
     company,
     snapshot: clean(row?.snapshot),
-    recent_moves: Array.isArray(row?.recent_moves) ? row.recent_moves.map(clean).filter(Boolean).slice(0, 5) : [],
+    recent_moves: moves,
     buying_trigger: clean(row?.buying_trigger),
     unique_insight: clean(row?.unique_insight),
     osint_angle: clean(row?.osint_angle),
-    sources: Array.isArray(row?.sources)
-      ? row.sources.map(clean).filter((url: string) => /^https?:\/\/\S+\.\S+/i.test(url)).slice(0, 5)
-      : [],
-    confidence
+    sources,
+    confidence: grade
   };
 }
 

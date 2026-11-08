@@ -4,7 +4,9 @@
 import { base44 } from '@/api/base44Client';
 
 const text = (value) => String(value ?? '').trim();
-const BATCH_SIZE = 6;
+// The function reads up to eight companies per call; a full book of a few hundred buyers is
+// therefore a few dozen web-search calls, which is why the export reports progress per batch.
+const BATCH_SIZE = 8;
 
 export function collectBuyers(seeds) {
   const book = new Map();

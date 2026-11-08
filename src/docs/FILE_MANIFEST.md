@@ -93,7 +93,7 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `base44/functions/completeIpSeed/entry.ts` — repairs an incomplete seed by filling tech stack, schema and core logic.
 - `base44/functions/create-checkout/entry.ts` — Base44 Payments checkout session for a product id and quantity.
 - `base44/functions/createMarketSeed/entry.ts` — keyed intake endpoint that captures a market seed and logs the event.
-- `base44/functions/buyerIntel/entry.ts` — OSINT read of up to eight named buyers per call: snapshot, dated public moves, buying trigger, one falsifiable insight with its source, and an explicit confidence grade.
+- `base44/functions/buyerIntel/entry.ts` — OSINT read of up to eight named buyers per call: snapshot, dated public moves, buying trigger, one falsifiable insight with its source, and an explicit confidence grade. The grade is enforced server-side: a profile with no source URL is graded down to thin, and a verified profile must carry at least one dated move.
 - `base44/functions/draftBuyerLeads/entry.ts` — names every credible buyer for a seed and writes each company its own first-touch email; single seed or a sweep of three, returning the digest text for the nightly email.
 - `base44/functions/draftCapitalPack/entry.ts` — drafts grant applications and a small-business loan proposal for a seed.
 - `base44/functions/draftFundingLetters/entry.ts` — drafts outreach subject, body and application narrative per matched funder.
@@ -170,7 +170,7 @@ Bundled from `antislop-skillset@3.3.4`.
 - `skills/pods/security.md` — Security pod: isolation, trust boundaries, delete behaviour.
 - `skills/pods/structure.md` — Structure pod: tables, keys, uniqueness, indexes.
 
-## 4. App source (203)
+## 4. App source (205)
 
 ### 4.1 Entry and shell (4)
 
@@ -341,7 +341,7 @@ Bundled from `antislop-skillset@3.3.4`.
 - `src/hooks/useDossierBuild.js` — dossier build and refinement state.
 - `src/hooks/useHuggingFace.js` — connector-backed inference state.
 
-### 4.16 Library (31)
+### 4.16 Library (33)
 
 - `src/lib/AuthContext.jsx` — auth provider, session state and public settings.
 - `src/lib/PageNotFound.jsx` — 404 page with a real 404 status.
@@ -369,6 +369,8 @@ Bundled from `antislop-skillset@3.3.4`.
 - `src/lib/seedDocs.js` — derives one seed's user guide, technical guide and file manifest from the generator.
 - `src/lib/seedComplete.js` — required-field rules for a complete seed.
 - `src/lib/buyerArchive.js` — assembles the buyer book: one profile per company, an index table and the JSON record, with confidence stated per buyer.
+- `src/lib/buyerSummary.js` — the research summary report: coverage, the evidence grade behind every finding, who to open first, and what to re-verify; emitted as Markdown and PDF.
+- `src/lib/dossierPdf.js` — parses a dossier document's title, subtitle and sections and renders it as a paginated PDF, so a seed can ship as a print-ready set instead of Markdown.
 - `src/lib/buyerIntel.js` — collects and deduplicates every named buyer across the ledger, then researches them in bounded batches through the buyerIntel function.
 - `src/lib/seedArchive.js` — the bulk seed archive: dossier documents as Markdown, the verified codebase file set and the buyer book, per seed folder, in one compressed ZIP.
 - `src/lib/seedReadiness.js` — funding readiness scoring per seed.

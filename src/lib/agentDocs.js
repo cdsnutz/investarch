@@ -1,15 +1,22 @@
 // Deterministic build documents for an AI coding agent, generated from the seed blueprint and scaffold.
 import { parseTables, appSlug } from '@/lib/scaffoldKit';
+import { buildKitFiles } from '@/lib/buildKit';
 const list = (arr) => (arr || []).map((x) => `- ${x}`).join('\n') || '- Not specified; choose a mainstream, well-documented stack.';
 
 export function buildAgentReadme(seed, codebase) {
   const bp = seed.blueprint || {};
-  const tree = (codebase?.files || []).map((f) => `- \`${f.path}\``).join('\n') || '- No scaffold files exported. Create the project from scratch using the stack below.';
+  const built = buildKitFiles(seed, codebase);
+  const tree = built.map((f) => `- \`${f.path}\``).join('\n');
+  const drafts = (codebase?.files || []).map((f) => `- \`${f.path}\` (reference draft)`).join('\n') || '- None.';
   return `# ${seed.title}: Build Brief for an AI Coding Agent
 
-Read this file in full before writing code. It is the single source of truth for scope. Build the complete, working application described here on top of the scaffold in \`Codebase/\`. Do not stop at stubs.
+Read this file in full before writing code. It is the single source of truth for scope.
 
-\`SCAFFOLD.md\` is the execution order for that build: bootstrap, port the scaffold, data, auth, core logic, screens, integrations, tests, and the finish checklist. Follow it step by step and run every check it names.
+The application described here is already built in \`Codebase/\`: authentication, owner-scoped persistence, every screen, migrations, seed data, tests and hand-off documentation. It runs and passes its own full run as delivered. This brief is the specification it was built against, and the contract for every change after it.
+
+\`USER_GUIDE.md\` is what the product does for its users. \`TECHNICAL_GUIDE.md\` is how it is put together, endpoint by endpoint. \`MANIFEST.md\` maps every path to its purpose and its owning agent.
+
+\`SCAFFOLD.md\` is the order to change things in, with a command check after each step. Run \`./verify.sh\` first: if the delivered application does not pass its own run, that is the only defect worth fixing.
 
 \`ACCEPTANCE.md\` holds the pass conditions for each screen. A screen is not finished because it renders: it is finished when every box in its block is checked against observed behaviour.
 
@@ -34,8 +41,15 @@ ${bp.db_schema || 'Derive entities from the core logic below. Every table needs 
 ## 6. Core Logic
 ${bp.core_logic || 'Implement the solution in section 2 as the primary user flow.'}
 ${seed.ecosystem_interlocks ? `\n## 7. Integrations\n${seed.ecosystem_interlocks}\n` : ''}
-## Scaffold Contents
+## What ships in Codebase/
+
+Runnable application:
+
 ${tree}
+
+Build-pod drafts, kept for intent only. They are already reconciled into \`server/\` and \`src/\`; do not port them again:
+
+${drafts}
 
 ## Agent Operating Rules
 1. Inspect every scaffold file first, then execute \`SCAFFOLD.md\` sections 2 to 11 in order. Extend the scaffold; do not rewrite working parts without cause.
@@ -150,17 +164,15 @@ Documentation and tooling you follow rather than port: \`AGENTS.md\`, \`ROADMAP.
 
 ## 2. Bootstrap the project
 
-The skeleton is already complete and runs: \`package.json\` with pinned dependencies, \`eslint.config.js\`, \`vite.config.js\`, \`index.html\`, \`src/\`, \`server/app.js\`, \`server/index.js\`, \`server/routes/index.js\`, \`database/migrate.js\`, \`database/migrations/001_init.sql\`, \`vitest.config.js\` and \`tests/\`. Do not scaffold a new project on top of it.
+The application is complete and already runs: \`package.json\`, \`server/\` (auth, owner-scoped collections, validation), \`src/\` (six screens plus not found), \`database/\` (baseline migration, runner, seed), \`tests/\` and \`verify.sh\`. Do not scaffold a new project on top of it and do not rebuild what is there.
 
 \`\`\`bash
 npm install
-cp .env.example .env          # fill DATABASE_URL, AUTH_SECRET (openssl rand -hex 32), APP_URL
-npm test                      # three tests pass, no database required
-npm run db:migrate            # applies 001_init.sql
-npm run db:seed               # demo dataset plus credentials
-npm run dev                   # listening on http://localhost:3000
-curl -s localhost:3000/health # {"ok":true,...}
-npm run dev:web               # http://localhost:5173, shell reports the API version
+cp .env.example .env            # fill DATABASE_URL, AUTH_SECRET (openssl rand -hex 32), APP_URL
+./verify.sh                     # install, lint, test, build, migrate, seed, boot, probe
+npm run dev                     # listening on http://localhost:3000
+curl -s localhost:3000/health   # {"ok":true,...}
+npm run dev:web                 # http://localhost:5173
 \`\`\`
 
 \`MANIFEST.md\` lists every dependency, path and script with its purpose, and states which agent writes which file. \`AGENT_ORDERS.md\` holds one work contract per agent: owned paths, tasks, commands and hand-off evidence.
@@ -169,17 +181,11 @@ If AGENTS.md section 4 names a different framework, database or package manager,
 
 Check: \`npm test\` passes and \`curl localhost:3000/health\` returns 200 before you write any feature code.
 
-## 3. Port the scaffold
+## 3. Reference drafts
 
-Order matters. Each layer must exist before the layer above it references it.
+The \`backend/\`, \`frontend/\` and \`database/\` drafts in this folder were the build pod's proposal. They are already reconciled into \`server/\`, \`src/\` and \`database/migrations/\`, and the working application is the authority. Read a draft only to recover intent that did not make it into the code, then implement that intent in the real files. Never port a draft over working code.
 
-1. \`database/\`: read the schema draft, then write \`database/migrations/001_init.sql\` (section 4). Do not execute the draft directly.
-2. \`backend/\` service modules: move each into \`server/services/\`. Replace every import with a real relative path that exists.
-3. \`backend/\` route handlers: move into \`server/routes/\`, mount each router in \`server/index.js\`.
-4. \`frontend/\`: move pages to \`src/pages/\`, components to \`src/components/\`. Point the API client at the server base URL from \`env\`, not a hardcoded host.
-5. Root config: merge \`package.json\` dependencies, reconcile \`docker-compose.yml\` with the real service names, and turn \`.env.template\` into \`.env.example\`.
-
-Porting rules:
+Rules for changing what exists:
 
 - Endpoint path, method and payload must be identical in the client, the route and the service. Fix mismatches now, not at integration time.
 - Every \`process.env\` read must appear in \`.env.example\`.
@@ -232,7 +238,7 @@ Check: \`npm test\` passes and service coverage is at or above 80%.
 
 ## 7. Screens
 
-Build in this order, each wired to the real API:
+All six exist and are wired to the real API. Verify them in this order, then extend:
 
 1. \`/\` landing: what the product does and one call to action.
 2. \`/login\` and \`/register\`.
@@ -285,6 +291,7 @@ Do not report the build as complete until every line is true.
 - [ ] Register, login, logout and password reset work; session survives a refresh; logout clears it.
 - [ ] Every flow in AGENTS.md section 6 is reachable from the UI and persists.
 - [ ] Loading, empty, error and success states exist on every data screen.
+- [ ] \`./verify.sh\` prints PASS, including the live probe and the 401 check.
 - [ ] \`npm run lint\`, \`npm test\`, \`npm run build\` pass with no new warnings.
 - [ ] \`.env.example\` covers every \`process.env\` read.
 - [ ] \`grep -rn "TODO\\|FIXME\\|coming soon\\|lorem" src server\` returns nothing.
@@ -414,8 +421,8 @@ Run against the local or deployed base URL.
 
 \`\`\`bash
 curl -i $APP_URL/health
-curl -i -X POST $APP_URL/auth/register -H 'content-type: application/json' -d '{"email":"probe@example.com","password":"Passw0rd!23"}'
-curl -i $APP_URL/api/${primary}
+curl -i -X POST $APP_URL/api/auth/register -H 'content-type: application/json' -d '{"email":"probe@example.com","password":"Passw0rd!23","fullName":"Probe"}'
+curl -i $APP_URL/api/records/${primary}
 \`\`\`
 
 - [ ] S9-A1 \`/health\` returns 200 with a JSON body.

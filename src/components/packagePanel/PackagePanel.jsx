@@ -154,7 +154,7 @@ export default function PackagePanel({ project, funding }) {
     const zip = new JSZip();
     docs.forEach((d) => zip.file(d.name, buildPdf(d.args)));
     buildKitFiles({ title: project.company_name || project.url || 'Codebase' }, data.codebase).forEach((f) =>
-      zip.file(`02_Technical_Vault/Codebase/${f.path}`, f.content)
+      zip.file(`02_Technical_Vault/Codebase/${f.path}`, f.content, f.executable ? { unixPermissions: '755' } : undefined)
     );
     (data.codebase?.files || []).forEach((f) => {
       if (f.path === 'package.json') return;

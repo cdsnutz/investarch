@@ -114,7 +114,9 @@ export async function buildDossierPack({ seed, filings, prospectus, codebase, ca
   [...antislopFiles(), ...devproDeployFiles()].forEach((f) => zip.file(`${base}/Codebase/${f.path}`, f.content, f.path.endsWith('.sh') ? { unixPermissions: '755' } : undefined));
 
   const kit = buildKitFiles(seed, codebase);
-  kit.forEach((f) => zip.file(`${base}/Codebase/${f.path}`, f.content));
+  kit.forEach((f) =>
+    zip.file(`${base}/Codebase/${f.path}`, f.content, f.executable ? { unixPermissions: '755' } : undefined)
+  );
 
   if (codebase?.files?.length) {
     (codebase.files || []).forEach((f) => {

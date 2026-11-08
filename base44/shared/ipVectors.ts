@@ -213,6 +213,378 @@ export const IP_VECTORS: IpVector[] = [
     label: 'Sport, fitness & wellness',
     brief: 'Club and league operations, memberships and billing, class scheduling, athlete performance data, clinic and studio management, waivers and compliance.',
     channels: ['r/personaltraining, r/gymowners and r/Coaching threads', 'studio-management app one-star reviews', 'league and federation rule changes', 'club-owner association forums']
+  },
+  {
+    id: 'knowledge_work',
+    label: 'Knowledge work & internal search',
+    brief: 'Internal search across docs and messages, meeting memory and decision trails, knowledge capture that survives staff turnover, structured notes for regulated roles.',
+    channels: ['r/KnowledgeManagement and r/Notion threads', 'enterprise search and wiki migration complaints', 'r/consulting and r/accounting note-taking threads', 'productivity-tool cancellation surveys']
+  },
+  {
+    id: 'support_ops',
+    label: 'Customer support operations',
+    brief: 'Helpdesk routing, answer deflection, quality review of AI-drafted replies, escalation policy, staffing forecasts, multilingual coverage.',
+    channels: ['r/CustomerSuccess and r/sysadmin helpdesk threads', 'Zendesk and Intercom app-marketplace reviews', 'support-leader salary and staffing surveys', 'churn postmortems that name slow support']
+  },
+  {
+    id: 'sales_ops',
+    label: 'Revenue & sales operations',
+    brief: 'Pipeline hygiene, quote and CPQ configuration, territory and commission math, deal-desk approvals, forecast accuracy, sales-asset versioning.',
+    channels: ['r/sales and r/salesforce threads', 'CRM admin and consultant complaint boards', 'RevOps salary and benchmark surveys', 'commission-dispute threads in SaaS communities']
+  },
+  {
+    id: 'crm_lifecycle',
+    label: 'Marketing technology & lifecycle',
+    brief: 'CRM data quality and dedupe, lifecycle messaging orchestration, consent and preference tracking, campaign build and QA, marketing-to-billing handoff.',
+    channels: ['r/marketing and r/MarketingAutomation threads', 'HubSpot and Marketo integration complaints', 'GDPR and consent-enforcement guidance', 'martech replacement threads in r/SaaS']
+  },
+  {
+    id: 'adtech_measurement',
+    label: 'Advertising & measurement',
+    brief: 'Campaign build at volume, creative production and localisation, incrementality and attribution, spend pacing, retail-media and clean-room reporting.',
+    channels: ['r/PPC and r/adops threads', 'ad-platform policy and deprecation notices', 'agencies posting about reporting pain', 'MMM and incrementality experiment write-ups']
+  },
+  {
+    id: 'compliance_ops',
+    label: 'Compliance, privacy & audit readiness',
+    brief: 'SOC 2 and ISO evidence collection, vendor risk and questionnaire response, data-subject requests, policy attestation, audit finding remediation.',
+    channels: ['r/cybersecurity GRC threads', 'Vanta and Drata customer complaint threads', 'state privacy-law effective-date trackers', 'auditor and vCISO practice forums']
+  },
+  {
+    id: 'open_source_ops',
+    label: 'Open-source maintenance & supply chain',
+    brief: 'Maintainer funding and sustainability, dependency and licence health, security-patch propagation, fork and vendor-abandonment risk, contribution operations.',
+    channels: ['GitHub issue backlogs on critical libraries', 'Open Source Pledge and funding discussions', 'OSV and CISA supply-chain advisories', 'r/opensource maintainer burnout threads']
+  },
+  {
+    id: 'semiconductors',
+    label: 'Semiconductors & chip supply',
+    brief: 'Design flow and verification, EDA tool sprawl, fab yield analysis, packaging and test, allocation and allocation disputes, export-control screening.',
+    channels: ['r/chipdesign and r/FPGA threads', 'SEMI and SIA capacity reports', 'BIS export-control rule updates', 'tape-out postmortems in engineering blogs']
+  },
+  {
+    id: 'hardware_iot',
+    label: 'Hardware & connected devices',
+    brief: 'Device fleets and firmware updates, provisioning at scale, field-failure analytics, certification and labelling, returns and refurbishment, embedded supply planning.',
+    channels: ['r/embedded and r/IOT threads', 'device-cloud vendor outage postmortems', 'FCC and CE certification guidance', 'hardware-founder failure retrospectives']
+  },
+  {
+    id: 'gamedev',
+    label: 'Games & interactive entertainment',
+    brief: 'Studio production and milestone tracking, live-ops and economy tuning, player support at scale, UGC moderation, storefront and platform compliance, playtest operations.',
+    channels: ['r/gamedev and r/gamedev postmortems', 'Steam and console storefront policy changes', 'GDC survey and talk write-ups', 'live-service shutdown and sunset threads']
+  },
+  {
+    id: 'banking_credit',
+    label: 'Banking, lending & credit',
+    brief: 'Core banking and deposits, loan origination and servicing, credit unions and community banks, mortgage pipelines, collections and workout, regulatory reporting.',
+    channels: ['r/Banking and r/creditunions threads', 'FDIC and OCC consent orders', 'core-vendor migration complaints', 'loan-officer and servicing forums']
+  },
+  {
+    id: 'capital_markets',
+    label: 'Capital markets & asset management',
+    brief: 'Order and portfolio operations, fund administration, investor reporting and capital calls, diligence data rooms, valuation and NAV workflows, research compliance.',
+    channels: ['r/FinancialCareers and r/quant threads', 'SEC and FINRA rulemaking notices', 'fund-admin and transfer-agent complaints', 'allocator due-diligence questionnaires']
+  },
+  {
+    id: 'payments_infra',
+    label: 'Payments infrastructure',
+    brief: 'Merchant acquiring and onboarding, payouts and reconciliation, cross-border and FX, chargeback and dispute operations, platform and marketplace money movement.',
+    channels: ['r/payments and r/fintech threads', 'card-network rule and interchange updates', 'processor outage postmortems', 'merchant complaint boards on reserve holds']
+  },
+  {
+    id: 'accounting_tax',
+    label: 'Accounting, tax & audit',
+    brief: 'Bookkeeping and month-end close, tax preparation and multi-state filing, audit workpapers, multi-entity consolidation, expense and revenue recognition.',
+    channels: ['r/Accounting threads on close and busy season', 'IRS and state tax-notice guidance', 'firm-management software complaints', 'CPA society practice surveys']
+  },
+  {
+    id: 'crypto_onchain',
+    label: 'Onchain finance & digital assets',
+    brief: 'Custody and key management, onchain accounting and tax, token and staking compliance, node and validator operations, on/off ramps, treasury for digital-asset businesses.',
+    channels: ['r/ethdev and r/CryptoTechnology threads', 'IRS digital-asset guidance and enforcement', 'protocol governance and upgrade forums', 'exchange and custodian incident postmortems']
+  },
+  {
+    id: 'pharma_lifesci',
+    label: 'Pharmaceutical & life-science operations',
+    brief: 'Clinical-trial operations and site coordination, regulatory submissions, pharmacovigilance case handling, medical and regulatory affairs, commercial compliance.',
+    channels: ['r/clinicalresearch and r/biotech threads', 'FDA guidance and warning letters', 'site and CRO start-up complaints', 'DIA and RAPS practitioner forums']
+  },
+  {
+    id: 'biotech_lab',
+    label: 'Laboratory & research science',
+    brief: 'Lab informatics and LIMS, sequencing and assay pipelines, sample and reagent inventory, instrument scheduling, reproducibility and protocol records.',
+    channels: ['r/labrats and r/bioinformatics threads', 'LIMS migration complaint threads', 'NIH and NSF data-sharing mandates', 'core-facility director forums']
+  },
+  {
+    id: 'medical_devices',
+    label: 'Medical devices & diagnostics',
+    brief: 'Device quality systems and design controls, software-as-a-medical-device, post-market surveillance, UDI and labelling, sterility and recall handling, diagnostic reporting.',
+    channels: ['r/MedicalDevices and r/regulatoryaffairs threads', 'FDA 510(k) and MDR guidance updates', 'notified-body backlog reporting', 'quality-engineer practice forums']
+  },
+  {
+    id: 'pharmacy_ops',
+    label: 'Pharmacy & medication operations',
+    brief: 'Dispensing workflow, benefit checks and prior authorisation at the counter, specialty pharmacy fulfilment, 340B and inventory, adherence outreach, compounding records.',
+    channels: ['r/pharmacy and r/TalesFromThePharmacy threads', 'state board of pharmacy rule changes', 'PBM reimbursement dispute threads', 'specialty-pharmacy accreditation guidance']
+  },
+  {
+    id: 'behavioral_health',
+    label: 'Behavioral & mental health practice',
+    brief: 'Therapy practice operations, intake and authorisation, group-practice billing, care coordination, telehealth compliance, outcome measurement.',
+    channels: ['r/therapists and r/psychotherapy threads', 'payer authorization and clawback complaints', 'state licensure and telehealth rule changes', 'group-practice owner forums']
+  },
+  {
+    id: 'senior_care',
+    label: 'Senior & home care',
+    brief: 'Home-care scheduling and electronic visit verification, assisted-living operations, caregiver compliance and training, family communication, payer and waiver billing.',
+    channels: ['r/cna and r/HomeHealth threads', 'CMS EVV and waiver guidance', 'state survey deficiency reports', 'caregiver-agency owner forums']
+  },
+  {
+    id: 'veterinary_pet',
+    label: 'Veterinary & animal care',
+    brief: 'Clinic practice management, animal records and lab ordering, boarding and grooming operations, prescription and pharmacy handling, pet-insurance claims.',
+    channels: ['r/VetTech and r/veterinary threads', 'practice-management vendor complaint threads', 'AVMA and state board guidance', 'clinic-owner forums on staffing and pricing']
+  },
+  {
+    id: 'clinical_specialties',
+    label: 'Clinical specialties & chair-side care',
+    brief: 'Dental, vision, dermatology and orthopaedic practice operations, imaging and chair scheduling, treatment planning and estimates, insurance verification, specialty referral loops.',
+    channels: ['r/Dentistry, r/optometry and r/dermatology threads', 'specialty-society coding updates', 'practice-management software reviews', 'front-office staffing complaint threads']
+  },
+  {
+    id: 'public_health',
+    label: 'Public health & epidemiology',
+    brief: 'Health-department casework and contact tracing, immunisation registries, outbreak reporting, syndromic surveillance, laboratory-result exchange, population dashboards.',
+    channels: ['NACCHO and ASTHO member materials', 'CDC data-interoperability guidance', 'state and county health-department job threads', 'epidemiology conference abstracts']
+  },
+  {
+    id: 'k12_schools',
+    label: 'K-12 school districts',
+    brief: 'District operations and rostering, IEP and 504 compliance, substitute and transport logistics, parent communication, assessment reporting, Title funding documentation.',
+    channels: ['r/Teachers and r/k12sysadmin threads', 'state education department reporting mandates', 'district RFP and board-meeting minutes', 'SIS and LMS procurement complaints']
+  },
+  {
+    id: 'early_childhood',
+    label: 'Early childhood & childcare',
+    brief: 'Enrolment and tuition billing, ratio and licensing compliance, subsidy claims and attendance, parent updates and billing, staff credentialing.',
+    channels: ['r/ECEProfessionals and r/childcare threads', 'state licensing inspection reports', 'childcare-management app reviews', 'provider-association member surveys']
+  },
+  {
+    id: 'workforce_training',
+    label: 'Workforce training & credentialing',
+    brief: 'Apprenticeship and certification tracking, skills assessment, employer-funded reskilling, continuing education records, placement and outcome reporting.',
+    channels: ['r/instructionaldesign and r/humanresources threads', 'state licensing and CE requirement changes', 'workforce-board RFP documents', 'training-vendor and LMS complaint threads']
+  },
+  {
+    id: 'research_academia',
+    label: 'Research administration & academia',
+    brief: 'Grant administration and effort reporting, IRB and protocol compliance, core-facility scheduling, scholarly output tracking, conflict-of-interest disclosure.',
+    channels: ['r/AskAcademia and r/GradSchool threads', 'NIH and NSF policy notices', 'research-administrator listservs', 'university audit and OIG findings']
+  },
+  {
+    id: 'libraries_archives',
+    label: 'Libraries & archives',
+    brief: 'Catalogue and lending systems, interlibrary loan, digital preservation, records-retention schedules, patron privacy, special-collection access.',
+    channels: ['r/librarians and r/Archivists threads', 'state library association reports', 'ILMS migration complaints', 'records-management compliance guidance']
+  },
+  {
+    id: 'museums_culture',
+    label: 'Museums & cultural institutions',
+    brief: 'Collections and provenance records, exhibition planning and loans, membership and ticketing, rights and image licensing, donor and patron records.',
+    channels: ['r/MuseumPros threads', 'AAM and ICOM guidance updates', 'collections-management vendor complaints', 'institution annual and provenance reports']
+  },
+  {
+    id: 'membership_associations',
+    label: 'Membership bodies & associations',
+    brief: 'Dues and renewals, chapter and volunteer operations, HOAs and clubs, event and benefit administration, governance and voting, member-record hygiene.',
+    channels: ['r/associations and r/HOA threads', 'ASAE member surveys', 'AMS and HOA-software review complaints', 'nonprofit and chapter-leader forums']
+  },
+  {
+    id: 'restaurants',
+    label: 'Restaurants & food service',
+    brief: 'Kitchen and menu operations, recipe and plate costing, delivery-channel reconciliation, labour scheduling, allergy and temp compliance, multi-unit reporting.',
+    channels: ['r/restaurateur and r/KitchenConfidential threads', 'POS and delivery-integration complaint threads', 'state health-inspection results', 'restaurant-owner cost threads']
+  },
+  {
+    id: 'food_distribution',
+    label: 'Food distribution & cold chain',
+    brief: 'Distributor ordering and EDI, lot traceability and recalls, cold-chain monitoring, commissary and central-kitchen production, broker and deduction management.',
+    channels: ['r/foodindustry and r/supplychain threads', 'FDA FSMA 204 traceability guidance', 'broadline-distributor portal complaints', 'recall and withdrawal announcements']
+  },
+  {
+    id: 'wholesale_distribution',
+    label: 'Wholesale & B2B distribution',
+    brief: 'B2B ordering and vendor portals, EDI and price-file exchange, rebate and contract pricing, vendor-managed inventory, quote-to-cash for complex orders.',
+    channels: ['r/supplychain and r/warehouses threads', 'ERP and EDI integration complaint boards', 'NAW and distributor association reports', 'sales-rep and branch-manager forums']
+  },
+  {
+    id: 'cpg_brands',
+    label: 'Consumer packaged goods',
+    brief: 'Product development and packaging, trade promotion and deduction disputes, retail compliance and chargebacks, co-manufacturer coordination, distributor depletion data.',
+    channels: ['r/CPG and r/FulfillmentByAmazon brand threads', 'retailer vendor-portal complaint threads', 'trade-promotion deduction threads', 'category-manager practitioner forums']
+  },
+  {
+    id: 'apparel_textiles',
+    label: 'Apparel & textiles',
+    brief: 'Tech packs and product lifecycle data, size and fit intelligence, factory allocation and sampling, returns and resale, textile compliance and origin records.',
+    channels: ['r/fashion and r/sewing industry threads', 'factory-audit and compliance reporting', 'returns and sizing complaint threads', 'sourcing-agency practitioner forums']
+  },
+  {
+    id: 'events_venues',
+    label: 'Events, venues & exhibitions',
+    brief: 'Venue booking and operations, exhibitor and floorplan management, credentialing and access control, show settlement, speaker and session logistics.',
+    channels: ['r/eventprofs and r/CommercialRealEstate venue threads', 'venue-management software complaint boards', 'exhibitor and organiser post-show threads', 'IAEE and MPI member surveys']
+  },
+  {
+    id: 'local_services',
+    label: 'Local & personal services',
+    brief: 'Cleaning, landscaping, pest, repair and salon operators: quoting, dispatch, recurring billing, reviews and reputation, staff and route utilisation.',
+    channels: ['r/sweatystartup and r/smallbusiness threads', 'field-service app one-star reviews', 'local-services franchisee forums', 'Google Business review complaint patterns']
+  },
+  {
+    id: 'chemicals_materials',
+    label: 'Chemicals & advanced materials',
+    brief: 'Formulation and batch records, SDS and hazard communication, materials testing and characterisation, plant quality, REACH and TSCA compliance.',
+    channels: ['r/chemistry and r/ChemicalEngineering threads', 'EPA TSCA and ECHA REACH updates', 'plant quality-engineer forums', 'materials-science conference proceedings']
+  },
+  {
+    id: 'mining_metals',
+    label: 'Mining & metals',
+    brief: 'Exploration and drill data, mine planning and grade control, haulage and assay tracking, permitting and rehabilitation, metal accounting and offtake.',
+    channels: ['r/mining and r/geology threads', 'NI 43-101 and JORC disclosure filings', 'regulator rehabilitation directives', 'mine-site maintenance practitioner forums']
+  },
+  {
+    id: 'oil_gas',
+    label: 'Oil, gas & midstream',
+    brief: 'Upstream production data and field maintenance, midstream nominations and measurement, joint-interest billing, emissions and flaring reporting, land and lease records.',
+    channels: ['r/oil and r/energy threads', 'state railroad-commission and FERC filings', 'measurement and allocation dispute threads', 'field-operator automation forums']
+  },
+  {
+    id: 'water_utilities',
+    label: 'Water & wastewater utilities',
+    brief: 'Treatment and distribution operations, metering and billing, leak and non-revenue-water tracking, regulatory sampling, asset condition and capital planning.',
+    channels: ['AWWA and WEF member reporting', 'state primacy agency violation notices', 'utility billing-software complaints', 'r/Wastewater and operator certification threads']
+  },
+  {
+    id: 'waste_recycling',
+    label: 'Waste, recycling & circularity',
+    brief: 'Collection routing, weighbridge and tonnage data, contamination and recycling-rate measurement, hauler contracts, extended-producer-responsibility reporting.',
+    channels: ['r/recycling and r/WasteManagement threads', 'state EPR and landfill-diversion rules', 'municipal waste contract documents', 'hauler operations forums']
+  },
+  {
+    id: 'nuclear_power',
+    label: 'Nuclear & radiological operations',
+    brief: 'Licensing and configuration control, outage planning, radiation-dose records, radioactive-waste tracking, procedure compliance, decommissioning documentation.',
+    channels: ['NRC inspection and event notices', 'r/nuclear and operator-licence study threads', 'INPO and industry operating-experience reports', 'utility outage-engineering forums']
+  },
+  {
+    id: 'environment_climate',
+    label: 'Environment, climate & ESG data',
+    brief: 'Carbon accounting and scope 3 collection, climate-risk disclosure, offset and REC MRV, environmental permitting, supplier sustainability questionnaires.',
+    channels: ['ISSB, CSRD and SEC climate-rule guidance', 'r/sustainability and ESG-reporting threads', 'assurance-provider methodology notes', 'MRV registry and methodology consultations']
+  },
+  {
+    id: 'conservation_land',
+    label: 'Conservation & land management',
+    brief: 'Land and easement records, wildlife and habitat monitoring, prescribed-burn and restoration operations, stewardship reporting, public-access and permitting.',
+    channels: ['r/ecology and r/landmanagement threads', 'USFWS and state wildlife agency notices', 'land-trust stewardship reports', 'conservation-GIS practitioner forums']
+  },
+  {
+    id: 'fisheries_aquaculture',
+    label: 'Fisheries & aquaculture',
+    brief: 'Quota and catch reporting, electronic monitoring, pen and feed operations, cold-chain handling, certification audits, vessel and licence records.',
+    channels: ['NOAA fisheries bulletins and quota notices', 'r/aquaculture and r/commercialfishing threads', 'MSC and ASC audit findings', 'seafood-supply compliance threads']
+  },
+  {
+    id: 'forestry_timber',
+    label: 'Forestry & timber',
+    brief: 'Timber cruising and inventory, harvest planning and log accounting, chain-of-custody certification, mill intake and grading, fire-risk and road records.',
+    channels: ['r/forestry and r/logging threads', 'FSC and SFI certification updates', 'state forestry commission notices', 'mill and landowner association forums']
+  },
+  {
+    id: 'facilities_management',
+    label: 'Facilities & building operations',
+    brief: 'CMMS and work orders, building systems and energy, vendor and SLA management, space and moves, inspection and compliance logs.',
+    channels: ['r/facilitiesmanagement and r/maintenance threads', 'CMMS and BMS vendor complaint boards', 'IFMA member surveys', 'building-code and inspection updates']
+  },
+  {
+    id: 'geospatial_survey',
+    label: 'Geospatial, survey & mapping',
+    brief: 'Survey and GIS data capture, drone and LiDAR processing, cadastral and boundary records, utility locate and as-built data, map publication and licensing.',
+    channels: ['r/gis and r/Surveying threads', 'state licensing board and datum updates', 'drone and LiDAR processing complaints', 'municipal GIS user-group forums']
+  },
+  {
+    id: 'architecture_engineering',
+    label: 'Architecture & engineering design',
+    brief: 'BIM and design coordination, permit and code review, structural calculation records, submittal and RFI review, specification management, design-fee tracking.',
+    channels: ['r/architecture and r/StructuralEngineering threads', 'ICC code-change cycles', 'BIM-software migration complaints', 'AIA and ACEC member surveys']
+  },
+  {
+    id: 'aviation',
+    label: 'Aviation & aerospace operations',
+    brief: 'Airline ops and crew scheduling, MRO and parts traceability, ground handling, airworthiness and maintenance records, drone and AAM operations.',
+    channels: ['r/aviation and r/aviationmaintenance threads', 'FAA airworthiness directives', 'airline-irregular-operations postmortems', 'MRO and lessor practitioner forums']
+  },
+  {
+    id: 'maritime_ports',
+    label: 'Maritime & ports',
+    brief: 'Vessel and port-call operations, chartering and demurrage, container and terminal flow, crew and STCW compliance, bunker and voyage accounting.',
+    channels: ['r/maritime and r/logistics shipping threads', 'IMO and port-state-control notices', 'terminal and carrier EDI complaint threads', 'chartering and ship-management forums']
+  },
+  {
+    id: 'rail_transit',
+    label: 'Rail & public transit',
+    brief: 'Transit agency operations, track and asset inspection, fare systems and reconciliation, freight car accounting, service disruption communication, accessibility compliance.',
+    channels: ['APTA and FTA program guidance', 'r/transit and r/trains threads', 'agency board and capital-plan documents', 'rail signalling and maintenance forums']
+  },
+  {
+    id: 'automotive_retail',
+    label: 'Automotive retail & aftermarket',
+    brief: 'Dealership DMS and F&I, service-bay scheduling, parts catalogues and fitment, trade-in valuation, warranty claims, independent-shop operations.',
+    channels: ['r/askcarsales and r/MechanicAdvice threads', 'DMS and parts-catalogue vendor complaints', 'OEM warranty-policy updates', 'independent-shop owner forums']
+  },
+  {
+    id: 'film_production',
+    label: 'Film, TV & production',
+    brief: 'Production scheduling and budgeting, crew and equipment booking, VFX and post pipelines, rights and clearances, residuals and payroll, location and permit records.',
+    channels: ['r/FilmIndustryLA and r/vfx threads', 'guild and union agreement updates', 'production-accounting complaint threads', 'post-house pipeline postmortems']
+  },
+  {
+    id: 'music_audio',
+    label: 'Music & audio',
+    brief: 'Rights and royalty splits, catalogue metadata, distribution and DSP reporting, studio and live-event operations, sync licensing, fan and ticketing data.',
+    channels: ['r/WeAreTheMusicMakers and r/musicbusiness threads', 'DSP and PRO payout policy changes', 'royalty-statement dispute threads', 'audio-engineering practitioner forums']
+  },
+  {
+    id: 'news_publishing',
+    label: 'News & publishing',
+    brief: 'Newsroom planning and archives, wire and syndication management, subscriber and ad operations, fact-check workflow, community and comment moderation.',
+    channels: ['r/Journalism and r/editors threads', 'publisher platform policy changes', 'local-news business-model postmortems', 'press-association member surveys']
+  },
+  {
+    id: 'pr_comms',
+    label: 'PR & corporate communications',
+    brief: 'Media-list and outreach operations, coverage measurement, crisis-response workflow, spokesperson and message approval, agency retainer reporting.',
+    channels: ['r/PublicRelations and r/communications threads', 'media-database accuracy complaint threads', 'agency-account-team workflow threads', 'comms-measurement standard updates']
+  },
+  {
+    id: 'social_services',
+    label: 'Social services & human services',
+    brief: 'Case management and caseload tracking, eligibility and benefit determinations, child-welfare and foster records, provider billing, outcome reporting.',
+    channels: ['r/socialwork and r/CaseManagement threads', 'HHS and state agency policy letters', 'caseworker workload reporting', 'county human-services RFP documents']
+  },
+  {
+    id: 'public_safety_ops',
+    label: 'Public safety & emergency response',
+    brief: 'Dispatch and records management, evidence and chain-of-custody, fire inspection and prevention, EMS billing, incident reporting and mutual aid.',
+    channels: ['r/ProtectAndServe and r/Firefighting threads', 'state POST and NFPA standards updates', 'city council public-safety budget documents', 'records-management vendor complaints']
+  },
+  {
+    id: 'housing_authorities',
+    label: 'Housing & public housing',
+    brief: 'Voucher and waitlist administration, inspection and recertification, tenant accounting, capital-fund reporting, homeless-services coordination.',
+    channels: ['HUD notices and REAC inspection guidance', 'r/section8 and housing-authority staff threads', 'PHADA and NAHRO member materials', 'authority board-meeting minutes']
   }
 ];
 
@@ -225,14 +597,20 @@ export type IpPreset = {
 
 export const IP_PRESETS: IpPreset[] = [
   { id: 'all', label: 'All markets', blurb: 'Every vector in the taxonomy', vectors: IP_VECTORS.map((v) => v.id) },
-  { id: 'frontier', label: 'Frontier tech', blurb: 'Agents, dev tools, compute, robotics, spatial', vectors: ['agentic_ai', 'dev_experience', 'dataai', 'devinfra', 'security', 'frontier_compute', 'robotics_embodied', 'spatial_xr'] },
+  { id: 'frontier', label: 'Frontier tech', blurb: 'Agents, dev tools, compute, robotics, spatial, chips', vectors: ['agentic_ai', 'dev_experience', 'dataai', 'devinfra', 'security', 'frontier_compute', 'robotics_embodied', 'spatial_xr', 'semiconductors', 'hardware_iot'] },
   { id: 'viral', label: 'Viral & consumer', blurb: 'Consumer breakouts, creators, growth', vectors: ['viral_consumer', 'creator_economy', 'growth_ops', 'dev_experience'] },
-  { id: 'software', label: 'Software & data', blurb: 'Dev infra, security, applied AI, agents', vectors: ['devinfra', 'security', 'dataai', 'dev_experience', 'agentic_ai', 'frontier_compute'] },
-  { id: 'regulated', label: 'Regulated & money', blurb: 'Finance, insurance, legal, healthcare', vectors: ['fintech', 'insuretech', 'legal', 'healthcare'] },
-  { id: 'physical', label: 'Physical economy', blurb: 'Logistics, industry, energy, food, construction, trades, fleets, telecom', vectors: ['logistics', 'industrial', 'energy', 'agrifood', 'construction', 'trades_smb', 'mobility_auto', 'telecom_network'] },
-  { id: 'public', label: 'Public & institutional', blurb: 'Government, education, nonprofits, defense', vectors: ['govtech', 'education', 'nonprofits', 'defense_space'] },
-  { id: 'commerce', label: 'Commerce & property', blurb: 'Retail, marketplaces, media, travel, real estate', vectors: ['commerce_retail', 'marketplaces', 'media_rights', 'travel_hospitality', 'proptech_realestate', 'growth_ops'] },
-  { id: 'people', label: 'People & wellness', blurb: 'HR, education, health, sport', vectors: ['hr_talent', 'education', 'healthcare', 'sports_wellness'] }
+  { id: 'software', label: 'Software & data', blurb: 'Dev infra, security, applied AI, business tooling, games', vectors: ['devinfra', 'security', 'dataai', 'dev_experience', 'agentic_ai', 'frontier_compute', 'knowledge_work', 'support_ops', 'sales_ops', 'crm_lifecycle', 'adtech_measurement', 'compliance_ops', 'open_source_ops', 'semiconductors', 'hardware_iot', 'gamedev'] },
+  { id: 'regulated', label: 'Regulated & money', blurb: 'Finance, insurance, legal, payments, tax', vectors: ['fintech', 'insuretech', 'legal', 'healthcare', 'banking_credit', 'capital_markets', 'payments_infra', 'accounting_tax', 'crypto_onchain'] },
+  { id: 'physical', label: 'Physical economy', blurb: 'Logistics, industry, energy, food, construction, trades, fleets, telecom', vectors: ['logistics', 'industrial', 'energy', 'agrifood', 'construction', 'trades_smb', 'mobility_auto', 'telecom_network', 'chemicals_materials', 'mining_metals', 'oil_gas', 'water_utilities', 'waste_recycling', 'nuclear_power', 'environment_climate', 'conservation_land', 'fisheries_aquaculture', 'forestry_timber', 'geospatial_survey', 'facilities_management', 'architecture_engineering'] },
+  { id: 'public', label: 'Public & institutional', blurb: 'Government, education, nonprofits, defense, civic', vectors: ['govtech', 'education', 'nonprofits', 'defense_space', 'social_services', 'public_safety_ops', 'housing_authorities', 'libraries_archives', 'museums_culture', 'membership_associations', 'research_academia', 'public_health', 'k12_schools'] },
+  { id: 'commerce', label: 'Commerce & property', blurb: 'Retail, marketplaces, media, travel, real estate, food, local', vectors: ['commerce_retail', 'marketplaces', 'media_rights', 'travel_hospitality', 'proptech_realestate', 'growth_ops', 'restaurants', 'food_distribution', 'wholesale_distribution', 'cpg_brands', 'apparel_textiles', 'events_venues', 'local_services'] },
+  { id: 'people', label: 'People & wellness', blurb: 'HR, education, health, care, sport', vectors: ['hr_talent', 'education', 'healthcare', 'sports_wellness', 'workforce_training', 'early_childhood', 'senior_care', 'behavioral_health', 'clinical_specialties'] },
+  { id: 'health', label: 'Health & life sciences', blurb: 'Clinical, pharma, labs, devices, pharmacy, care', vectors: ['healthcare', 'pharma_lifesci', 'biotech_lab', 'medical_devices', 'pharmacy_ops', 'behavioral_health', 'senior_care', 'clinical_specialties', 'public_health', 'veterinary_pet', 'sports_wellness'] },
+  { id: 'money', label: 'Money & legal', blurb: 'Banking, capital markets, payments, tax, digital assets', vectors: ['fintech', 'insuretech', 'banking_credit', 'capital_markets', 'payments_infra', 'accounting_tax', 'crypto_onchain', 'legal'] },
+  { id: 'industry', label: 'Industry & resources', blurb: 'Plant, energy, chemicals, mining, water, waste, climate', vectors: ['industrial', 'energy', 'oil_gas', 'chemicals_materials', 'mining_metals', 'water_utilities', 'waste_recycling', 'nuclear_power', 'environment_climate', 'conservation_land', 'fisheries_aquaculture', 'forestry_timber'] },
+  { id: 'mobility', label: 'Transport & mobility', blurb: 'Fleets, freight, aviation, maritime, rail, dealer', vectors: ['mobility_auto', 'logistics', 'aviation', 'maritime_ports', 'rail_transit', 'automotive_retail', 'telecom_network'] },
+  { id: 'culture', label: 'Media & culture', blurb: 'Film, music, news, games, museums, events, sport', vectors: ['media_rights', 'film_production', 'music_audio', 'news_publishing', 'pr_comms', 'gamedev', 'museums_culture', 'events_venues', 'sports_wellness', 'creator_economy'] },
+  { id: 'build', label: 'Built environment', blurb: 'Construction, design, survey, facilities, property, local', vectors: ['construction', 'trades_smb', 'architecture_engineering', 'geospatial_survey', 'facilities_management', 'proptech_realestate', 'local_services'] }
 ];
 
 export const DEFAULT_PRESET = 'all';

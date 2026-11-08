@@ -161,7 +161,7 @@ Notes that matter in maintenance:
 
 ## 7. Shared modules
 
-- `base44/shared/ipVectors.ts` — the thirty-four vectors and the hunt presets. The UI imports the same taxonomy from `src/lib/ipVectors.js`; the two must stay in step.
+- `base44/shared/ipVectors.ts` — the ninety-six vectors and the hunt presets. The UI imports the same taxonomy from `src/lib/ipVectors.js`; the two must stay in step.
 - `base44/shared/planPipeline.ts` — loads a project with its dossier context so scan, funding and readiness functions agree on what a dossier contains.
 - `base44/shared/seedTargets.ts` — resolves buyer and target candidates for liquidation work.
 - `base44/shared/v9Core.ts` — scoring constants shared by the generators.

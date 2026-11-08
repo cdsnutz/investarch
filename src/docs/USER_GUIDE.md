@@ -11,7 +11,7 @@ This guide covers every surface an operator can reach. Each section names the ro
 InvestArch turns a company, a market gap, or a raw signal into a defensible asset. Three engines do the work:
 
 - **The Dossier engine** takes a company URL and returns an investment dossier: value proposition, market analysis, strategic edge, a five-year forecast, milestones, scored plan points and matched funders.
-- **The Market Hunter** sweeps thirty-four market vectors for pain-signals opened in the last twelve months, discards anything already in the portfolio, and yields IP seeds: a gap, a solution, a blueprint and a route to the first thousand users.
+- **The Market Hunter** sweeps ninety-six market vectors for pain-signals opened in the last twelve months, discards anything already in the portfolio, and yields IP seeds: a gap, a solution, a blueprint and a route to the first thousand users.
 - **The Registrar** turns a seed into property: a patent draft written as claims, a trademark packet, a deed of ownership, a copyright registration, a liquidation prospectus naming its buyers, a grant and loan pack, and a complete, verified codebase.
 
 Everything the system produces is an artifact you can hand to a counterparty: a PDF, a ZIP, or a repository.
@@ -70,7 +70,7 @@ The industrial floor of the app. This is where seeds are hunted, instrumented, a
 
 ### 7.1 Running the hunt
 
-**Run the hunt now** executes the Market Hunter. Choose a **hunt scope** first; the scope narrows which of the thirty-four vectors are swept. The run is the single most expensive operation in the app, so the panel above the ledger shows the credit estimate and, after a run, the yield it produced.
+**Run the hunt now** executes the Market Hunter. Choose a **hunt scope** first; the scope narrows which of the ninety-six vectors are swept. The run is the single most expensive operation in the app, so the panel above the ledger shows the credit estimate and, after a run, the yield it produced.
 
 A hunt returns seeds in batches and only keeps complete ones: a seed without a gap, a solution, a pain-signal, a why-now and a distribution hook is retried, and if a batch still yields nothing complete the run reports a failure rather than writing partial records. After the seeds land, the strategy pass (`ipWealthStrategy`) assigns each one **hold**, **flip** or **build** with a written rationale.
 

@@ -125,7 +125,7 @@ This manifest enumerates every file in the application repository, grouped by ar
 ### 2.4 Shared modules (5)
 
 - `base44/shared/buyerLeads.ts` — buyer-lead schema, coverage prompt, pitch rules and the drafting call shared by the seed action and the sweep, plus the target rule the sweep uses.
-- `base44/shared/ipVectors.ts` — the 34-vector taxonomy and hunt presets shared by the hunter and the UI.
+- `base44/shared/ipVectors.ts` — the 96-vector taxonomy and fifteen hunt presets shared by the hunter and the UI.
 - `base44/shared/planPipeline.ts` — dossier pipeline context loader shared by analysis, scan and funding functions.
 - `base44/shared/seedTargets.ts` — buyer and target resolution helpers for liquidation and prospectus work.
 - `base44/shared/v9Core.ts` — core scoring and strategy constants used across generators.

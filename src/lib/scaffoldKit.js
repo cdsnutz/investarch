@@ -82,6 +82,159 @@ export function devproDeployFiles() {
   ];
 }
 
+export function appSlug(seed) {
+  return (seed.title || 'app').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 32) || 'app';
+}
+
+// Reads table and column names out of a schema draft written as CREATE TABLE statements.
+export function parseTables(dbSchema) {
+  const tables = [];
+  const re = /create\s+table(?:\s+if\s+not\s+exists)?\s+"?(\w+)"?\s*\(([\s\S]*?)\)\s*;/gi;
+  let match;
+  while ((match = re.exec(dbSchema || ''))) {
+    const name = match[1];
+    if (/^(users?|migrations|sessions|accounts)$/i.test(name)) continue;
+    const cols = match[2]
+      .split('\n')
+      .map((l) => l.trim())
+      .filter(Boolean)
+      .filter((l) => !/^(primary key|foreign key|constraint|unique|check|index|--)/i.test(l))
+      .map((l) => l.split(/[\s(]/)[0].replace(/"/g, ''))
+      .filter((c) => c && !/^(id|created_at|updated_at|owner_id|user_id|deleted_at)$/i.test(c));
+    if (cols.length) tables.push({ name, cols });
+  }
+  return tables;
+}
+
+function seedPools(seed) {
+  const plan = (seed.mini_plan || '')
+    .split(/\n+/)
+    .map((l) => l.replace(/^[-*\d.)\s]+/, '').trim())
+    .filter((l) => l.length > 12);
+  const titles = [seed.title, ...plan].filter(Boolean).map((t) => String(t).slice(0, 120));
+  const bodies = [seed.solution, seed.gap, seed.pain_signal, ...plan]
+    .filter((b) => b && String(b).length > 20)
+    .map((b) => String(b).slice(0, 300));
+  while (titles.length < 3) titles.push(`${seed.title || 'Record'} ${titles.length + 1}`);
+  while (bodies.length < 3) bodies.push(String(seed.solution || seed.title || 'Seeded record'));
+  return { titles: titles.slice(0, 3), bodies: bodies.slice(0, 3) };
+}
+
+function valueFor(col, i, pools, slug) {
+  const c = col.toLowerCase();
+  if (/email/.test(c)) return `owner${i + 1}@${slug}.example.com`;
+  if (/amount|price|cost|revenue|budget|fee|salary|value/.test(c)) return [1200, 4800, 9600][i];
+  if (/count|qty|quantity|score|rating|percent|hours|days|month|year|number/.test(c)) return i + 1;
+  if (/^(is_|has_)|_flag$|boolean|active|enabled/.test(c)) return true;
+  if (/date|_at$|due|deadline|start|end|expires/.test(c)) return new Date(Date.UTC(2026, 0, 8 + i * 7)).toISOString();
+  if (/url|link|website|href/.test(c)) return `https://example.com/${slug}-${i + 1}`;
+  if (/status|state|stage|phase/.test(c)) return ['active', 'in_progress', 'done'][i];
+  if (/title|name|label|headline|subject/.test(c)) return pools.titles[i];
+  if (/desc|summary|body|content|detail|note|text|thesis|rationale|comment/.test(c)) return pools.bodies[i];
+  return `${pools.titles[i]} · ${col} ${i + 1}`;
+}
+
+export function buildSeedScript(seed) {
+  const slug = appSlug(seed);
+  const pools = seedPools(seed);
+  const parsed = parseTables(seed.blueprint?.db_schema);
+  const tables = (parsed.length ? parsed : [{ name: 'items', cols: ['title', 'description', 'status'] }]).slice(0, 6);
+  const dataset = tables.map((t) => {
+    const cols = t.cols.filter((c) => !/password|token|secret|hash|salt/i.test(c)).slice(0, 8);
+    return {
+      name: t.name,
+      rows: [0, 1, 2].map((i) => {
+        const row = {};
+        cols.forEach((c) => { row[c] = valueFor(c, i, pools, slug); });
+        return row;
+      })
+    };
+  });
+  const demoEmail = `demo@${slug}.example.com`;
+  const otherEmail = `other@${slug}.example.com`;
+
+  return `#!/usr/bin/env node
+// Deterministic demo dataset for ${seed.title}. Re-runnable: it clears the demo user's rows first.
+import 'dotenv/config';
+import pg from 'pg';
+import bcrypt from 'bcryptjs';
+
+// The only schema knowledge in this file. Edit these names if your tables differ.
+const USERS = { table: 'users', email: 'email', name: 'full_name', password: 'password_hash' };
+const OWNER = 'owner_id';
+
+const DEMO = {
+  email: ${JSON.stringify(demoEmail)},
+  other: ${JSON.stringify(otherEmail)},
+  password: 'DemoPass123!',
+  name: ${JSON.stringify(seed.title || 'Demo Operator')}
+};
+
+const DATASET = ${JSON.stringify(dataset, null, 2)};
+
+const client = new pg.Client({ connectionString: process.env.DATABASE_URL });
+await client.connect();
+
+const passwordHash = await bcrypt.hash(DEMO.password, 10);
+
+async function ensureUser(email, name) {
+  const found = await client.query(
+    'select id from ' + USERS.table + ' where ' + USERS.email + ' = $1',
+    [email]
+  );
+  if (found.rowCount) return found.rows[0].id;
+  const made = await client.query(
+    'insert into ' + USERS.table + ' (' + USERS.email + ', ' + USERS.name + ', ' + USERS.password + ') values ($1, $2, $3) returning id',
+    [email, name, passwordHash]
+  );
+  return made.rows[0].id;
+}
+
+const demoId = await ensureUser(DEMO.email, DEMO.name);
+await ensureUser(DEMO.other, 'Outside Reviewer');
+
+const found = await client.query("select table_name from information_schema.tables where table_schema = 'public'");
+const known = new Set(found.rows.map((r) => r.table_name));
+const report = [];
+
+for (const table of DATASET) {
+  if (!known.has(table.name)) {
+    report.push({ table: table.name, result: 'skipped: table not found' });
+    continue;
+  }
+  const cols = await client.query(
+    'select column_name from information_schema.columns where table_schema = $1 and table_name = $2',
+    ['public', table.name]
+  );
+  const present = new Set(cols.rows.map((r) => r.column_name));
+  const ownsRows = present.has(OWNER);
+  if (ownsRows) {
+    await client.query('delete from "' + table.name + '" where "' + OWNER + '" = $1', [demoId]);
+  }
+
+  let inserted = 0;
+  for (const row of table.rows) {
+    const names = Object.keys(row).filter((k) => present.has(k));
+    if (ownsRows) names.push(OWNER);
+    if (!names.length) continue;
+    const values = names.map((k) => (k === OWNER ? demoId : row[k]));
+    const marks = names.map((_, idx) => '$' + (idx + 1));
+    await client.query(
+      'insert into "' + table.name + '" (' + names.map((n) => '"' + n + '"').join(', ') + ') values (' + marks.join(', ') + ')',
+      values
+    );
+    inserted += 1;
+  }
+  report.push({ table: table.name, result: inserted + ' rows' });
+}
+
+console.table(report);
+console.log('Demo sign-in: ' + DEMO.email + ' / ' + DEMO.password);
+console.log('Isolation account (no rows): ' + DEMO.other);
+await client.end();
+`;
+}
+
 export function buildRoadmap(seed) {
   return `# ${seed.title}: Agent Roadmap
 

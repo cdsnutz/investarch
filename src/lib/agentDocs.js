@@ -1,4 +1,5 @@
 // Deterministic build documents for an AI coding agent, generated from the seed blueprint and scaffold.
+import { parseTables, appSlug } from '@/lib/scaffoldKit';
 const list = (arr) => (arr || []).map((x) => `- ${x}`).join('\n') || '- Not specified; choose a mainstream, well-documented stack.';
 
 export function buildAgentReadme(seed, codebase) {
@@ -9,6 +10,8 @@ export function buildAgentReadme(seed, codebase) {
 Read this file in full before writing code. It is the single source of truth for scope. Build the complete, working application described here on top of the scaffold in \`Codebase/\`. Do not stop at stubs.
 
 \`SCAFFOLD.md\` is the execution order for that build: bootstrap, port the scaffold, data, auth, core logic, screens, integrations, tests, and the finish checklist. Follow it step by step and run every check it names.
+
+\`ACCEPTANCE.md\` holds the pass conditions for each screen. A screen is not finished because it renders: it is finished when every box in its block is checked against observed behaviour.
 
 ## 1. Problem
 ${seed.gap || ''}
@@ -158,7 +161,8 @@ npm pkg set scripts.dev="node --watch server/index.js" \\
   scripts.build="vite build" \\
   scripts.test="vitest run" \\
   scripts.lint="eslint ." \\
-  scripts.db:migrate="node database/migrate.js"
+  scripts.db:migrate="node database/migrate.js" \\
+  scripts.db:seed="node database/seed.js"
 mkdir -p server/routes server/services server/middleware database/migrations src/pages src/components tests
 \`\`\`
 
@@ -196,6 +200,21 @@ Check: \`npm run build\` passes and \`node server/index.js\` boots with no missi
 
 Check: run \`npm run db:migrate\` against an empty database twice; the second run applies nothing and exits 0.
 
+### Demo dataset
+
+\`database/seed.js\` ships with this pack. It inserts a demo user with three rows in every table it can match, plus a second account with no rows for the ownership test. The row values are drawn from this dossier, not invented.
+
+\`\`\`bash
+npm run db:seed
+\`\`\`
+
+- Run it after migrations and after the auth tables exist.
+- The \`USERS\` map at the top of the file is its only schema knowledge. Edit those four names if your tables differ.
+- It deletes the demo user's rows before inserting, so re-running is safe.
+- The \`DATASET\` constant holds the actual rows. Extend it there instead of adding fixtures elsewhere.
+
+Check: \`npm run db:seed\` exits 0, prints one line per table, and prints the demo credentials. Sign in with them and the dashboard shows the seeded rows.
+
 ## 5. Authentication, before any feature screen
 
 - Routes: \`POST /auth/register\`, \`POST /auth/login\`, \`POST /auth/logout\`, \`POST /auth/reset-request\`, \`POST /auth/reset\`.
@@ -226,7 +245,9 @@ Build in this order, each wired to the real API:
 
 Every screen needs loading, empty, error and success states. Responsive at 375px, 768px and 1280px. A control that does nothing is a defect, not a placeholder.
 
-Check: walk the primary flow from AGENTS.md section 6 in a browser with the console open. Zero errors, data persists across a refresh.
+Each screen's pass conditions are in \`ACCEPTANCE.md\`, one block per screen. Work screen by screen: build it, check its block against observed behaviour, and only then move on. A screen with unchecked boxes is unfinished work, not a finishing touch.
+
+Check: walk the primary flow from AGENTS.md section 6 in a browser with the console open. Zero errors, data persists across a refresh, and every box in the blocks for sections S1 to S8 is checked with evidence.
 
 ## 8. Integrations and configuration
 
@@ -269,11 +290,150 @@ Do not report the build as complete until every line is true.
 - [ ] \`npm run lint\`, \`npm test\`, \`npm run build\` pass with no new warnings.
 - [ ] \`.env.example\` covers every \`process.env\` read.
 - [ ] \`grep -rn "TODO\\|FIXME\\|coming soon\\|lorem" src server\` returns nothing.
+- [ ] Every block in ACCEPTANCE.md is 100% checked, each box backed by an observed screen or command output.
+- [ ] \`npm run db:seed\` runs twice without error, and the isolation account sees zero rows.
 - [ ] antislop-code, antislop-ui, antislop-layoutmobile and antislop-copywriting checklists applied and findings fixed.
 - [ ] Deployed per DEPLOYMENT.md; production health check 200; primary flow verified on the deployed URL.
 
 ## 12. Report back
 
 State, in this order: files created and their purpose, commands run with their real results, any departure from AGENTS.md with its reason, and what remains out of scope. Never mark a step complete without the output that proves it.
+`;
+}
+
+export function buildAcceptanceGuide(seed, codebase) {
+  const slug = appSlug(seed);
+  const tables = parseTables(seed.blueprint?.db_schema);
+  const primary = tables[0]?.name || 'items';
+  const tableList = (tables.length ? tables.map((t) => `\`${t.name}\``) : ['\`items\`']).join(', ');
+  const demo = `demo@${slug}.example.com`;
+  const other = `other@${slug}.example.com`;
+
+  return `# ${seed.title}: Screen Acceptance Criteria
+
+Pass conditions for every screen, written so they can be checked by observation rather than opinion. Build a screen, then check its block. A screen is finished when every box in its block is checked and you can point at the evidence: a command transcript, or the step you performed and what you saw. Never check a box you did not observe, and never edit a criterion to match what was built.
+
+Data for every check comes from \`database/seed.js\`: sign in as \`${demo}\` with \`DemoPass123!\`. The second account \`${other}\` has no rows and exists for the ownership checks.
+
+Tables in scope: ${tableList}.
+
+## Global criteria
+
+- [ ] G1 Loading, empty, error and success states all exist and are reachable through the real data path, not by editing source.
+- [ ] G2 No console error or warning from app code on load, navigation or the primary action.
+- [ ] G3 At 375, 768 and 1280 px: no horizontal scroll, no overlapping or clipped text, primary action visible without scrolling at 375.
+- [ ] G4 Every input has a visible label; every button and link has an accessible name; focus ring visible when tabbing.
+- [ ] G5 A grep for TODO, FIXME, "coming soon" and lorem across \`src\` and \`server\` returns nothing.
+- [ ] G6 A failed request shows a human sentence and a retry control; it never leaves a blank screen or a spinner that never stops.
+
+## S1 Landing: \`/\`
+
+Purpose: state the problem and the offer, then route a visitor into the product.
+
+- [ ] S1-A1 The headline names the problem from AGENTS.md section 1 in plain language, not the product's internal name.
+- [ ] S1-A2 One primary call to action is visibly dominant; secondary actions carry visibly lower weight.
+- [ ] S1-A3 Signed out the primary action leads to \`/register\`; signed in it leads to \`/app\`. Both observed.
+- [ ] S1-A4 No dead links: every link and button either navigates or is absent.
+- [ ] S1-A5 Content renders with a clean console and no layout shift after fonts load.
+
+Fails if: the page is a placeholder hero that never says what the product does.
+
+## S2 Registration: \`/register\`
+
+Purpose: create an account that owns data from its first row.
+
+- [ ] S2-A1 Empty submit shows field-level messages and sends no request (check the network panel).
+- [ ] S2-A2 Invalid email and a password under 8 characters are both rejected with specific messages.
+- [ ] S2-A3 Mismatched password confirmation is rejected before submit.
+- [ ] S2-A4 An already-registered email returns an inline error naming the field, not a 500 and not a console error.
+- [ ] S2-A5 Success creates the user, starts a session and lands on \`/app\` with no second login.
+- [ ] S2-A6 The submit control disables while in flight and cannot be double-submitted.
+- [ ] S2-A7 A typed password never appears as a DOM attribute, query string or log line.
+
+## S3 Sign in: \`/login\`
+
+Purpose: start a session for an existing account.
+
+- [ ] S3-A1 The seeded credentials land on \`/app\`.
+- [ ] S3-A2 Wrong password and unknown email return the same generic message; neither reveals which was wrong.
+- [ ] S3-A3 Visiting \`/login\` while signed in redirects to \`/app\`.
+- [ ] S3-A4 The form shows a pending state and cannot be re-submitted during the request.
+- [ ] S3-A5 After reload the session persists and \`/app\` renders without a flash of the logged-out state.
+
+## S4 Dashboard: \`/app\`
+
+Purpose: the signed-in user's working surface.
+
+- [ ] S4-A1 The count shown equals \`select count(*) from ${primary} where owner_id = <current user>\`.
+- [ ] S4-A2 Only rows owned by the signed-in user appear. Signed in as \`${other}\`, the list is empty.
+- [ ] S4-A3 The empty state explains what will appear here and carries the create action.
+- [ ] S4-A4 Newest first, and that order survives a refresh.
+- [ ] S4-A5 A loading state appears on first load and on refresh, and resolves within 2 seconds locally.
+- [ ] S4-A6 With the API stopped the error state and a working retry appear, and the retry succeeds once the API is back.
+- [ ] S4-A7 Each row opens its detail screen, and the whole row is clickable rather than only the text.
+
+## S5 Create: \`/app/new\`
+
+Purpose: add a row owned by the current user.
+
+- [ ] S5-A1 Empty submit shows required-field errors and issues no request.
+- [ ] S5-A2 Wrongly typed or oversized input is rejected with a field-level message, not a server 500.
+- [ ] S5-A3 Success creates exactly one row owned by the current user and lands on its detail screen.
+- [ ] S5-A4 The new row is on \`/app\` on return, without a hard reload.
+- [ ] S5-A5 A double-click on submit creates one row, not two.
+- [ ] S5-A6 Cancel returns to \`/app\` and creates nothing.
+
+## S6 Detail: \`/app/:id\`
+
+Purpose: read one row, then change or remove it.
+
+- [ ] S6-A1 Every stored field renders. Empty fields are hidden or marked, never printed as undefined or null.
+- [ ] S6-A2 An edited field persists and survives a full reload.
+- [ ] S6-A3 \`updated_at\` changes on save; \`created_at\` does not.
+- [ ] S6-A4 Delete asks for confirmation, and confirming removes the row from the list and navigates away.
+- [ ] S6-A5 A non-existent id shows a not-found state with a way back.
+- [ ] S6-A6 Signed in as \`${other}\`, opening this record's URL shows not-found or forbidden and leaks no field of the record.
+- [ ] S6-A7 A failed save keeps the entered values on screen and shows an error; it never silently discards input.
+
+## S7 Settings: \`/settings\`
+
+Purpose: account self-service.
+
+- [ ] S7-A1 The signed-in user's name and email are shown and prefilled.
+- [ ] S7-A2 A valid change persists after reload.
+- [ ] S7-A3 Invalid input is rejected inline before any request is sent.
+- [ ] S7-A4 Sign out clears the session and lands on \`/\`; pressing back does not restore \`/app\`.
+
+## S8 Route protection
+
+- [ ] S8-A1 Signed out, \`/app\`, \`/app/new\`, \`/app/:id\` and \`/settings\` each redirect to \`/login\`.
+- [ ] S8-A2 The attempted path is returned to after a successful sign in.
+- [ ] S8-A3 A signed-out deep link never renders record content before redirecting.
+
+## S9 API contract
+
+Run against the local or deployed base URL.
+
+\`\`\`bash
+curl -i $APP_URL/health
+curl -i -X POST $APP_URL/auth/register -H 'content-type: application/json' -d '{"email":"probe@example.com","password":"Passw0rd!23"}'
+curl -i $APP_URL/api/${primary}
+\`\`\`
+
+- [ ] S9-A1 \`/health\` returns 200 with a JSON body.
+- [ ] S9-A2 Register returns 201 and a session cookie; repeating it returns 4xx, not 500.
+- [ ] S9-A3 The protected list route returns 401 without a session.
+- [ ] S9-A4 No response body contains a password hash, a token or an internal stack trace.
+
+## S10 Seed and isolation
+
+- [ ] S10-A1 \`npm run db:seed\` exits 0 and prints one result line per table.
+- [ ] S10-A2 Running it twice leaves the same row counts, never duplicates.
+- [ ] S10-A3 Signed in as \`${demo}\`, every seeded table shows three rows.
+- [ ] S10-A4 Signed in as \`${other}\`, every seeded table shows zero rows.
+
+## Scoring
+
+Count the unchecked boxes. Zero unchecked is the only passing state for the primary flow in AGENTS.md section 6. Report that count in your hand-off note alongside the evidence for each global criterion.
 `;
 }

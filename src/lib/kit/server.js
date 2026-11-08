@@ -1,9 +1,11 @@
 // Backend half of the generated application: schema metadata, pool, auth, owner-scoped CRUD,
 // routers, the Express app factory and the baseline migration.
-import { entityModel, sqlColumn } from '@/lib/kit/model';
+import { entityModel, entityMap, primaryEntity, sqlColumn } from '@/lib/kit/model';
 
 function buildSchemaModule(seed) {
-  return `export const ENTITIES = ${JSON.stringify(entityModel(seed), null, 2)};
+  return `export const ENTITIES = ${JSON.stringify(entityMap(seed), null, 2)};
+
+export const PRIMARY_KEY = ${JSON.stringify(primaryEntity(seed).key)};
 
 export function entityOf(key) {
   return Object.prototype.hasOwnProperty.call(ENTITIES, key) ? ENTITIES[key] : null;

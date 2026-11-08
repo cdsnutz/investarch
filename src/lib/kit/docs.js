@@ -62,7 +62,7 @@ A complete, running full-stack application for ${seed.title}. Not a scaffold and
 | HTTP server, routes, services | \`server/\` | Complete: auth, owner-scoped CRUD, validation, error handling. |
 | Database schema and migrations | \`database/\` | Complete: \`001_init.sql\` plus a migration runner and a demo seeder. |
 | Interface | \`src/\` | Complete: landing, register, sign in, password reset, dashboard, create, detail, settings, not found. |
-| Tests | \`tests/\` | Complete: shell, route protection, validation, schema, ownership isolation. |
+| Tests | \`tests/\` | Complete: shell, route protection, validation, schema, collection contract, ownership isolation. |
 | Run and verify | \`verify.sh\`, \`npm run verify\` | Complete: lints, tests, builds, migrates, seeds and probes the running server. |
 
 ## Quick start
@@ -100,7 +100,7 @@ Install, lint, test, build, migrate twice, seed, boot the server, probe \`/healt
 
 ## Data model at a glance
 
-The interface works on \`${primary.key}\` (\`${primary.label}\`); ${entityModel(seed).length > 1 ? 'the other collections are also exposed through the same API' : 'it is the only collection this build needs'}.
+The interface works on \`${primary.key}\` (\`${primary.label}\`); ${entityModel(seed).length > 1 ? 'every collection also has its own screens under /app' : 'its screens live under /app'}.
 
 | Collection | Label | Title field |
 | --- | --- | --- |
@@ -240,7 +240,7 @@ Everything an engineer or operator needs: how it is put together, what it stores
 | Passwords | bcryptjs | 2.4 | Pure JS, cost 12, no native build. |
 | Validation | zod | 3.23 | Route-boundary schemas with field-level messages. |
 | Interface | React + Vite | 18.3 / 5.4 | Static build served by the same process. |
-| Routing | react-router-dom | 6.26 | Six screens plus a not-found route. |
+| Routing | react-router-dom | 6.26 | Public pages, then one list, create and detail route per collection. |
 | Tests | Vitest + supertest | 2.0 / 7.0 | Real HTTP assertions without binding a port. |
 
 ## 2. Shape of the system
@@ -361,10 +361,11 @@ One transaction per file; a failure rolls back and exits non-zero. Re-running is
 | \`tests/auth-guard.test.js\` | no | 401 on collection read, write, forged cookie and \`/auth/me\` |
 | \`tests/validation.test.js\` | no | 400 with field messages, no stack trace in an error body |
 | \`tests/schema.test.js\` | no | collection metadata: one title field, one required field, no timestamps exposed |
-| \`tests/ownership.test.js\` | yes | two accounts: create, list, read, patch, delete isolation |
+| \`tests/ownership.test.js\` | tests/contract.test.js | no | every collection is listed, protected and resolvable; an unknown one is 404 |
+| yes | two accounts: create, list, read, patch, delete isolation |
 
 \`\`\`bash
-npm test                                      # the four database-free suites
+npm test                                      # the five database-free suites
 DATABASE_URL_TEST=postgresql://... npm test   # adds the ownership suite
 \`\`\`
 
@@ -389,7 +390,7 @@ The ownership suite never runs against a database you care about: it creates acc
 
 **Add a field.** Add the column in \`002_add_<field>.sql\`, add it to the collection in \`server/schema.js\`, and the form, detail page and list pick it up: they render from metadata.
 
-**Add a collection.** Add the table migration, add the key to \`server/schema.js\`, add seed rows in \`database/seed.js\`, and the five REST routes exist already. Point a screen at \`ENTITY\` in \`src/schema.js\` to use it as the primary collection.
+**Add a collection.** Add the table migration, add the key to \`server/schema.js\`, add seed rows in \`database/seed.js\`, and the five REST routes and all three screens exist already. Register the key in \`ENTITY\` in \`src/schema.js\` to use it as the primary collection.
 
 **Add a screen.** One file in \`src/pages/\`, one route in \`src/App.jsx\`, its pass conditions in \`ACCEPTANCE.md\`.
 
@@ -398,7 +399,7 @@ The ownership suite never runs against a database you care about: it creates acc
 ## 12. Known limits, stated plainly
 
 - Password reset depends on an email provider you have not wired yet; outside development the token is issued but not delivered.
-- The other collections are API-complete but have no dedicated screens: the interface focuses on \`${primary.key}\`.
+- The other collections are fully screened: the workspace overview opens each one, starting with \`${primary.key}\`.
 - No pagination beyond the 50-row default and 200-row cap on the list endpoint.
 - No audit trail: \`updated_at\` says when, not who.
 - Backups, TLS termination and log retention belong to the host, per \`DEPLOYMENT.md\`.
@@ -406,7 +407,7 @@ The ownership suite never runs against a database you care about: it creates acc
 }
 
 export function buildVerifyScript(seed) {
-  const primary = primaryEntity(seed).key;
+  const keys = entityModel(seed).map((entity) => entity.key);
   return `#!/usr/bin/env bash
 # Full run for ${seed.title}: install, lint, test, build, migrate twice, seed, boot, probe.
 # Usage: ./verify.sh   Exits non-zero on the first failure.
@@ -452,9 +453,11 @@ done
 curl -fsS "http://localhost:\${PROBE_PORT:-3999}/health" | grep -q '"ok":true' || fail "health check"
 curl -fsS "http://localhost:\${PROBE_PORT:-3999}/api/version" >/dev/null || fail "version endpoint"
 
-step "Protected route"
-CODE=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:\${PROBE_PORT:-3999}/api/records/${primary}")
-[ "$CODE" = "401" ] || fail "expected 401 without a session, got $CODE"
+step "Protected routes"
+for COLLECTION in ${keys.join(' ')}; do
+  CODE=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:\${PROBE_PORT:-3999}/api/records/$COLLECTION")
+  [ "$CODE" = "401" ] || fail "expected 401 on $COLLECTION without a session, got $CODE"
+done
 
 echo
 echo "PASS: build, tests, migrations, seed and live probes all succeeded."

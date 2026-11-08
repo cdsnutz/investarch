@@ -104,6 +104,48 @@ describe('request validation', () => {
 });
 `;
 
+const CONTRACT = `import { describe, expect, it } from 'vitest';
+import request from 'supertest';
+import jwt from 'jsonwebtoken';
+import { createApp } from '../server/app.js';
+import { entityKeys } from '../server/schema.js';
+
+const app = createApp();
+const COLLECTIONS = entityKeys();
+const session =
+  'sid=' +
+  jwt.sign({ sub: '00000000-0000-0000-0000-000000000000' }, process.env.AUTH_SECRET, { expiresIn: '1h' });
+
+describe('collection contract', () => {
+  it('lists every declared collection on the version route', async () => {
+    const res = await request(app).get('/api/version');
+    expect(res.status).toBe(200);
+    expect(COLLECTIONS.length).toBeGreaterThan(0);
+    expect(res.body.collections).toEqual(COLLECTIONS);
+  });
+
+  it('protects every collection route with a session', async () => {
+    for (const key of COLLECTIONS) {
+      const res = await request(app).get('/api/records/' + key);
+      expect(res.status).toBe(401);
+    }
+  });
+
+  it('resolves every declared collection once authenticated', async () => {
+    for (const key of COLLECTIONS) {
+      const res = await request(app).get('/api/records/' + key).set('Cookie', session);
+      expect(res.status).not.toBe(404);
+    }
+  });
+
+  it('answers an undeclared collection with 404', async () => {
+    const res = await request(app).get('/api/records/not-a-collection').set('Cookie', session);
+    expect(res.status).toBe(404);
+    expect(res.body.error).toBe('Unknown collection.');
+  });
+});
+`;
+
 function buildModelTest(seed) {
   return `import { describe, expect, it } from 'vitest';
 import { ENTITIES, entityKeys } from '../server/schema.js';
@@ -194,6 +236,7 @@ export function buildTestFiles(seed) {
     { path: 'tests/auth-guard.test.js', content: buildGuardTest(seed) },
     { path: 'tests/validation.test.js', content: VALIDATION },
     { path: 'tests/schema.test.js', content: buildModelTest(seed) },
+    { path: 'tests/contract.test.js', content: CONTRACT },
     { path: 'tests/ownership.test.js', content: buildOwnershipTest(seed) }
   ];
 }

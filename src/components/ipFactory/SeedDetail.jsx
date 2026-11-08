@@ -4,12 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Loader2, Download, Scale, Tag, FileSignature, Handshake, Wrench, FileArchive } from 'lucide-react';
-import JSZip from 'jszip';
 import { buildDossierPack } from '@/lib/dossierPack';
-import { buildKitFiles } from '@/lib/buildKit';
-import { buildAgentReadme, buildDeploymentGuide, buildAcceptanceGuide } from '@/lib/agentDocs';
+import { downloadSeedCodebase } from '@/lib/codebaseExport';
 import { missingSeedFields } from '@/lib/seedComplete';
-import { buildAgentDeployGuide } from '@/lib/agentDeploy';
 
 function Block({ title, children }) {
   return (
@@ -47,13 +44,17 @@ function FilingView({ filing }) {
 
 export function SeedBody({ seed, filings, prospectus, onRefresh, brand }) {
   const [busy, setBusy] = useState('');
+  const [error, setError] = useState('');
   const [codebase, setCodebase] = useState(null);
 
   const run = async (key, fn) => {
     setBusy(key);
+    setError('');
     try {
       await fn();
       onRefresh();
+    } catch (problem) {
+      setError(problem?.message || 'That step failed.');
     } finally {
       setBusy('');
     }
@@ -63,21 +64,7 @@ export function SeedBody({ seed, filings, prospectus, onRefresh, brand }) {
     const res = await base44.functions.invoke('architectSeed', { seedId: seed.id });
     const cb = res.data || {};
     setCodebase(cb);
-    const zip = new JSZip();
-    buildKitFiles(seed, cb, brand).forEach((f) => zip.file(f.path, f.content, f.executable ? { unixPermissions: '755' } : undefined));
-    zip.file('AGENTS.md', buildAgentReadme(seed, cb));
-    zip.file('ACCEPTANCE.md', buildAcceptanceGuide(seed, cb));
-    zip.file('DEPLOYMENT.md', buildDeploymentGuide(seed));
-    zip.file('AGENT_DEPLOY.md', buildAgentDeployGuide({ agentName: seed.title, seedTitle: seed.title, repoName: cb.repo_name }));
-    zip.file('Developer_Onboarding_Guide.md', cb.onboarding_guide || '');
-    zip.file('User_Manual.md', cb.user_manual || '');
-    const blob = await zip.generateAsync({ type: 'blob', platform: 'UNIX' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${cb.repo_name || seed.title}.zip`;
-    a.click();
-    URL.revokeObjectURL(url);
+    await downloadSeedCodebase(seed, brand, cb);
   });
 
   const draft = (filingType) => run(filingType, async () => {
@@ -174,6 +161,11 @@ export function SeedBody({ seed, filings, prospectus, onRefresh, brand }) {
       </div>
       {busy === 'pack' && (
         <p className="text-xs text-muted-foreground">Drafting any missing filings, grant applications, the loan proposal and the prospectus, rebuilding the codebase, then assembling the pack. This can take a few minutes.</p>
+      )}
+      {error && (
+        <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-3">
+          <p className="text-xs text-destructive">{error}</p>
+        </div>
       )}
 
       {codebase?.onboarding_guide && (

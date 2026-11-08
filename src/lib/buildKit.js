@@ -175,8 +175,8 @@ The application in this folder is finished. It authenticates, persists, scopes e
 | Collections API | \`server/routes/records.js\`, \`server/services/records.js\` | Complete. Five owner-scoped routes per collection, column allowlist, validation. |
 | Authentication | \`server/routes/auth.js\`, \`server/services/auth.js\`, \`server/middleware/auth.js\` | Complete. Register, login, logout, profile, reset. |
 | Schema and migrations | \`database/\` | Complete. Baseline SQL, idempotent runner, deterministic seed. |
-| Interface | \`src/\` | Complete. Landing, register, sign in, dashboard, create, detail, settings, not found. |
-| Tests | \`tests/\` | Complete. Five suites. |
+| Interface | \`src/\` | Complete. Landing, register, sign in, reset, workspace, then list, create and detail for every collection, settings, not found. |
+| Tests | \`tests/\` | Complete. Six suites: shell, protection, validation, schema, contract, ownership. |
 | Full run | \`verify.sh\` | Complete. Install through live probe, failing loudly. |
 | Hand-off docs | \`README.md\`, \`USER_GUIDE.md\`, \`TECHNICAL_GUIDE.md\` | Complete. |
 
@@ -213,15 +213,17 @@ The application in this folder is finished. It authenticates, persists, scopes e
 | \`src/pages/Landing.jsx\` | Public entry with one primary action. |
 | \`src/pages/Login.jsx\`, \`src/pages/Register.jsx\` | Credential screens with inline errors. |
 | \`src/pages/Reset.jsx\` | Request a reset token, then choose a new password. |
-| \`src/pages/Dashboard.jsx\` | Owner's rows, count, empty state, retry. |
-| \`src/pages/RecordNew.jsx\` | Create screen. |
+| \`src/pages/Dashboard.jsx\` | Every collection with its count, three recent rows, empty state, retry. |
+| \`src/pages/RecordNew.jsx\` | Create screen for any collection. |
 | \`src/pages/RecordDetail.jsx\` | Read, inline edit, delete, not-found. |
+| src/pages/RecordList.jsx | One collection's rows, empty state, retry. |
 | \`src/pages/Settings.jsx\` | Name change, session, sign out. |
 | \`src/pages/NotFound.jsx\` | Unknown route. |
 | \`tests/health.test.js\` | Shell endpoints and JSON 404. |
 | \`tests/auth-guard.test.js\` | 401 without a session, and with a forged cookie. |
 | \`tests/validation.test.js\` | 400 with field messages, no stack trace leaked. |
 | \`tests/schema.test.js\` | Metadata invariants. |
+| tests/contract.test.js | Every collection listed, protected and resolvable; an unknown one is a 404. |
 | \`tests/ownership.test.js\` | Two-account isolation, when \`DATABASE_URL_TEST\` is set. |
 | \`verify.sh\` | The full run in section 7. |
 

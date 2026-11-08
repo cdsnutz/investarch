@@ -1,6 +1,6 @@
 // Frontend half of the generated application: router, session provider, API client and every screen.
-import { primaryEntity } from '@/lib/kit/model';
-import { DASHBOARD, RECORD_NEW, RECORD_DETAIL } from '@/lib/kit/pagesRecords';
+import { entityMap, primaryEntity } from '@/lib/kit/model';
+import { DASHBOARD, RECORD_LIST, RECORD_NEW, RECORD_DETAIL } from '@/lib/kit/pagesRecords';
 
 const STYLES = `:root {
   color-scheme: light;
@@ -473,6 +473,9 @@ export function useAuth() {
 const SHELL = `import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth';
 import { BRAND } from '../brand';
+import { entityList } from '../schema';
+
+const COLLECTIONS = entityList();
 
 export default function Shell() {
   const { user, signOut } = useAuth();
@@ -492,9 +495,13 @@ export default function Shell() {
         </Link>
         <nav className="nav" aria-label="Main">
           <NavLink to="/app" end>
-            Dashboard
+            Workspace
           </NavLink>
-          <NavLink to="/app/new">New record</NavLink>
+          {COLLECTIONS.map((entity) => (
+            <NavLink key={entity.key} to={'/app/' + entity.key}>
+              {entity.label}
+            </NavLink>
+          ))}
           <NavLink to="/settings">Settings</NavLink>
         </nav>
         <button type="button" className="btn-ghost" onClick={leave}>
@@ -603,15 +610,26 @@ const FORM = `export default function RecordForm({ fields, values, onChange, onS
 `;
 
 function buildSchemaModule(seed) {
-  return `export const ENTITY = ${JSON.stringify(primaryEntity(seed), null, 2)};
+  return `export const ENTITIES = ${JSON.stringify(entityMap(seed), null, 2)};
 
-export function fieldLabel(name) {
-  const field = ENTITY.fields.find((item) => item.name === name);
+export const PRIMARY_KEY = ${JSON.stringify(primaryEntity(seed).key)};
+
+export function entityOf(key) {
+  return Object.prototype.hasOwnProperty.call(ENTITIES, key) ? ENTITIES[key] : null;
+}
+
+export function entityList() {
+  return Object.keys(ENTITIES).map((key) => ENTITIES[key]);
+}
+
+export function fieldLabel(entity, name) {
+  const field = entity ? entity.fields.find((item) => item.name === name) : null;
   return field ? field.label : name;
 }
 
-export function titleOf(record) {
-  const value = record ? record[ENTITY.titleField] : null;
+export function titleOf(entity, record) {
+  const field = entity ? entity.titleField : null;
+  const value = field && record ? record[field] : null;
   return value == null || value === '' ? 'Untitled' : String(value);
 }
 `;
@@ -1048,6 +1066,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Reset from './pages/Reset';
 import Dashboard from './pages/Dashboard';
+import RecordList from './pages/RecordList';
 import RecordNew from './pages/RecordNew';
 import RecordDetail from './pages/RecordDetail';
 import Settings from './pages/Settings';
@@ -1083,8 +1102,9 @@ export default function App() {
             }
           >
             <Route path="/app" element={<Dashboard />} />
-            <Route path="/app/new" element={<RecordNew />} />
-            <Route path="/app/:id" element={<RecordDetail />} />
+            <Route path="/app/:entity" element={<RecordList />} />
+            <Route path="/app/:entity/new" element={<RecordNew />} />
+            <Route path="/app/:entity/:id" element={<RecordDetail />} />
             <Route path="/settings" element={<Settings />} />
           </Route>
           <Route path="*" element={<NotFound />} />
@@ -1110,6 +1130,7 @@ export function buildClientFiles(seed, brand) {
     { path: 'src/pages/Register.jsx', content: REGISTER },
     { path: 'src/pages/Reset.jsx', content: RESET },
     { path: 'src/pages/Dashboard.jsx', content: DASHBOARD },
+    { path: 'src/pages/RecordList.jsx', content: RECORD_LIST },
     { path: 'src/pages/RecordNew.jsx', content: RECORD_NEW },
     { path: 'src/pages/RecordDetail.jsx', content: RECORD_DETAIL },
     { path: 'src/pages/Settings.jsx', content: SETTINGS },

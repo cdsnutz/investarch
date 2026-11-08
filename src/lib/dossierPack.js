@@ -3,6 +3,19 @@ import { buildPdf } from '@/lib/pdfBuilder';
 import { buildAgentReadme, buildDeploymentGuide, buildScaffoldGuide, buildAcceptanceGuide } from '@/lib/agentDocs';
 import { buildEnvExample, buildRoadmap, antislopFiles, devproDeployFiles, buildSeedScript } from '@/lib/scaffoldKit';
 import { buildKitFiles } from '@/lib/buildKit';
+import { entityModel } from '@/lib/kit/model';
+import { normalizeBrand } from '@/lib/kit/brand';
+import { auditKit } from '@/lib/kit/audit';
+import { auditDossier, dossierAuditNotes } from '@/lib/dossierAudit';
+
+const EXTENSIONS_NOTE = `# Extensions, not yet verified
+
+These files were written by the model that architected this codebase. They live beside the
+verified application rather than inside it, because they have not been reconciled with the
+generated schema, routes or screens.
+
+Read one, prove it against \`./verify.sh\`, then move it into the app in a normal commit.
+Nothing here is loaded by the application.`;
 
 function splitIntoSections(text) {
   const sections = [];
@@ -114,15 +127,29 @@ export async function buildDossierPack({ seed, filings, prospectus, codebase, ca
   [...antislopFiles(), ...devproDeployFiles()].forEach((f) => zip.file(`${base}/Codebase/${f.path}`, f.content, f.path.endsWith('.sh') ? { unixPermissions: '755' } : undefined));
 
   const kit = buildKitFiles(seed, codebase, brand);
+  const kitReport = auditKit(kit, { entities: entityModel(seed), brand: normalizeBrand(brand, seed) });
+  const audit = auditDossier({ seed, filings, prospectus, capital, kitReport });
+
+  if (!audit.ok) {
+    const first = audit.errors[0];
+    const problem = new Error(
+      `Dossier blocked by verification: ${audit.errors.length} error${audit.errors.length === 1 ? '' : 's'}. ${first.doc}: ${first.message}`
+    );
+    problem.report = audit;
+    throw problem;
+  }
+
   kit.forEach((f) =>
     zip.file(`${base}/Codebase/${f.path}`, f.content, f.executable ? { unixPermissions: '755' } : undefined)
   );
+  zip.file(`${base}/QA_REPORT.md`, dossierAuditNotes(audit, kitReport));
 
   if (codebase) {
     (codebase.files || []).forEach((f) => {
-      if (f.path === 'package.json') return;
-      zip.file(`${base}/Codebase/${f.path}`, f.content);
+      if (!f?.path || f.path === 'package.json') return;
+      zip.file(`${base}/Codebase/extensions/${f.path}`, f.content || '');
     });
+    zip.file(`${base}/Codebase/extensions/README.md`, EXTENSIONS_NOTE);
     zip.file(`${base}/Codebase/Developer_Onboarding_Guide.md`, codebase.onboarding_guide || '');
     zip.file(`${base}/Codebase/User_Manual.md`, codebase.user_manual || '');
   }

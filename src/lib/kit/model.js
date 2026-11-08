@@ -3,12 +3,23 @@
 import { parseTables } from '@/lib/scaffoldKit';
 
 const ENTITY_CAP = 4;
+const META_COLUMNS = /^(id|owner_id|created_at|updated_at|user_id|deleted_at)$/i;
 
 export function toLabel(name) {
   return String(name)
     .replace(/_/g, ' ')
     .replace(/\b\w/g, (c) => c.toUpperCase())
     .trim();
+}
+
+// Identifiers travel into SQL, JSON keys and JSX, so they are normalised exactly once here.
+export function identifier(value, fallback) {
+  const clean = String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 48);
+  return /^[a-z][a-z0-9_]*$/.test(clean) ? clean : fallback;
 }
 
 function fieldType(col) {
@@ -21,19 +32,30 @@ function fieldType(col) {
 }
 
 export function entityModel(seed) {
-  const parsed = parseTables(seed.blueprint?.db_schema);
+  const parsed = parseTables(seed?.blueprint?.db_schema);
   const raw = parsed.length ? parsed : [{ name: 'items', cols: ['title', 'description', 'status'] }];
+  const taken = new Set();
 
-  return raw.slice(0, ENTITY_CAP).map((table) => {
-    const names = table.cols
-      .filter((c) => !/^(id|created_at|updated_at|owner_id|user_id|deleted_at)$/i.test(c))
-      .slice(0, 10);
-    const cols = names.length ? names : ['title', 'description'];
+  return raw.slice(0, ENTITY_CAP).map((table, index) => {
+    let key = identifier(table.name, 'collection_' + (index + 1));
+    while (taken.has(key)) key = key + '_' + (index + 1);
+    taken.add(key);
+
+    const seen = new Set();
+    const names = [];
+    for (const col of table.cols) {
+      const name = identifier(col, '');
+      if (!name || META_COLUMNS.test(name) || seen.has(name)) continue;
+      seen.add(name);
+      names.push(name);
+    }
+
+    const cols = names.length ? names.slice(0, 10) : ['title', 'description'];
     const titleCol = cols.find((c) => /title|name|label|subject/i.test(c)) || cols[0];
 
     return {
-      key: table.name,
-      label: toLabel(table.name.replace(/s$/, '')),
+      key,
+      label: toLabel(key.replace(/s$/, '')),
       titleField: titleCol,
       fields: cols.map((c) => ({
         name: c,
@@ -43,6 +65,13 @@ export function entityModel(seed) {
       }))
     };
   });
+}
+
+// Keyed view of the same model: what the generated server and client both read at runtime.
+export function entityMap(seed) {
+  const map = {};
+  for (const entity of entityModel(seed)) map[entity.key] = entity;
+  return map;
 }
 
 export function primaryEntity(seed) {

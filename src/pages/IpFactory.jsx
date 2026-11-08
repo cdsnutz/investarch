@@ -11,6 +11,7 @@ import CodebaseExportPanel from '@/components/ipFactory/CodebaseExportPanel';
 import BrandKitPanel from '@/components/brand/BrandKitPanel';
 import { Badge } from '@/components/ui/badge';
 import { HUNT_PRESETS } from '@/lib/ipVectors';
+import MixSeedsDialog from '@/components/ipFactory/MixSeedsDialog';
 
 const STAGES = [
   'Signal Miner: sweeping 24 market vectors — launch feeds, app charts, repos, dockets…',
@@ -143,6 +144,7 @@ export default function IpFactory() {
           {running ? <Loader2 className="size-4 mr-2 animate-spin" /> : <Crosshair className="size-4 mr-2" />}
           {running ? 'The hunt is running' : 'Run the hunt now'}
         </Button>
+        <MixSeedsDialog onCreated={() => { setFilter('all'); load('all'); }} />
         <Tabs value={filter} onValueChange={setFilter} className="w-full sm:w-auto">
           <TabsList className="w-full sm:w-auto">
             <TabsTrigger value="all" className="flex-1 sm:flex-none">All</TabsTrigger>
@@ -208,6 +210,9 @@ export default function IpFactory() {
                 <h3 className="text-lg sm:text-xl font-semibold leading-snug break-words">{s.title}</h3>
                 <div className="flex flex-wrap items-center gap-2 mt-2">
                   <Badge variant="secondary" className="bg-slate-100">Asym {s.asymmetric_score}/10</Badge>
+                  {s.source_seed_titles?.length > 0 && (
+                    <Badge variant="secondary" className="bg-emerald-50 text-emerald-800">Mix of {s.source_seed_titles.length}</Badge>
+                  )}
                   <Badge variant="secondary" className="bg-slate-100">{s.strategy}</Badge>
                   {s.yield_date && <span className="text-xs text-muted-foreground">Yield: {s.yield_date}</span>}
                 </div>

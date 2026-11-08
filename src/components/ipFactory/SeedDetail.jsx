@@ -120,6 +120,16 @@ export function SeedBody({ seed, filings, prospectus, onRefresh, brand }) {
           </Button>
         </div>
       )}
+      {seed.mix_thesis && (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 p-3 space-y-1.5">
+          <h4 className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Ecosystem Thesis</h4>
+          <p className="text-sm leading-relaxed">{seed.mix_thesis}</p>
+          {seed.source_seed_titles?.length > 0 && (
+            <p className="text-[11px] text-emerald-800">Combines: {seed.source_seed_titles.join(' + ')}</p>
+          )}
+        </div>
+      )}
+
       <div className="space-y-3">
         <Block title="The Gap">{seed.gap}</Block>
         {seed.pain_signal && <Block title="Pain-Signal">{seed.pain_signal}</Block>}
@@ -217,6 +227,9 @@ export default function SeedDetail({ seed, filings, prospectus, brand, open, onC
           <DialogDescription className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary" className="bg-slate-100">Asym {seed.asymmetric_score}/10</Badge>
             <Badge variant="secondary" className="bg-slate-100">{seed.strategy}</Badge>
+            {seed.source_seed_titles?.length > 0 && (
+              <Badge variant="secondary" className="bg-emerald-50 text-emerald-800">Mix of {seed.source_seed_titles.length}</Badge>
+            )}
             {seed.yield_date && <span className="text-xs">Yield: {seed.yield_date}</span>}
           </DialogDescription>
         </DialogHeader>

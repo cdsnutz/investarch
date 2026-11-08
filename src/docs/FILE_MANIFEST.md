@@ -4,7 +4,7 @@ Version 1.0 · 8 November 2026 · Compiled by the Registrar.
 
 This manifest enumerates every file in the application repository, grouped by area, with the role each file plays. It is the completeness check for the Registrar's documentation: if a file is on disk and not listed here, it is undocumented; if it is listed here and not on disk, the guide describes something that no longer exists.
 
-**Totals:** 320 files — 15 root · 94 backend · 12 skills · 199 app source.
+**Totals:** 327 files — 15 root · 94 backend · 19 skills · 199 app source.
 
 **Verification.** Run `node src/docs/verify-manifest.mjs` from the repository root. It walks the working tree (ignoring `node_modules`, `.git`, `dist`), compares it against the entries below, prints any file missing from the manifest and any entry with no file behind it, and exits non-zero on drift. A clean run prints `OK` and the two matching counts.
 
@@ -145,17 +145,26 @@ This manifest enumerates every file in the application repository, grouped by ar
 
 - `base44/emails/BuyerLeadDigest.html` — the nightly buyer-lead digest: seeds covered, every named buyer with its subject line and pitch, and coverage notes.
 
-## 3. Agent skills (12)
+## 3. Agent skills (19)
+
+Bundled from `antislop-skillset@3.3.4`.
 
 - `skills/antislop/SKILL.md` — house rule against generic AI copy.
-- `skills/antislop/VERSION` — skill version marker.
+- `skills/antislop/VERSION` — skill version marker and source lineage.
+- `skills/antislop/references/TAXONOMY-2.1.0-SUPERSEDED.md` — retired taxonomy kept for reference.
 - `skills/antislop-code/SKILL.md` — code-specific anti-slop rules.
 - `skills/antislop-copywriting/SKILL.md` — copywriting rules.
 - `skills/antislop-human/SKILL.md` — human-voice rules.
 - `skills/antislop-human/contrast-check.py` — contrast audit helper.
 - `skills/antislop-human/contrast-mcp.py` — contrast audit over MCP.
+- `skills/antislop-human/LICENSE-web-quality-skills` — upstream licence for the human-voice rules.
+- `skills/antislop-human/references/WCAG.md` — accessibility conformance reference.
+- `skills/antislop-human/references/A11Y-PATTERNS.md` — accessibility patterns for common controls.
 - `skills/antislop-layoutmobile/SKILL.md` — mobile layout rules.
 - `skills/antislop-ui/SKILL.md` — interface rules.
+- `skills/antislop-ui/LICENSE-web-quality-skills` — upstream licence for the interface rules.
+- `skills/antislop-ui/references/WEB-BASELINE.md` — browser baseline and support floor.
+- `skills/antislop-ui/references/CORE-WEB-VITALS.md` — performance thresholds.
 - `skills/pods/contracts.md` — Contracts pod: schema, logic and screens must agree.
 - `skills/pods/security.md` — Security pod: isolation, trust boundaries, delete behaviour.
 - `skills/pods/structure.md` — Structure pod: tables, keys, uniqueness, indexes.

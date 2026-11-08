@@ -1,1 +1,8 @@
-3.2.20
+3.3.4
+Source: antislop-skillset@3.3.4 (npm, github.com/cdsnutz/antislop-skillset).
+Six of the package's twenty skills are bundled here: antislop, antislop-code,
+antislop-copywriting, antislop-human, antislop-layoutmobile, antislop-ui.
+Base text: antislop-ai@3.2.26 (publisher miqdadbadjuber) with specialized content
+merged from anti-ai-slop@2.1.0 (publisher muris11); the package carries the full
+provenance and the remaining fourteen skills.
+Updated 8 November 2026.

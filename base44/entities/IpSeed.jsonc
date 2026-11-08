@@ -102,6 +102,9 @@
     "research_brief": {
       "type": "string"
     },
+    "buyer_leads_date": {
+      "type": "string"
+    },
     "buyer_leads": {
       "type": "array",
       "items": {
@@ -109,6 +112,26 @@
         "properties": {
           "company": {
             "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "incumbent",
+              "platform",
+              "reseller",
+              "acquirer",
+              "services",
+              "research"
+            ],
+            "enumColors": [
+              "blue",
+              "purple",
+              "yellow",
+              "green",
+              "pink",
+              "gray"
+            ],
+            "default": "incumbent"
           },
           "why_fit": {
             "type": "string"
@@ -120,6 +143,12 @@
             "type": "string"
           },
           "evidence_to_lead_with": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "pitch": {
             "type": "string"
           }
         }

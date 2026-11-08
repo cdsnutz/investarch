@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, Radar, Crosshair, BrainCircuit } from 'lucide-react';
+import { Loader2, Radar, Crosshair, BrainCircuit, Users } from 'lucide-react';
 import { SeedBody } from '@/components/ipFactory/SeedDetail';
 import RunCost from '@/components/ipFactory/RunCost';
 import AgentRegistryPanel from '@/components/ipFactory/AgentRegistryPanel';
@@ -14,7 +14,7 @@ import { HUNT_PRESETS } from '@/lib/ipVectors';
 import MixSeedsDialog from '@/components/ipFactory/MixSeedsDialog';
 
 const STAGES = [
-  'Signal Miner: sweeping 24 market vectors — launch feeds, app charts, repos, dockets…',
+  'Signal Miner: sweeping 34 market vectors — launch feeds, app charts, repos, dockets…',
   'Filtering for asymmetric market lacunae…',
   'Synthesizer: drafting 120 IP-seeds across five parallel batches…',
   'Portfolio Strategist: issuing Hold / Flip / Build verdicts…'
@@ -37,6 +37,8 @@ export default function IpFactory() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [counts, setCounts] = useState({ today: 0, hold: 0, flip: 0, build: 0 });
   const [brand, setBrand] = useState(null);
+  const [sweeping, setSweeping] = useState(false);
+  const [sweepNote, setSweepNote] = useState('');
 
   const load = useCallback(async (ledger = 'all') => {
     const today = new Date().toISOString().slice(0, 10);
@@ -105,6 +107,22 @@ export default function IpFactory() {
     }
   };
 
+  const sweepLeads = async () => {
+    setSweeping(true);
+    setError('');
+    setSweepNote('');
+    try {
+      const res = await base44.functions.invoke('draftBuyerLeads', { action: 'sweep' });
+      const run = res?.data || {};
+      setSweepNote(run.note || `${run.drafted} of ${run.attempted} seeds drafted. Run it again for the next three.`);
+      await load(filter);
+    } catch (err) {
+      setError(err?.response?.data?.error || err?.message || 'The buyer-lead sweep failed.');
+    } finally {
+      setSweeping(false);
+    }
+  };
+
   const filingsBySeed = {};
   filings.forEach((f) => { (filingsBySeed[f.seed_id] = filingsBySeed[f.seed_id] || []).push(f); });
   const prospectusBySeed = {};
@@ -117,7 +135,7 @@ export default function IpFactory() {
           <h1 className="text-2xl md:text-3xl font-semibold tracking-tight flex items-center gap-2.5">
             <Radar className="size-6 text-emerald-500" /> IP Factory
           </h1>
-          <p className="text-sm text-muted-foreground mt-2 max-w-xl">The Market Hunter sweeps twenty-four market vectors, weighted toward the frontier — AI agents, developer tooling, new compute, consumer breakouts — for live pain-signals opened in the last twelve months, skips anything already in the portfolio, and converts the sharpest lacunae into a yield of 120 IP-seeds, each with its own path to first thousand users. The Registrar then turns each seed into a legal asset: patents written as claims, trademark packets, deeds, and a liquidation prospectus naming its buyers.</p>
+          <p className="text-sm text-muted-foreground mt-2 max-w-xl">The Market Hunter sweeps thirty-four market vectors, from the frontier — AI agents, developer tooling, new compute, consumer breakouts — for live pain-signals opened in the last twelve months, skips anything already in the portfolio, and converts the sharpest lacunae into a yield of 120 IP-seeds, each with its own path to first thousand users. The Registrar then turns each seed into a legal asset: patents written as claims, trademark packets, deeds, and a liquidation prospectus naming its buyers.</p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 text-center w-full sm:w-auto">
           <div className="rounded-lg border bg-card px-3 py-2.5 sm:px-4 sm:py-3">
@@ -145,6 +163,10 @@ export default function IpFactory() {
           {running ? 'The hunt is running' : 'Run the hunt now'}
         </Button>
         <MixSeedsDialog onCreated={() => { setFilter('all'); load('all'); }} />
+        <Button variant="outline" onClick={sweepLeads} disabled={sweeping} className="w-full sm:w-auto">
+          {sweeping ? <Loader2 className="size-4 mr-2 animate-spin" /> : <Users className="size-4 mr-2" />}
+          {sweeping ? 'Drafting buyer leads' : 'Sweep buyer leads'}
+        </Button>
         <Tabs value={filter} onValueChange={setFilter} className="w-full sm:w-auto">
           <TabsList className="w-full sm:w-auto">
             <TabsTrigger value="all" className="flex-1 sm:flex-none">All</TabsTrigger>
@@ -192,6 +214,7 @@ export default function IpFactory() {
         </div>
       )}
 
+      {sweepNote && <p className="text-sm text-emerald-700 mb-4">{sweepNote}</p>}
       {error && <p className="text-sm text-destructive mb-4">{error}</p>}
 
       {seeds === null ? (

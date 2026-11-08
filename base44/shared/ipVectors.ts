@@ -153,6 +153,66 @@ export const IP_VECTORS: IpVector[] = [
     label: 'Nonprofits & grantmaking',
     brief: 'Grant discovery, grant reporting compliance, donor operations, program measurement, fiscal sponsorship.',
     channels: ['r/nonprofit and r/grantwriting threads', 'foundation reporting requirement changes', 'NTEN and TechSoup member threads', '990 filing and audit findings']
+  },
+  {
+    id: 'hr_talent',
+    label: 'People, HR & payroll',
+    brief: 'Recruiting operations, screening and credential checks, onboarding paperwork, payroll and benefits administration, workforce scheduling, time and attendance.',
+    channels: ['r/humanresources and r/recruiting threads', 'SHRM member surveys and compliance alerts', 'HRIS vendor review complaints', 'state payroll and wage-regulation notices']
+  },
+  {
+    id: 'marketplaces',
+    label: 'Marketplaces & matching',
+    brief: 'Two-sided marketplaces, supply and demand matching, take-rate and trust mechanics, payouts to sellers, dispute and refund operations.',
+    channels: ['r/marketplace and r/ecommerce threads', 'marketplace seller-forum payout complaints', 'trust-and-safety incident writeups', 'platform policy-change threads']
+  },
+  {
+    id: 'commerce_retail',
+    label: 'Retail & commerce operations',
+    brief: 'Inventory and replenishment, order routing, returns and reverse logistics, pricing and promotion execution, wholesale and CPG trade operations.',
+    channels: ['r/ecommerce, r/retail and r/FulfillmentByAmazon threads', 'Shopify and marketplace app one-star reviews', 'NRF member surveys', 'wholesale and broker complaint boards']
+  },
+  {
+    id: 'media_rights',
+    label: 'Media, publishing & rights',
+    brief: 'Rights and royalties, content licensing, editorial workflow, subscriber operations, ad operations and yield, archives and asset management.',
+    channels: ['r/publishing, r/editors and r/adops threads', 'royalty-statement and rights-dispute threads', 'publisher platform policy changes', 'newsroom and trade-publication postmortems']
+  },
+  {
+    id: 'travel_hospitality',
+    label: 'Travel & hospitality',
+    brief: 'Property management, rate and revenue management, booking and distribution, guest operations, tour and activity operators, multi-property accounting.',
+    channels: ['r/askhotels and r/travelagents threads', 'OTA and channel-manager integration complaints', 'HSMAI and AHLA member surveys', 'short-term-rental host forums']
+  },
+  {
+    id: 'proptech_realestate',
+    label: 'Property & real estate',
+    brief: 'Listings and syndication, property management, leasing and renewals, title and closing, valuations and inspections, HOA and portfolio accounting.',
+    channels: ['r/realestate and r/PropertyManagement threads', 'MLS and brokerage compliance rule changes', 'title and closing vendor complaint boards', 'NAR and state realtor association surveys']
+  },
+  {
+    id: 'mobility_auto',
+    label: 'Fleets, mobility & automotive',
+    brief: 'Fleet operations and telematics, dealership F&I and inventory, EV charging operations, roadside and claims workflows, last-mile and delivery fleets.',
+    channels: ['r/justrolledintotheshop and r/FleetManagement threads', 'NHTSA and FMCSA rule updates', 'dealership DMS vendor complaints', 'charging-network uptime reports']
+  },
+  {
+    id: 'telecom_network',
+    label: 'Telecom & networking',
+    brief: 'Network operations and provisioning, connectivity ordering, usage and billing mediation, subscriber support, tower and fibre asset records.',
+    channels: ['r/networking, r/telecom and r/sysadmin threads', 'FCC and state PUC filings', 'OSS/BSS vendor integration complaints', 'ISP operator forums']
+  },
+  {
+    id: 'defense_space',
+    label: 'Defense, space & public safety',
+    brief: 'Defense procurement and compliance, export control, satellite and ground-segment operations, mission data handling, emergency response coordination.',
+    channels: ['SAM.gov and DIU solicitations', 'ITAR and CMMC guidance updates', 'r/space and r/defensecontracting threads', 'GAO bid-protest decisions']
+  },
+  {
+    id: 'sports_wellness',
+    label: 'Sport, fitness & wellness',
+    brief: 'Club and league operations, memberships and billing, class scheduling, athlete performance data, clinic and studio management, waivers and compliance.',
+    channels: ['r/personaltraining, r/gymowners and r/Coaching threads', 'studio-management app one-star reviews', 'league and federation rule changes', 'club-owner association forums']
   }
 ];
 
@@ -169,8 +229,10 @@ export const IP_PRESETS: IpPreset[] = [
   { id: 'viral', label: 'Viral & consumer', blurb: 'Consumer breakouts, creators, growth', vectors: ['viral_consumer', 'creator_economy', 'growth_ops', 'dev_experience'] },
   { id: 'software', label: 'Software & data', blurb: 'Dev infra, security, applied AI, agents', vectors: ['devinfra', 'security', 'dataai', 'dev_experience', 'agentic_ai', 'frontier_compute'] },
   { id: 'regulated', label: 'Regulated & money', blurb: 'Finance, insurance, legal, healthcare', vectors: ['fintech', 'insuretech', 'legal', 'healthcare'] },
-  { id: 'physical', label: 'Physical economy', blurb: 'Logistics, industrial, energy, food, construction, trades', vectors: ['logistics', 'industrial', 'energy', 'agrifood', 'construction', 'trades_smb'] },
-  { id: 'public', label: 'Public & institutional', blurb: 'Government, education, nonprofits', vectors: ['govtech', 'education', 'nonprofits'] }
+  { id: 'physical', label: 'Physical economy', blurb: 'Logistics, industry, energy, food, construction, trades, fleets, telecom', vectors: ['logistics', 'industrial', 'energy', 'agrifood', 'construction', 'trades_smb', 'mobility_auto', 'telecom_network'] },
+  { id: 'public', label: 'Public & institutional', blurb: 'Government, education, nonprofits, defense', vectors: ['govtech', 'education', 'nonprofits', 'defense_space'] },
+  { id: 'commerce', label: 'Commerce & property', blurb: 'Retail, marketplaces, media, travel, real estate', vectors: ['commerce_retail', 'marketplaces', 'media_rights', 'travel_hospitality', 'proptech_realestate', 'growth_ops'] },
+  { id: 'people', label: 'People & wellness', blurb: 'HR, education, health, sport', vectors: ['hr_talent', 'education', 'healthcare', 'sports_wellness'] }
 ];
 
 export const DEFAULT_PRESET = 'all';

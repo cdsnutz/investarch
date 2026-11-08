@@ -4,7 +4,7 @@ Version 1.0 · 8 November 2026 · Compiled by the Registrar.
 
 This manifest enumerates every file in the application repository, grouped by area, with the role each file plays. It is the completeness check for the Registrar's documentation: if a file is on disk and not listed here, it is undocumented; if it is listed here and not on disk, the guide describes something that no longer exists.
 
-**Totals:** 311 files — 15 root · 90 backend · 12 skills · 194 app source.
+**Totals:** 315 files — 15 root · 93 backend · 12 skills · 195 app source.
 
 **Verification.** Run `node src/docs/verify-manifest.mjs` from the repository root. It walks the working tree (ignoring `node_modules`, `.git`, `dist`), compares it against the entries below, prints any file missing from the manifest and any entry with no file behind it, and exits non-zero on drift. A clean run prints `OK` and the two matching counts.
 
@@ -28,7 +28,7 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `tailwind.config.js` — token-to-class mapping, font roles, keyframes.
 - `vite.config.js` — Vite build with the Base44 plugin, React, HMR and analytics hooks.
 
-## 2. Base44 backend (90)
+## 2. Base44 backend (93)
 
 ### 2.1 Configuration (2)
 
@@ -83,7 +83,7 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `base44/entities/ValueAnchor.jsonc` — multi-year value anchors with steering design and progress.
 - `base44/entities/ValueAxiom.jsonc` — value axioms indexing assets against a defined metric.
 
-### 2.3 Backend functions (35)
+### 2.3 Backend functions (36)
 
 - `base44/functions/agentOps/entry.ts` — agent registrar: register, deploy, pause and record runs; app-user session or `x-agent-key`.
 - `base44/functions/analyzeBusiness/entry.ts` — turns a URL and company name into a dossier: sections, forecast, milestones and funding sources.
@@ -93,6 +93,7 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `base44/functions/completeIpSeed/entry.ts` — repairs an incomplete seed by filling tech stack, schema and core logic.
 - `base44/functions/create-checkout/entry.ts` — Base44 Payments checkout session for a product id and quantity.
 - `base44/functions/createMarketSeed/entry.ts` — keyed intake endpoint that captures a market seed and logs the event.
+- `base44/functions/draftBuyerLeads/entry.ts` — names every credible buyer for a seed and writes each company its own first-touch email; single seed or a sweep of three.
 - `base44/functions/draftCapitalPack/entry.ts` — drafts grant applications and a small-business loan proposal for a seed.
 - `base44/functions/draftFundingLetters/entry.ts` — drafts outreach subject, body and application narrative per matched funder.
 - `base44/functions/draftIpFiling/entry.ts` — drafts one instrument (patent, trademark, deed, copyright) for a seed.
@@ -121,15 +122,17 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `base44/functions/runWarRoom/entry.ts` — builds disruption plans against a target competitor.
 - `base44/functions/scoreCompetition/entry.ts` — scores competitors on fixed dimensions and stores the radar.
 
-### 2.4 Shared modules (4)
+### 2.4 Shared modules (5)
 
-- `base44/shared/ipVectors.ts` — the 24-vector taxonomy and hunt presets shared by the hunter and the UI.
+- `base44/shared/buyerLeads.ts` — buyer-lead schema, coverage prompt, pitch rules and the drafting call shared by the seed action and the sweep, plus the target rule the sweep uses.
+- `base44/shared/ipVectors.ts` — the 34-vector taxonomy and hunt presets shared by the hunter and the UI.
 - `base44/shared/planPipeline.ts` — dossier pipeline context loader shared by analysis, scan and funding functions.
 - `base44/shared/seedTargets.ts` — buyer and target resolution helpers for liquidation and prospectus work.
 - `base44/shared/v9Core.ts` — core scoring and strategy constants used across generators.
 
-### 2.5 Workflows (3)
+### 2.5 Workflows (4)
 
+- `base44/workflows/Buyer Lead Sweep.jsonc` — nightly buyer-lead pass over the ledger, highest asymmetry first, three seeds per run.
 - `base44/workflows/Codebase Hardening Pod.jsonc` — nightly hardening sweep over the seed ledger.
 - `base44/workflows/Dossier Ready For Review.jsonc` — fires when a dossier is promoted and runs the readiness function.
 - `base44/workflows/Sovereign IP Hunt.jsonc` — scheduled hunt that runs the hunter and strategy assignment.
@@ -153,7 +156,7 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `skills/pods/security.md` — Security pod: isolation, trust boundaries, delete behaviour.
 - `skills/pods/structure.md` — Structure pod: tables, keys, uniqueness, indexes.
 
-## 4. App source (194)
+## 4. App source (195)
 
 ### 4.1 Entry and shell (4)
 
@@ -217,13 +220,14 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `src/components/hf/RewriteSection.jsx` — rewrite a dossier section through inference.
 - `src/components/hf/ScoreSeedButton.jsx` — score a seed through inference.
 
-### 4.9 IP Factory (7)
+### 4.9 IP Factory (8)
 
 - `src/components/ipFactory/AgentRegistryPanel.jsx` — register, deploy, pause agents and copy their contract.
+- `src/components/ipFactory/BuyerLeadsPanel.jsx` — named buyers by category, each with its written pitch and a copy action.
 - `src/components/ipFactory/CodebaseExportPanel.jsx` — verify and download full codebase bundles.
 - `src/components/ipFactory/MixComboCard.jsx` — one seed combination: thesis, shared loop, roles and merged stack.
 - `src/components/ipFactory/MixSeedsDialog.jsx` — mix scan, the combination list and ecosystem creation.
-- `src/components/ipFactory/PlaybookSection.jsx` — funding and acquisition playbooks, named buyer leads, marketing plan, research brief and the hardening verdict.
+- `src/components/ipFactory/PlaybookSection.jsx` — funding and acquisition playbooks, named buyer leads with pitches, marketing plan, research brief and the hardening verdict.
 - `src/components/ipFactory/RunCost.jsx` — hunt cost estimate and last-run yield.
 - `src/components/ipFactory/SeedDetail.jsx` — full seed body and its instrument, prospectus and pack actions.
 

@@ -1,0 +1,47 @@
+{
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 5 * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "name": "Buyer Lead Sweep",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "buyer_lead_sweep",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "draft_buyer_leads": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "draftBuyerLeads",
+            "args": {
+              "action": "sweep"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Draft buyer leads",
+            "description": "Up to three unpitched seeds per run, each with a written first-touch email"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Nightly buyer-lead pass over the seed ledger, highest asymmetry first: names every credible buyer for a seed, writes each company its own pitch, and records both on the seed."
+}

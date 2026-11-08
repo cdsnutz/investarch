@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Loader2, Scale, Tag, FileSignature, Handshake, Wrench, FileArchive, BookOpenCheck, ShieldCheck } from 'lucide-react';
+import { Loader2, Scale, Tag, FileSignature, Handshake, Wrench, FileArchive, BookOpenCheck, ShieldCheck, Users } from 'lucide-react';
 import { buildDossierPack } from '@/lib/dossierPack';
 import { downloadSeedCodebase } from '@/lib/codebaseExport';
 import { missingSeedFields } from '@/lib/seedComplete';
@@ -83,6 +83,10 @@ export function SeedBody({ seed, filings, prospectus, onRefresh, brand }) {
 
   const draftPlaybooks = () => run('playbooks', async () => {
     await base44.functions.invoke('draftSeedPlaybooks', { seedId: seed.id });
+  });
+
+  const draftLeads = () => run('leads', async () => {
+    await base44.functions.invoke('draftBuyerLeads', { seedId: seed.id });
   });
 
   const harden = () => run('harden', async () => {
@@ -182,6 +186,9 @@ export function SeedBody({ seed, filings, prospectus, onRefresh, brand }) {
         </Button>
         <Button size="sm" variant="outline" onClick={harden} disabled={!!busy}>
           {busy === 'harden' ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <ShieldCheck className="size-3.5 mr-1.5" />} Harden codebase
+        </Button>
+        <Button size="sm" variant="outline" onClick={draftLeads} disabled={!!busy}>
+          {busy === 'leads' ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <Users className="size-3.5 mr-1.5" />} Buyer leads & pitches
         </Button>
         <Button size="sm" onClick={buildPack} disabled={!!busy}>
           {busy === 'pack' ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <FileArchive className="size-3.5 mr-1.5" />} Download dossier pack (PDFs)

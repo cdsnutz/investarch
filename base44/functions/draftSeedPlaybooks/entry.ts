@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
+import { LEAD_ITEM_SCHEMA, normalizeLeads } from '../../shared/buyerLeads.ts';
 
 const PLAYBOOK_SCHEMA = {
   type: 'object',
@@ -9,17 +10,7 @@ const PLAYBOOK_SCHEMA = {
     research_brief: { type: 'string' },
     buyer_leads: {
       type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          company: { type: 'string' },
-          why_fit: { type: 'string' },
-          contact_role: { type: 'string' },
-          approach: { type: 'string' },
-          evidence_to_lead_with: { type: 'string' }
-        },
-        required: ['company', 'why_fit', 'contact_role', 'approach']
-      }
+      items: LEAD_ITEM_SCHEMA
     }
   },
   required: ['funding_playbook', 'acquisition_playbook', 'marketing_plan', 'research_brief', 'buyer_leads']
@@ -32,7 +23,7 @@ const PROMPT = [
   '2. acquisition_playbook — how this asset is sold to a larger company. Name the buyer categories that pay for this capability and what they are really buying (a customer list, a licence, a compliance position, a team). Give the packaging argument, the valuation logic in terms a buyer accepts (multiples, comparable transactions, cost-to-rebuild), the approach sequence from first contact to term sheet, what belongs in the data room, and the four conditions that make a strategic buyer walk.',
   '3. marketing_plan — the first thousand users. Name the buyer, the wedge, the single channel that carries the first hundred, the proof asset that closes them, the pricing test, and the retention signal that says the wedge holds.',
   '4. research_brief — separate what the record actually shows from what is assumed. List the load-bearing assumptions, the evidence that would falsify each one, the sources a reader can check, and the questions that must be answered before money is spent.',
-  '5. buyer_leads — six to ten specific companies that plausibly acquire or license this asset. Each must be a real, currently operating company found in your sources, with why it fits its own current product line, the role to approach, the opening move, and the proof to lead with.',
+  '5. buyer_leads — six to ten specific companies that plausibly acquire or license this asset. Each must be a real, currently operating company found in your sources, with its buyer category (incumbent, platform, reseller, acquirer, services or research), why it fits its own current product line, the role to approach, the opening move, and the proof to lead with. Also write each one its own first-touch email: subject under nine words, and a 90 to 140 word pitch in first person — their situation, what the asset makes possible for them, one proof the operator can produce this week, one small ask. No manufactured urgency, no false scarcity, no fear appeals, no fake social proof, no invented facts about the company or invented contacts.',
   '',
   'Rules: no invented funding amounts, no invented statistics, no invented contacts. Where a figure is an estimate, say it is an estimate and give the basis. Never claim a program funds this category unless your sources support it. Plain declarative sentences. No headings inside the four playbooks other than short markdown headings.'
 ].join('\n');
@@ -78,16 +69,7 @@ export default async function (req) {
       acquisition_playbook: String(raw?.acquisition_playbook || '').trim(),
       marketing_plan: String(raw?.marketing_plan || '').trim(),
       research_brief: String(raw?.research_brief || '').trim(),
-      buyer_leads: (Array.isArray(raw?.buyer_leads) ? raw.buyer_leads : [])
-        .map((lead) => ({
-          company: String(lead?.company || '').trim(),
-          why_fit: String(lead?.why_fit || '').trim(),
-          contact_role: String(lead?.contact_role || '').trim(),
-          approach: String(lead?.approach || '').trim(),
-          evidence_to_lead_with: String(lead?.evidence_to_lead_with || '').trim()
-        }))
-        .filter((lead) => lead.company && lead.why_fit && lead.approach)
-        .slice(0, 10)
+      buyer_leads: normalizeLeads(raw?.buyer_leads, 10, false)
     };
 
     if (!playbooks.funding_playbook || !playbooks.acquisition_playbook || !playbooks.buyer_leads.length) {

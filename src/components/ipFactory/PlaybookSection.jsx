@@ -1,4 +1,5 @@
 import { Badge } from '@/components/ui/badge';
+import BuyerLeadsPanel from '@/components/ipFactory/BuyerLeadsPanel';
 
 function Block({ title, children }) {
   return (
@@ -49,22 +50,7 @@ export default function PlaybookSection({ seed }) {
       {seed.funding_playbook && <Block title="Funding Playbook">{seed.funding_playbook}</Block>}
       {seed.acquisition_playbook && <Block title="Acquisition Playbook">{seed.acquisition_playbook}</Block>}
 
-      {leads.length > 0 && (
-        <div className="space-y-2">
-          <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Named Buyer Leads</h4>
-          <div className="space-y-2">
-            {leads.map((lead, i) => (
-              <div key={i} className="rounded-md border p-2.5 space-y-1">
-                <div className="text-sm font-medium">{lead.company}</div>
-                {lead.why_fit && <p className="text-xs leading-relaxed text-muted-foreground">{lead.why_fit}</p>}
-                {lead.contact_role && <p className="text-xs"><span className="text-muted-foreground">Reach: </span>{lead.contact_role}</p>}
-                {lead.approach && <p className="text-xs"><span className="text-muted-foreground">Opening move: </span>{lead.approach}</p>}
-                {lead.evidence_to_lead_with && <p className="text-xs"><span className="text-muted-foreground">Lead with: </span>{lead.evidence_to_lead_with}</p>}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      <BuyerLeadsPanel leads={leads} />
 
       {seed.marketing_plan && <Block title="Marketing Plan">{seed.marketing_plan}</Block>}
       {seed.research_brief && <Block title="Research Brief">{seed.research_brief}</Block>}

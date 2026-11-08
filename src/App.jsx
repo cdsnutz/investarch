@@ -13,6 +13,7 @@ import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
+import Mfa from '@/pages/Mfa';
 import ThankYou from '@/pages/ThankYou';
 import Dashboard from '@/pages/Dashboard';
 import NewAnalysis from '@/pages/NewAnalysis';
@@ -76,6 +77,7 @@ const AuthenticatedApp = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/mfa" element={<Mfa />} />
       <Route path="/ThankYou" element={<ThankYou />} />
       <Route path="/oauth/consent" element={<OAuthConsent />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>

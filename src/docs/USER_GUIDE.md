@@ -102,6 +102,14 @@ Finding combinations costs one synthesis call. Creating the mix costs nothing fu
 
 **Automatic mixing.** The ledger mixes itself once a day. When IP Factory opens, it reads the current seeds, writes up to three of the strongest combinations as ecosystems without a click, and ranks them under **Top ranked ecosystems** above the seed ledger, highest compounding score first. Each card carries its rank, its compounding score, the members it merges and its full record, so its instruments, prospectus, dossier pack and codebase export are one action away. The members stay where they are and are not listed twice.
 
+**Exporting the ledger.** Three buttons beside **Mix seeds** build one archive each, in the browser, from the full ledger rather than the page on screen:
+
+- **Export all seeds** — every single-asset seed, each in its own folder: its dossier documents (thesis, instruments, prospectus, playbooks, marketing plan, research brief, architecture, logic, data model, strategy, hardening report), its verified codebase file set, and its buyer book with the written first-touch emails. Documents ship as Markdown rather than PDF: a four-hundred-seed archive of rendered PDFs runs to hundreds of megabytes, while the same text compresses into a few megabytes. The single-seed **Download dossier pack** still renders PDFs.
+- **Export all ecosystems** — the same structure for the mixed seeds.
+- **Export all buyers** — one profile per company, deduplicated across every seed and researched from public sources: what the company does today, its dated recent moves, the buying trigger those moves expose, and one falsifiable insight with the source it came from. Every profile states its confidence — verified, likely or thin — and where to re-check before the first send.
+
+Each export shows its progress and reports anything incomplete instead of failing silently. Buyer research calls the model once per six buyers, so a seventy-buyer book is about a dozen calls.
+
 ### 7.4 What the dossier pack contains
 
 ```

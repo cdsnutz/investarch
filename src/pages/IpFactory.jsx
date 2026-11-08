@@ -14,6 +14,7 @@ import { HUNT_PRESETS } from '@/lib/ipVectors';
 import MixSeedsDialog from '@/components/ipFactory/MixSeedsDialog';
 import EcosystemRanking from '@/components/ipFactory/EcosystemRanking';
 import RebuildCodebasesButton from '@/components/ipFactory/RebuildCodebasesButton';
+import ExportArchives from '@/components/ipFactory/ExportArchives';
 
 const STAGES = [
   'Signal Miner: sweeping 96 market vectors — launch feeds, app charts, repos, dockets…',
@@ -194,6 +195,7 @@ export default function IpFactory() {
           {running ? 'The hunt is running' : 'Run the hunt now'}
         </Button>
         <MixSeedsDialog onCreated={() => { setFilter('all'); load('all'); }} />
+        <ExportArchives brand={brand} />
         <Button variant="outline" onClick={sweepLeads} disabled={sweeping} className="w-full sm:w-auto">
           {sweeping ? <Loader2 className="size-4 mr-2 animate-spin" /> : <Users className="size-4 mr-2" />}
           {sweeping ? 'Drafting buyer leads' : 'Sweep buyer leads'}

@@ -1,10 +1,10 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import { resolveVectors, vectorBriefBlock, DEFAULT_PRESET } from "../../shared/ipVectors.ts";
 
-const SIGNAL_BATCHES = 2;
+const SIGNAL_BATCHES = 3;
 const SIGNALS_PER_BATCH = 20;
-const SEED_BATCHES = 5;
-const SEEDS_PER_BATCH = 24;
+const SEED_BATCHES = 10;
+const SEEDS_PER_BATCH = 35;
 const PORTFOLIO_MEMORY = 150;
 const SEED_MEMORY = 80;
 

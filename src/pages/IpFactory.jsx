@@ -19,7 +19,7 @@ import ExportArchives from '@/components/ipFactory/ExportArchives';
 const STAGES = [
   'Signal Miner: sweeping 96 market vectors — launch feeds, app charts, repos, dockets…',
   'Filtering for asymmetric market lacunae…',
-  'Synthesizer: drafting 120 IP-seeds across five parallel batches…',
+  'Synthesizer: drafting 350 IP-seeds across ten parallel batches…',
   'Portfolio Strategist: issuing Hold / Flip / Build verdicts…'
 ];
 
@@ -167,7 +167,7 @@ export default function IpFactory() {
           <h1 className="text-2xl md:text-3xl font-semibold tracking-tight flex items-center gap-2.5">
             <Radar className="size-6 text-emerald-500" /> IP Factory
           </h1>
-          <p className="text-sm text-muted-foreground mt-2 max-w-xl">The Market Hunter sweeps ninety-six market vectors, from the frontier — AI agents, developer tooling, new compute, consumer breakouts — for live pain-signals opened in the last twelve months, skips anything already in the portfolio, and converts the sharpest lacunae into a yield of 120 IP-seeds, each with its own path to first thousand users. The Registrar then turns each seed into a legal asset: patents written as claims, trademark packets, deeds, and a liquidation prospectus naming its buyers.</p>
+          <p className="text-sm text-muted-foreground mt-2 max-w-xl">The Market Hunter sweeps ninety-six market vectors, from the frontier — AI agents, developer tooling, new compute, consumer breakouts — for live pain-signals opened in the last twelve months, skips anything already in the portfolio, and converts the sharpest lacunae into a yield of 350 IP-seeds, each with its own path to first thousand users. The Registrar then turns each seed into a legal asset: patents written as claims, trademark packets, deeds, and a liquidation prospectus naming its buyers.</p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 text-center w-full sm:w-auto">
           <div className="rounded-lg border bg-card px-3 py-2.5 sm:px-4 sm:py-3">
@@ -244,7 +244,7 @@ export default function IpFactory() {
           <BrainCircuit className="size-6 text-emerald-500 mb-3" />
           <div className="font-medium">Sovereign IP Hunt</div>
           <div className="text-sm text-muted-foreground mt-1.5 h-5">{stage}</div>
-          <p className="text-xs text-muted-foreground/70 mt-3">Signal mining with live web context, then 120 seeds synthesized in five parallel batches — a couple of minutes.</p>
+          <p className="text-xs text-muted-foreground/70 mt-3">Signal mining with live web context, then 350 seeds synthesized in ten parallel batches — a few minutes.</p>
         </div>
       )}
 

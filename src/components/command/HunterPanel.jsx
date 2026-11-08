@@ -6,6 +6,9 @@ import { logActivity } from '@/lib/activity';
 import { Link, useNavigate } from 'react-router-dom';
 import useDossierBuild from '@/hooks/useDossierBuild';
 import StageTrack from '@/components/command/StageTrack';
+import useHuggingFace from '@/hooks/useHuggingFace';
+import HuggingFaceConnect from '@/components/hf/HuggingFaceConnect';
+import ScoreSeedButton from '@/components/hf/ScoreSeedButton';
 
 export default function HunterPanel({ onChange }) {
   const [seeds, setSeeds] = useState(null);
@@ -14,6 +17,7 @@ export default function HunterPanel({ onChange }) {
   const [buildingId, setBuildingId] = useState(null);
   const { stages, stageList, running, start, retry } = useDossierBuild();
   const navigate = useNavigate();
+  const hf = useHuggingFace();
 
   const load = () => base44.entities.MarketSeed.filter({ status: 'New' }, { sort: '-created_date', limit: 20 }).then((p) => setSeeds(p.items));
 
@@ -53,6 +57,11 @@ export default function HunterPanel({ onChange }) {
 
   return (
     <Panel code="C" title="Market Hunter" action={<span className="text-xs text-muted-foreground">{seeds?.length ?? '–'} open · live</span>}>
+      {!hf.connected && (
+        <div className="mb-4 pb-4 border-b border-border">
+          <HuggingFaceConnect hf={hf} />
+        </div>
+      )}
       {building && (
         <div className="mb-4 space-y-2">
           <div className="flex items-start justify-between gap-3">
@@ -76,9 +85,11 @@ export default function HunterPanel({ onChange }) {
                   <span className="font-mono text-sm text-bottle shrink-0">{s.signal_score ?? '–'}</span>
                 </div>
                 {s.thesis && <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{s.thesis}</p>}
-                <div className="flex gap-2 mt-2">
+                {s.signal_note && <p className="text-[11px] italic text-bottle/80 mt-1.5 leading-relaxed">{s.signal_note}</p>}
+                <div className="flex items-start gap-2 mt-2">
                   <Button size="sm" disabled={running || busy === s.id} onClick={() => capture(s)} className="h-7 bg-bottle text-bottle-foreground hover:bg-bottle/90">Capture</Button>
                   <Button size="sm" variant="outline" disabled={busy === s.id} onClick={() => dismiss(s)} className="h-7">Dismiss</Button>
+                  <ScoreSeedButton seed={s} hf={hf} onScored={(patch) => setSeeds((prev) => prev.map((x) => (x.id === s.id ? { ...x, ...patch } : x)))} />
                 </div>
               </li>
             ))}

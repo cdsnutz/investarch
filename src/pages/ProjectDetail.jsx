@@ -14,6 +14,9 @@ import EngineTab from '@/components/valueEngine/EngineTab';
 import FundingDrafts from '@/components/valueEngine/FundingDrafts';
 import PackagePanel from '@/components/packagePanel/PackagePanel';
 import BuildButton from '@/components/command/BuildButton';
+import useHuggingFace from '@/hooks/useHuggingFace';
+import HuggingFaceConnect from '@/components/hf/HuggingFaceConnect';
+import RewriteSection from '@/components/hf/RewriteSection';
 
 function Section({ title, children }) {
   return (
@@ -32,6 +35,7 @@ export default function ProjectDetail() {
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
   const [scoringRadar, setScoringRadar] = useState(false);
+  const hf = useHuggingFace();
 
   useEffect(() => {
     let active = true;
@@ -130,6 +134,9 @@ export default function ProjectDetail() {
         <div className="mt-5 print:hidden">
           <BuildButton project={project} onComplete={() => window.location.reload()} />
         </div>
+        <div className="mt-3 print:hidden">
+          <HuggingFaceConnect hf={hf} />
+        </div>
       </div>
 
       <Tabs defaultValue="overview" className="print:hidden">
@@ -146,6 +153,7 @@ export default function ProjectDetail() {
 
         <TabsContent value="overview" className="space-y-8">
           <Section title="Executive Command">{project.executive_summary}</Section>
+          <RewriteSection project={project} field="executive_summary" hf={hf} onSaved={(t) => setProject((p) => ({ ...p, executive_summary: t }))} />
           {project.value_proposition && <Section title="Value Proposition">{project.value_proposition}</Section>}
           {project.strategic_edge && (
             <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-5">
@@ -157,6 +165,7 @@ export default function ProjectDetail() {
 
         <TabsContent value="market" className="space-y-6">
           <Section title="Market Analysis">{project.market_analysis}</Section>
+          <RewriteSection project={project} field="market_analysis" hf={hf} onSaved={(t) => setProject((p) => ({ ...p, market_analysis: t }))} />
         </TabsContent>
 
         <TabsContent value="competitive" className="space-y-6">
@@ -201,6 +210,7 @@ export default function ProjectDetail() {
 
         <TabsContent value="narrative" className="space-y-6">
           <Section title="Investor Narrative">{project.investor_narrative}</Section>
+          <RewriteSection project={project} field="investor_narrative" hf={hf} onSaved={(t) => setProject((p) => ({ ...p, investor_narrative: t }))} />
         </TabsContent>
       </Tabs>
 

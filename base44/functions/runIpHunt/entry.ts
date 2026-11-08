@@ -5,7 +5,6 @@ const SIGNAL_BATCHES = 2;
 const SIGNALS_PER_BATCH = 20;
 const SEED_BATCHES = 5;
 const SEEDS_PER_BATCH = 24;
-const YIELD_TARGET = SEED_BATCHES * SEEDS_PER_BATCH;
 const PORTFOLIO_MEMORY = 150;
 const SEED_MEMORY = 80;
 
@@ -195,8 +194,7 @@ export default async function(req) {
     const heldSet = new Set(heldTitles.map((t) => t.toLowerCase()));
     const fresh = dedupeBy(produced, (s) => s.title).filter((s) => !heldSet.has(String(s.title || '').trim().toLowerCase()));
     const toStore = (fresh.length ? fresh : dedupeBy(produced, (s) => s.title))
-      .filter((s) => String(s.title || '').trim())
-      .slice(0, YIELD_TARGET);
+      .filter((s) => String(s.title || '').trim());
 
     const yieldDate = new Date().toISOString().slice(0, 10);
     const records = toStore.map((s) => ({

@@ -4,7 +4,7 @@ Version 1.0 · 8 November 2026 · Compiled by the Registrar.
 
 This manifest enumerates every file in the application repository, grouped by area, with the role each file plays. It is the completeness check for the Registrar's documentation: if a file is on disk and not listed here, it is undocumented; if it is listed here and not on disk, the guide describes something that no longer exists.
 
-**Totals:** 316 files — 15 root · 94 backend · 12 skills · 195 app source.
+**Totals:** 319 files — 15 root · 94 backend · 12 skills · 198 app source.
 
 **Verification.** Run `node src/docs/verify-manifest.mjs` from the repository root. It walks the working tree (ignoring `node_modules`, `.git`, `dist`), compares it against the entries below, prints any file missing from the manifest and any entry with no file behind it, and exits non-zero on drift. A clean run prints `OK` and the two matching counts.
 
@@ -160,7 +160,7 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `skills/pods/security.md` — Security pod: isolation, trust boundaries, delete behaviour.
 - `skills/pods/structure.md` — Structure pod: tables, keys, uniqueness, indexes.
 
-## 4. App source (195)
+## 4. App source (198)
 
 ### 4.1 Entry and shell (4)
 
@@ -235,11 +235,13 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `src/components/ipFactory/RunCost.jsx` — hunt cost estimate and last-run yield.
 - `src/components/ipFactory/SeedDetail.jsx` — full seed body and its instrument, prospectus and pack actions.
 
-### 4.10 Nexus (3)
+### 4.10 Nexus (5)
 
 - `src/components/nexus/NetworkMap.jsx` — SVG network of seeds, competitors, funders and archetypes.
 - `src/components/nexus/NodeInspector.jsx` — detail panel for the selected node.
 - `src/components/nexus/ReadinessPanel.jsx` — funding readiness scoring.
+- `src/components/nexus/SyndicateList.jsx` — syndicate cards: shared asset, seed count, combined and average asymmetry.
+- `src/components/nexus/SyndicateMap.jsx` — two-column map of shared investor bases and market vectors against the seeds that share them.
 
 ### 4.11 Brand and shared panels (3)
 
@@ -325,7 +327,7 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `src/hooks/useDossierBuild.js` — dossier build and refinement state.
 - `src/hooks/useHuggingFace.js` — connector-backed inference state.
 
-### 4.16 Library (26)
+### 4.16 Library (27)
 
 - `src/lib/AuthContext.jsx` — auth provider, session state and public settings.
 - `src/lib/PageNotFound.jsx` — 404 page with a real 404 status.
@@ -352,6 +354,7 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `src/lib/seedDocs.js` — derives one seed's user guide, technical guide and file manifest from the generator.
 - `src/lib/seedComplete.js` — required-field rules for a complete seed.
 - `src/lib/seedReadiness.js` — funding readiness scoring per seed.
+- `src/lib/syndicateMap.js` — clusters seeds that share a named buyer or a market vector, for combined-round syndicates.
 - `src/lib/utils.js` — class-name merge helper.
 
 ### 4.17 Generated-code kit (9)

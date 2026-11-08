@@ -35,8 +35,15 @@ function displayName(name) {
     .trim();
 }
 
-export function buildSyndicates({ seeds = [], vectors = [], prospectuses = [] } = {}) {
+export function buildSyndicates({ seeds = [], vectors = [], prospectuses = [], funding = [] } = {}) {
   const seedById = new Map(seeds.map((s) => [s.id, s]));
+
+  // The operator's own investor base: every funder recorded on a dossier.
+  const baseNames = new Map();
+  funding.forEach((f) => {
+    const key = companyKey(f?.name);
+    if (key.length >= 3 && !baseNames.has(key)) baseNames.set(key, displayName(f.name) || String(f.name));
+  });
 
   // Investor base: every company named as a target on a prospectus, or drafted
   // as a buyer lead, keyed so "Salesforce, Inc." and "Salesforce.com Inc." agree.
@@ -100,10 +107,15 @@ export function buildSyndicates({ seeds = [], vectors = [], prospectuses = [] } 
     };
   };
 
+  const buyers = [...byBuyer]
+    .map(([key, entry]) => ({
+      ...toCluster('buyer', key, entry.label, 'shared investor base', entry.seeds),
+      owned: baseNames.has(key)
+    }))
+    .sort((a, b) => b.count - a.count || b.avgAsym - a.avgAsym || a.label.localeCompare(b.label));
+
   const clusters = [];
-  byBuyer.forEach((entry, key) => {
-    if (entry.seeds.size >= 2) clusters.push(toCluster('buyer', key, entry.label, 'shared investor base', entry.seeds));
-  });
+  buyers.filter((c) => c.count >= 2).forEach((c) => clusters.push(c));
   byVector.forEach((entry, id) => {
     if (entry.seeds.size >= 2) clusters.push(toCluster('vector', id, entry.label, entry.sector || 'shared market vector', entry.seeds));
   });
@@ -113,6 +125,10 @@ export function buildSyndicates({ seeds = [], vectors = [], prospectuses = [] } 
   const covered = new Set(clusters.flatMap((c) => c.seeds.map((s) => s.id)));
   return {
     clusters,
+    buyers,
+    investorBase: [...baseNames]
+      .map(([key, label]) => ({ key, label, seeds: byBuyer.get(key)?.seeds.size || 0 }))
+      .sort((a, b) => b.seeds - a.seeds || a.label.localeCompare(b.label)),
     coveredSeeds: covered.size,
     buyerClusters: clusters.filter((c) => c.kind === 'buyer').length,
     vectorClusters: clusters.filter((c) => c.kind === 'vector').length

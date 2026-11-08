@@ -4,7 +4,7 @@ Version 1.0 · 8 November 2026 · Compiled by the Registrar.
 
 This manifest enumerates every file in the application repository, grouped by area, with the role each file plays. It is the completeness check for the Registrar's documentation: if a file is on disk and not listed here, it is undocumented; if it is listed here and not on disk, the guide describes something that no longer exists.
 
-**Totals:** 319 files — 15 root · 94 backend · 12 skills · 198 app source.
+**Totals:** 320 files — 15 root · 94 backend · 12 skills · 199 app source.
 
 **Verification.** Run `node src/docs/verify-manifest.mjs` from the repository root. It walks the working tree (ignoring `node_modules`, `.git`, `dist`), compares it against the entries below, prints any file missing from the manifest and any entry with no file behind it, and exits non-zero on drift. A clean run prints `OK` and the two matching counts.
 
@@ -132,7 +132,7 @@ This manifest enumerates every file in the application repository, grouped by ar
 
 ### 2.5 Workflows (4)
 
-- `base44/workflows/Buyer Lead Sweep.jsonc` — nightly buyer-lead pass over the ledger, highest asymmetry first, three seeds per run, ending in the digest email to the operator.
+- `base44/workflows/Buyer Lead Sweep.jsonc` — nightly buyer-lead pass over the ledger, highest asymmetry first, twelve seeds per run, ending in the digest email to the operator.
 - `base44/workflows/Codebase Hardening Pod.jsonc` — nightly hardening sweep over the seed ledger.
 - `base44/workflows/Dossier Ready For Review.jsonc` — fires when a dossier is promoted and runs the readiness function.
 - `base44/workflows/Sovereign IP Hunt.jsonc` — scheduled hunt that runs the hunter and strategy assignment.
@@ -160,7 +160,7 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `skills/pods/security.md` — Security pod: isolation, trust boundaries, delete behaviour.
 - `skills/pods/structure.md` — Structure pod: tables, keys, uniqueness, indexes.
 
-## 4. App source (198)
+## 4. App source (199)
 
 ### 4.1 Entry and shell (4)
 
@@ -235,8 +235,9 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `src/components/ipFactory/RunCost.jsx` — hunt cost estimate and last-run yield.
 - `src/components/ipFactory/SeedDetail.jsx` — full seed body and its instrument, prospectus and pack actions.
 
-### 4.10 Nexus (5)
+### 4.10 Nexus (6)
 
+- `src/components/nexus/InvestorBaseFilter.jsx` — investor-base filter: pick a tracked investor and see the seeds that name them.
 - `src/components/nexus/NetworkMap.jsx` — SVG network of seeds, competitors, funders and archetypes.
 - `src/components/nexus/NodeInspector.jsx` — detail panel for the selected node.
 - `src/components/nexus/ReadinessPanel.jsx` — funding readiness scoring.
@@ -354,7 +355,7 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `src/lib/seedDocs.js` — derives one seed's user guide, technical guide and file manifest from the generator.
 - `src/lib/seedComplete.js` — required-field rules for a complete seed.
 - `src/lib/seedReadiness.js` — funding readiness scoring per seed.
-- `src/lib/syndicateMap.js` — clusters seeds that share a named buyer or a market vector, for combined-round syndicates.
+- `src/lib/syndicateMap.js` — clusters seeds that share a named buyer or a market vector, for combined-round syndicates; buyer links come from buyer leads, prospectus targets and tracked funders named in a seed's playbook.
 - `src/lib/utils.js` — class-name merge helper.
 
 ### 4.17 Generated-code kit (9)

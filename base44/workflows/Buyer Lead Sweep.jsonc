@@ -37,7 +37,7 @@
           "then": "any_new_leads",
           "x-base44": {
             "title": "Draft buyer leads",
-            "description": "Up to three unpitched seeds per run, each with a written first-touch email"
+            "description": "Up to twelve unpitched seeds per run, each with a written first-touch email"
           }
         }
       },
@@ -86,5 +86,5 @@
       }
     ]
   },
-  "description": "Nightly buyer-lead pass over the seed ledger, highest asymmetry first: names every credible buyer for a seed, writes each company its own pitch, records both on the seed, then emails the sweep's buyers and pitches to the operator's inbox."
+  "description": "Nightly buyer-lead pass over the seed ledger, highest asymmetry first: names every credible buyer for twelve seeds a night, writes each company its own pitch, records both on the seed, then emails the sweep's buyers and pitches to the operator's inbox."
 }

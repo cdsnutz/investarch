@@ -1,7 +1,49 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { draftLeadsForSeed, leadTarget } from '../../shared/buyerLeads.ts';
 
-const MAX_PER_SWEEP = 3;
+const MAX_PER_SWEEP = 12;
+const PARALLEL = 6;
+
+async function pitchSeed(base44, seed) {
+  try {
+    const drafted = await draftLeadsForSeed(base44, seed);
+    if (!drafted.leads.length) {
+      return { result: { seed: seed.title, ok: false, error: 'No usable leads came back.' }, digest: '', leads: 0 };
+    }
+
+    await base44.entities.IpSeed.update(seed.id, {
+      buyer_leads: drafted.leads,
+      buyer_leads_date: drafted.date
+    });
+
+    await base44.entities.ActivityEvent.create({
+      action: 'Buyer leads drafted',
+      detail: `${seed.title} — ${drafted.leads.length} named buyers with written pitches${drafted.coverage_note ? ` (${drafted.coverage_note})` : ''}`,
+      timestamp: new Date().toISOString()
+    });
+
+    return {
+      result: {
+        seed: seed.title,
+        ok: true,
+        leads: drafted.leads.length,
+        companies: drafted.leads.map((lead) => lead.company),
+        coverage_note: drafted.coverage_note
+      },
+      digest: [
+        seed.title.toUpperCase(),
+        drafted.leads
+          .map((lead) => `• ${lead.company} — ${lead.category} · ${lead.contact_role}\n  Subject: ${lead.subject}\n  Why them: ${lead.why_fit}\n  Pitch: ${lead.pitch}`)
+          .join('\n\n'),
+        drafted.coverage_note ? `Coverage note: ${drafted.coverage_note}` : ''
+      ].filter(Boolean).join('\n'),
+      leads: drafted.leads.length
+    };
+  } catch (error) {
+    console.log('draftBuyerLeads seed failed:', seed.id, error?.message);
+    return { result: { seed: seed.title, ok: false, error: error?.message }, digest: '', leads: 0 };
+  }
+}
 
 export default async function (req) {
   try {
@@ -14,7 +56,7 @@ export default async function (req) {
 
     let targets = [];
     if (sweep) {
-      const { items } = await base44.entities.IpSeed.filter({}, { sort: '-asymmetric_score', limit: 60 });
+      const { items } = await base44.entities.IpSeed.filter({}, { sort: '-asymmetric_score', limit: 200 });
       targets = (items || []).filter(leadTarget).slice(0, MAX_PER_SWEEP);
       if (!targets.length) {
         return Response.json({ drafted: 0, attempted: 0, results: [], recipient: user.email, digest: '', note: 'Every seed already carries pitched buyer leads.' });
@@ -30,45 +72,16 @@ export default async function (req) {
     const results = [];
     const digestParts = [];
     let leadTotal = 0;
-    for (const seed of targets) {
-      try {
-        const drafted = await draftLeadsForSeed(base44, seed);
-        if (!drafted.leads.length) {
-          results.push({ seed: seed.title, ok: false, error: 'No usable leads came back.' });
-          continue;
-        }
 
-        await base44.entities.IpSeed.update(seed.id, {
-          buyer_leads: drafted.leads,
-          buyer_leads_date: drafted.date
-        });
-
-        await base44.entities.ActivityEvent.create({
-          action: 'Buyer leads drafted',
-          detail: `${seed.title} — ${drafted.leads.length} named buyers with written pitches${drafted.coverage_note ? ` (${drafted.coverage_note})` : ''}`,
-          timestamp: new Date().toISOString()
-        });
-
-        results.push({
-          seed: seed.title,
-          ok: true,
-          leads: drafted.leads.length,
-          companies: drafted.leads.map((lead) => lead.company),
-          coverage_note: drafted.coverage_note
-        });
-
-        leadTotal += drafted.leads.length;
-        digestParts.push([
-          seed.title.toUpperCase(),
-          drafted.leads
-            .map((lead) => `• ${lead.company} — ${lead.category} · ${lead.contact_role}\n  Subject: ${lead.subject}\n  Why them: ${lead.why_fit}\n  Pitch: ${lead.pitch}`)
-            .join('\n\n'),
-          drafted.coverage_note ? `Coverage note: ${drafted.coverage_note}` : ''
-        ].filter(Boolean).join('\n'));
-      } catch (error) {
-        console.log('draftBuyerLeads seed failed:', seed.id, error?.message);
-        results.push({ seed: seed.title, ok: false, error: error?.message });
-      }
+    // Two waves of six: twelve seeds a night while every request stays well
+    // inside the platform's ceiling.
+    for (let i = 0; i < targets.length; i += PARALLEL) {
+      const chunk = await Promise.all(targets.slice(i, i + PARALLEL).map((seed) => pitchSeed(base44, seed)));
+      chunk.forEach(({ result, digest, leads }) => {
+        results.push(result);
+        if (digest) digestParts.push(digest);
+        leadTotal += leads;
+      });
     }
 
     return Response.json({

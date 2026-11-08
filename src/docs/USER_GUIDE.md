@@ -176,7 +176,7 @@ The portfolio in motion: the seed board across the pipeline, the readiness trend
 
 | Route | Purpose | Reads |
 | --- | --- | --- |
-| `/entity-nexus` | Network map of projects, competitors, funders and archetypes with a readiness inspector. | Project, Competitor, FundingSource, ArchetypeImprint |
+| `/entity-nexus` | Network map of projects, competitors, funders and archetypes with a readiness inspector, plus seed syndicates: which seeds share an investor base or a market vector for one combined round, filterable by your own tracked investors. | Project, Competitor, FundingSource, ArchetypeImprint, IpSeed, MarketVector, IpProspectus |
 | `/market-intel` | The market vector taxonomy and its thesis. | MarketVector |
 | `/market-resonance` | Whether a narrative is landing, against archetypes and live signals. | NarrativeVector, LiveSignal, ArchetypeImprint |
 | `/strategy-vault` | Narrative theses held and the projects they belong to. | NarrativeVector, Project |

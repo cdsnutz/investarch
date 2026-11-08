@@ -5,6 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, Radar, Crosshair, BrainCircuit } from 'lucide-react';
 import { SeedBody } from '@/components/ipFactory/SeedDetail';
+import RunCost from '@/components/ipFactory/RunCost';
 import { Badge } from '@/components/ui/badge';
 import { HUNT_PRESETS } from '@/lib/ipVectors';
 
@@ -24,6 +25,7 @@ export default function IpFactory() {
   const [running, setRunning] = useState(false);
   const [stage, setStage] = useState('');
   const [error, setError] = useState('');
+  const [lastRun, setLastRun] = useState(null);
 
   const load = useCallback(async () => {
     const [seedPage, filingPage, prospectusPage] = await Promise.all([
@@ -49,8 +51,10 @@ export default function IpFactory() {
   const runHunt = async () => {
     setRunning(true);
     setError('');
+    setLastRun(null);
     try {
-      await base44.functions.invoke('runIpHunt', { preset });
+      const res = await base44.functions.invoke('runIpHunt', { preset });
+      setLastRun(res?.data || null);
       await base44.functions.invoke('ipWealthStrategy', {});
       await load();
     } catch (err) {
@@ -111,6 +115,10 @@ export default function IpFactory() {
             <TabsTrigger value="build">Build</TabsTrigger>
           </TabsList>
         </Tabs>
+      </div>
+
+      <div className="mb-6">
+        <RunCost running={running} lastRun={lastRun} />
       </div>
 
       <div className="mb-6">

@@ -213,12 +213,17 @@ export default async function(req) {
       yield_date: yieldDate
     }));
     const created = await db.IpSeed.bulkCreate(records);
+    const signalCalls = signalResults.filter((r) => r.status === 'fulfilled').length;
+    const seedCalls = seedResults.filter((r) => r.status === 'fulfilled').length;
     return Response.json({
       preset,
       vectors: vectors.length,
       signals_found: signals.length,
       seeds_created: (created || []).length || records.length,
       batches: seedResults.map((r) => (r.status === 'fulfilled' ? (r.value?.seeds || []).length : 0)),
+      model_calls: signalCalls + seedCalls,
+      web_search_calls: signalCalls,
+      credits_estimate: signalCalls + seedCalls,
       yield_date: yieldDate
     });
   } catch (error) {

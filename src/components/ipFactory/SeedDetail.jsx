@@ -45,7 +45,7 @@ function FilingView({ filing }) {
   return <Block title="Deed of Ownership">{filing.deed_text}</Block>;
 }
 
-export function SeedBody({ seed, filings, prospectus, onRefresh }) {
+export function SeedBody({ seed, filings, prospectus, onRefresh, brand }) {
   const [busy, setBusy] = useState('');
   const [codebase, setCodebase] = useState(null);
 
@@ -64,7 +64,7 @@ export function SeedBody({ seed, filings, prospectus, onRefresh }) {
     const cb = res.data || {};
     setCodebase(cb);
     const zip = new JSZip();
-    buildKitFiles(seed, cb).forEach((f) => zip.file(f.path, f.content, f.executable ? { unixPermissions: '755' } : undefined));
+    buildKitFiles(seed, cb, brand).forEach((f) => zip.file(f.path, f.content, f.executable ? { unixPermissions: '755' } : undefined));
     zip.file('AGENTS.md', buildAgentReadme(seed, cb));
     zip.file('ACCEPTANCE.md', buildAcceptanceGuide(seed, cb));
     zip.file('DEPLOYMENT.md', buildDeploymentGuide(seed));
@@ -105,7 +105,7 @@ export function SeedBody({ seed, filings, prospectus, onRefresh }) {
     const arch = await base44.functions.invoke('architectSeed', { seedId: seed.id });
     const codebase = arch.data || {};
     const fresh = await base44.entities.IpFiling.filter({ seed_id: seed.id }, { limit: 20 });
-    const blob = await buildDossierPack({ seed, filings: fresh.items || [], prospectus: prospectusRec, codebase, capital });
+    const blob = await buildDossierPack({ seed, filings: fresh.items || [], prospectus: prospectusRec, codebase, capital, brand });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;

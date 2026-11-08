@@ -7,6 +7,8 @@ import { Loader2, Radar, Crosshair, BrainCircuit } from 'lucide-react';
 import { SeedBody } from '@/components/ipFactory/SeedDetail';
 import RunCost from '@/components/ipFactory/RunCost';
 import AgentRegistryPanel from '@/components/ipFactory/AgentRegistryPanel';
+import CodebaseExportPanel from '@/components/ipFactory/CodebaseExportPanel';
+import BrandKitPanel from '@/components/brand/BrandKitPanel';
 import { Badge } from '@/components/ui/badge';
 import { HUNT_PRESETS } from '@/lib/ipVectors';
 
@@ -33,6 +35,7 @@ export default function IpFactory() {
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [counts, setCounts] = useState({ today: 0, hold: 0, flip: 0, build: 0 });
+  const [brand, setBrand] = useState(null);
 
   const load = useCallback(async (ledger = 'all') => {
     const today = new Date().toISOString().slice(0, 10);
@@ -70,6 +73,12 @@ export default function IpFactory() {
   };
 
   useEffect(() => { load(filter).catch(() => setSeeds([])); }, [filter, load]);
+
+  useEffect(() => {
+    base44.entities.BrandKit.filter({}, { sort: '-updated_date', limit: 1 })
+      .then((page) => setBrand((page.items || [])[0] || null))
+      .catch(() => setBrand(null));
+  }, []);
 
   useEffect(() => {
     if (!running) { setStage(''); return; }
@@ -167,6 +176,9 @@ export default function IpFactory() {
         </div>
       </div>
 
+      <BrandKitPanel brand={brand} onChange={setBrand} />
+      <CodebaseExportPanel seeds={seeds || []} brand={brand} />
+
       <AgentRegistryPanel onChanged={() => load(filter)} />
 
       {running && (
@@ -200,7 +212,7 @@ export default function IpFactory() {
                   {s.yield_date && <span className="text-xs text-muted-foreground">Yield: {s.yield_date}</span>}
                 </div>
               </div>
-              <SeedBody seed={s} filings={filingsBySeed[s.id] || []} prospectus={prospectusBySeed[s.id]} onRefresh={load} />
+              <SeedBody seed={s} filings={filingsBySeed[s.id] || []} prospectus={prospectusBySeed[s.id]} onRefresh={load} brand={brand} />
             </div>
           ))}
         </div>

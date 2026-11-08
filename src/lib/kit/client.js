@@ -1,5 +1,6 @@
 // Frontend half of the generated application: router, session provider, API client and every screen.
 import { primaryEntity } from '@/lib/kit/model';
+import { DASHBOARD, RECORD_NEW, RECORD_DETAIL } from '@/lib/kit/pagesRecords';
 
 const STYLES = `:root {
   color-scheme: light;
@@ -296,7 +297,84 @@ a:focus-visible {
     margin-bottom: 12px;
   }
 }
+
+/* Brand kit: palette and type generated from the operator's uploaded assets. */
+:root {
+  --accent: __PRIMARY__;
+  --accent-ink: __ON_PRIMARY__;
+  --paper: __SURFACE__;
+  --surface: #ffffff;
+  --ink: __INK__;
+  --danger: __ACCENT__;
+  --font-heading: __HEADING_FONT__;
+  --font-body: __BODY_FONT__;
+}
+
+body {
+  font-family: var(--font-body);
+}
+
+h1,
+h2,
+h3,
+.brand,
+.stat {
+  font-family: var(--font-heading);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.brand-logo {
+  height: 26px;
+  width: auto;
+  display: block;
+}
+
+.logo {
+  display: block;
+  max-width: 148px;
+  height: auto;
+  margin-bottom: 18px;
+}
+
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 10px;
+}
+
+.hero {
+  padding: 6px 0 10px;
+}
+
+.hero h1 {
+  max-width: 24ch;
+}
+
+.footer {
+  margin-top: 40px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  font-size: 13px;
+  color: var(--muted);
+}
 `;
+
+function buildStyles(brand) {
+  return STYLES.replace('__PRIMARY__', brand.primary)
+    .replace('__ON_PRIMARY__', brand.onPrimary)
+    .replace('__SURFACE__', brand.surface)
+    .replace('__INK__', brand.ink)
+    .replace('__ACCENT__', brand.accent)
+    .replace('__HEADING_FONT__', brand.headingFont)
+    .replace('__BODY_FONT__', brand.bodyFont);
+}
 
 const API = `const BASE = import.meta.env.VITE_API_URL || '';
 
@@ -394,6 +472,7 @@ export function useAuth() {
 
 const SHELL = `import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth';
+import { BRAND } from '../brand';
 
 export default function Shell() {
   const { user, signOut } = useAuth();
@@ -408,7 +487,8 @@ export default function Shell() {
     <div>
       <header className="topbar">
         <Link className="brand" to="/app">
-          {user ? user.full_name : 'InvestArch'}
+          {BRAND.logo ? <img className="brand-logo" src={BRAND.logo} alt={BRAND.name} /> : null}
+          <span>{BRAND.name}</span>
         </Link>
         <nav className="nav" aria-label="Main">
           <NavLink to="/app" end>
@@ -537,38 +617,63 @@ export function titleOf(record) {
 `;
 }
 
+const safeCopy = (value, max) =>
+  String(value || '')
+    .replace(/[`\\]/g, '')
+    .replace(/\$\{/g, '')
+    .replace(/'/g, '’')
+    .trim()
+    .slice(0, max);
+
 function buildLanding(seed) {
+  const headline = safeCopy(`${seed.title || 'Operations'} in one workspace.`, 90);
+  const gap = safeCopy(seed.gap, 260) || 'Records scatter across tools and nobody trusts the numbers.';
+  const solution = safeCopy(seed.solution, 260) || 'One workspace per account, with every record scoped to its owner.';
+
   return `import { Link } from 'react-router-dom';
 import { useAuth } from '../auth';
+import { BRAND } from '../brand';
 
 export default function Landing() {
   const { user, loading } = useAuth();
 
   return (
     <main className="page">
-      <h1>${(seed.title || 'Operations').replace(/'/g, '')} keeps the work in one place.</h1>
-      <p>
-        ${(seed.gap || 'Records scatter across tools and nobody trusts the numbers.').replace(/'/g, '').slice(0, 220)}
-      </p>
-      <p>
-        ${(seed.solution || 'One workspace per account, with every record scoped to its owner.').replace(/'/g, '').slice(0, 220)}
-      </p>
-      <div className="toolbar">
-        {loading ? null : user ? (
-          <Link className="btn" to="/app">
-            Open dashboard
-          </Link>
-        ) : (
-          <>
-            <Link className="btn" to="/register">
-              Create an account
+      <section className="hero">
+        {BRAND.logo ? <img className="logo" src={BRAND.logo} alt={BRAND.name} /> : null}
+        <p className="eyebrow">{BRAND.name}</p>
+        <h1>{BRAND.tagline || '${headline}'}</h1>
+        <p>${gap}</p>
+        <div className="toolbar">
+          {loading ? null : user ? (
+            <Link className="btn" to="/app">
+              Open dashboard
             </Link>
-            <Link className="btn-ghost" to="/login">
-              Sign in
-            </Link>
-          </>
-        )}
+          ) : (
+            <>
+              <Link className="btn" to="/register">
+                Create an account
+              </Link>
+              <Link className="btn-ghost" to="/login">
+                Sign in
+              </Link>
+            </>
+          )}
+        </div>
+      </section>
+
+      <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', marginTop: '28px' }}>
+        <div className="card">
+          <h2>What is broken</h2>
+          <p>${gap}</p>
+        </div>
+        <div className="card">
+          <h2>What this does</h2>
+          <p>${solution}</p>
+        </div>
       </div>
+
+      {BRAND.supportEmail ? <p className="footer">Questions go to {BRAND.supportEmail}.</p> : null}
     </main>
   );
 }
@@ -730,242 +835,6 @@ export default function Register() {
         </div>
       </form>
     </main>
-  );
-}
-`;
-
-const DASHBOARD = `import { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { api } from '../api';
-import { ENTITY, titleOf } from '../schema';
-import StateBlock from '../components/StateBlock';
-
-export default function Dashboard() {
-  const [state, setState] = useState({ status: 'loading', items: [], total: 0, error: null });
-
-  const load = useCallback(async () => {
-    setState((current) => Object.assign({}, current, { status: 'loading', error: null }));
-    try {
-      const body = await api.list(ENTITY.key);
-      setState({ status: body.items.length ? 'ready' : 'empty', items: body.items, total: body.total, error: null });
-    } catch (error) {
-      setState({ status: 'error', items: [], total: 0, error: error.message });
-    }
-  }, []);
-
-  useEffect(() => {
-    load();
-  }, [load]);
-
-  return (
-    <section>
-      <div className="toolbar" style={{ justifyContent: 'space-between', marginBottom: '16px' }}>
-        <div>
-          <h1 style={{ marginBottom: '4px' }}>{ENTITY.label} records</h1>
-          <p className="hint" style={{ margin: 0 }}>
-            {state.total} stored
-          </p>
-        </div>
-        <Link className="btn" to="/app/new">
-          New {ENTITY.label.toLowerCase()}
-        </Link>
-      </div>
-
-      {state.status === 'loading' || state.status === 'error' ? (
-        <StateBlock status={state.status} message={state.error} onRetry={load} />
-      ) : null}
-
-      {state.status === 'empty' ? (
-        <StateBlock
-          status="empty"
-          message={'No ' + ENTITY.label.toLowerCase() + ' records yet.'}
-          action={
-            <Link className="btn" to="/app/new">
-              Add the first one
-            </Link>
-          }
-        />
-      ) : null}
-
-      {state.status === 'ready' ? (
-        <div className="card" style={{ padding: '4px 16px' }}>
-          {state.items.map((item) => (
-            <Link className="row" key={item.id} to={'/app/' + item.id}>
-              <div className="row-title">{titleOf(item)}</div>
-              <div className="row-meta">
-                {ENTITY.fields
-                  .filter((field) => field.name !== ENTITY.titleField && item[field.name] != null)
-                  .slice(0, 3)
-                  .map((field) => (
-                    <span key={field.name}>
-                      {field.label}: {String(item[field.name])}
-                    </span>
-                  ))}
-                <span>{new Date(item.created_at).toLocaleDateString()}</span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      ) : null}
-    </section>
-  );
-}
-`;
-
-const RECORD_NEW = `import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { api } from '../api';
-import { ENTITY } from '../schema';
-import RecordForm from '../components/RecordForm';
-
-export default function RecordNew() {
-  const navigate = useNavigate();
-  const [values, setValues] = useState({});
-  const [error, setError] = useState('');
-  const [busy, setBusy] = useState(false);
-
-  const submit = async () => {
-    setError('');
-    setBusy(true);
-    try {
-      const body = await api.create(ENTITY.key, values);
-      navigate('/app/' + body.record.id, { replace: true });
-    } catch (problem) {
-      setError(problem.message || 'That could not be saved.');
-      setBusy(false);
-    }
-  };
-
-  return (
-    <section>
-      <h1>New {ENTITY.label.toLowerCase()}</h1>
-      <RecordForm
-        fields={ENTITY.fields}
-        values={values}
-        onChange={setValues}
-        onSubmit={submit}
-        submitting={busy}
-        error={error}
-        submitLabel="Save"
-        onCancel={() => navigate('/app')}
-      />
-    </section>
-  );
-}
-`;
-
-const RECORD_DETAIL = `import { useCallback, useEffect, useState } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
-import { api } from '../api';
-import { ENTITY, titleOf } from '../schema';
-import RecordForm from '../components/RecordForm';
-import StateBlock from '../components/StateBlock';
-
-function toInput(record) {
-  const values = {};
-  for (const field of ENTITY.fields) {
-    const value = record[field.name];
-    if (field.type === 'date' && value) values[field.name] = String(value).slice(0, 10);
-    else values[field.name] = value == null ? '' : value;
-  }
-  return values;
-}
-
-export default function RecordDetail() {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const [state, setState] = useState({ status: 'loading', record: null, error: null });
-  const [values, setValues] = useState({});
-  const [error, setError] = useState('');
-  const [busy, setBusy] = useState(false);
-
-  const load = useCallback(async () => {
-    setState({ status: 'loading', record: null, error: null });
-    try {
-      const body = await api.read(ENTITY.key, id);
-      setState({ status: 'ready', record: body.record, error: null });
-      setValues(toInput(body.record));
-    } catch (problem) {
-      setState({
-        status: problem.status === 404 ? 'missing' : 'error',
-        record: null,
-        error: problem.message
-      });
-    }
-  }, [id]);
-
-  useEffect(() => {
-    load();
-  }, [load]);
-
-  const save = async () => {
-    setError('');
-    setBusy(true);
-    try {
-      const body = await api.update(ENTITY.key, id, values);
-      setState({ status: 'ready', record: body.record, error: null });
-      setValues(toInput(body.record));
-    } catch (problem) {
-      setError(problem.message || 'That could not be saved.');
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const destroy = async () => {
-    if (!window.confirm('Delete this record? This cannot be undone.')) return;
-    setBusy(true);
-    try {
-      await api.remove(ENTITY.key, id);
-      navigate('/app', { replace: true });
-    } catch (problem) {
-      setError(problem.message || 'That could not be deleted.');
-      setBusy(false);
-    }
-  };
-
-  if (state.status === 'loading' || state.status === 'error') {
-    return <StateBlock status={state.status} message={state.error} onRetry={load} />;
-  }
-
-  if (state.status === 'missing') {
-    return (
-      <div className="empty">
-        <p>That record does not exist, or it belongs to another account.</p>
-        <Link className="btn" to="/app">
-          Back to dashboard
-        </Link>
-      </div>
-    );
-  }
-
-  return (
-    <section>
-      <p className="hint" style={{ marginBottom: '6px' }}>
-        <Link to="/app">Dashboard</Link> / {ENTITY.label}
-      </p>
-      <h1>{titleOf(state.record)}</h1>
-      <p className="hint">
-        Created {new Date(state.record.created_at).toLocaleString()} | Updated{' '}
-        {new Date(state.record.updated_at).toLocaleString()}
-      </p>
-
-      <RecordForm
-        fields={ENTITY.fields}
-        values={values}
-        onChange={setValues}
-        onSubmit={save}
-        submitting={busy}
-        error={error}
-        submitLabel="Save changes"
-      />
-
-      <div className="toolbar">
-        <button type="button" className="btn-danger" onClick={destroy} disabled={busy}>
-          Delete record
-        </button>
-      </div>
-    </section>
   );
 }
 `;
@@ -1226,9 +1095,9 @@ export default function App() {
 }
 `;
 
-export function buildClientFiles(seed) {
+export function buildClientFiles(seed, brand) {
   return [
-    { path: 'src/index.css', content: STYLES },
+    { path: 'src/index.css', content: buildStyles(brand) },
     { path: 'src/schema.js', content: buildSchemaModule(seed) },
     { path: 'src/api.js', content: API },
     { path: 'src/auth.jsx', content: AUTH },

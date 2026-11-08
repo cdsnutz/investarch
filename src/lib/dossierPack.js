@@ -22,7 +22,7 @@ function splitIntoSections(text) {
   return sections.map((s) => ({ heading: s.heading, body: s.body.trim() })).filter((s) => s.heading || s.body);
 }
 
-export async function buildDossierPack({ seed, filings, prospectus, codebase, capital }) {
+export async function buildDossierPack({ seed, filings, prospectus, codebase, capital, brand }) {
   const zip = new JSZip();
   const base = (seed.title || 'IP-Asset').replace(/[^\w\s-]/g, '').trim() || 'IP-Asset';
 
@@ -113,7 +113,7 @@ export async function buildDossierPack({ seed, filings, prospectus, codebase, ca
   zip.file(`${base}/Codebase/.env.example`, buildEnvExample(seed));
   [...antislopFiles(), ...devproDeployFiles()].forEach((f) => zip.file(`${base}/Codebase/${f.path}`, f.content, f.path.endsWith('.sh') ? { unixPermissions: '755' } : undefined));
 
-  const kit = buildKitFiles(seed, codebase);
+  const kit = buildKitFiles(seed, codebase, brand);
   kit.forEach((f) =>
     zip.file(`${base}/Codebase/${f.path}`, f.content, f.executable ? { unixPermissions: '755' } : undefined)
   );

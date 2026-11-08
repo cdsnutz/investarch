@@ -6,6 +6,7 @@ import { buildMigrateScript } from '@/lib/kit/db';
 import { buildServerFiles } from '@/lib/kit/server';
 import { buildClientFiles } from '@/lib/kit/client';
 import { buildTestFiles } from '@/lib/kit/tests';
+import { normalizeBrand, buildBrandFiles } from '@/lib/kit/brand';
 import {
   buildReadme,
   buildUserGuide,
@@ -127,15 +128,21 @@ coverage/
 .DS_Store
 `;
 
-function buildIndexHtml(seed) {
+function buildIndexHtml(seed, brand) {
+  const description = (brand.tagline || seed.gap || seed.solution || seed.title || '').replace(/"/g, '').slice(0, 150);
   return `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>${seed.title}</title>
-    <meta name="description" content="${(seed.solution || seed.gap || seed.title || '').replace(/"/g, '').slice(0, 150)}" />
-  </head>
+    <title>${brand.name}</title>
+    <meta name="description" content="${description}" />
+    <meta name="theme-color" content="${brand.primary}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="${brand.name}" />
+    <meta property="og:title" content="${brand.name}" />
+    <meta property="og:description" content="${description}" />
+${brand.logo ? `    <meta property="og:image" content="${brand.logo}" />\n    <link rel="icon" href="${brand.logo}" />\n` : ''}  </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
@@ -195,6 +202,7 @@ The application in this folder is finished. It authenticates, persists, scopes e
 | \`database/migrate.js\` | Applies pending migrations once each, one transaction per file. |
 | \`database/seed.js\` | Demo dataset: one owner with three rows per collection, one empty account. |
 | \`src/index.css\` | Design tokens and every shared class. |
+| \`src/brand.js\`, \`brand/BRAND.md\` | Brand name, tagline, logo, palette and type, generated from the operator's brand kit. |
 | \`src/api.js\` | Fetch wrapper: credentials included, typed errors carrying \`status\` and \`fields\`. |
 | \`src/auth.jsx\` | Session provider and \`useAuth\`. |
 | \`src/schema.js\` | Client view of the collection plus \`titleOf\`. |
@@ -434,19 +442,21 @@ Done when: the deployed URL answers \`/health\` 200, the primary flow works on i
 ${codebase?.repo_name ? `\nRepository name: \`${codebase.repo_name}\`.\n` : ''}`;
 }
 
-export function buildKitFiles(seed, codebase) {
+export function buildKitFiles(seed, codebase, brandKit) {
+  const brand = normalizeBrand(brandKit, seed);
   return [
     { path: 'package.json', content: buildPackageJson(seed) },
     { path: 'eslint.config.js', content: ESLINT_CONFIG },
     { path: 'vite.config.js', content: VITE_CONFIG },
     { path: 'vitest.config.js', content: VITEST_CONFIG },
-    { path: 'index.html', content: buildIndexHtml(seed) },
+    { path: 'index.html', content: buildIndexHtml(seed, brand) },
     { path: '.gitignore', content: GITIGNORE },
     { path: 'src/main.jsx', content: MAIN_JSX },
     { path: '.env.example', content: buildEnvExample(seed) },
     { path: 'database/migrate.js', content: buildMigrateScript() },
     { path: 'database/seed.js', content: buildSeedScript(seed) },
-    ...buildClientFiles(seed),
+    ...buildBrandFiles(seed, brand),
+    ...buildClientFiles(seed, brand),
     ...buildServerFiles(seed),
     ...buildTestFiles(seed),
     { path: 'README.md', content: buildReadme(seed) },

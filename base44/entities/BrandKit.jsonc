@@ -1,0 +1,86 @@
+{
+  "name": "BrandKit",
+  "type": "object",
+  "properties": {
+    "brand_name": {
+      "type": "string"
+    },
+    "tagline": {
+      "type": "string"
+    },
+    "logo_url": {
+      "type": "string"
+    },
+    "primary_color": {
+      "type": "string",
+      "default": "#1a3c34"
+    },
+    "accent_color": {
+      "type": "string",
+      "default": "#9a3b2e"
+    },
+    "surface_color": {
+      "type": "string",
+      "default": "#fbfaf7"
+    },
+    "ink_color": {
+      "type": "string",
+      "default": "#0f1115"
+    },
+    "heading_font": {
+      "type": "string",
+      "default": "Georgia, \"Times New Roman\", serif"
+    },
+    "body_font": {
+      "type": "string",
+      "default": "system-ui, -apple-system, \"Segoe UI\", sans-serif"
+    },
+    "support_email": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "brand_name"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

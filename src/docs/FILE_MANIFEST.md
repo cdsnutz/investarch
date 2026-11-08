@@ -4,7 +4,7 @@ Version 1.0 · 8 November 2026 · Compiled by the Registrar.
 
 This manifest enumerates every file in the application repository, grouped by area, with the role each file plays. It is the completeness check for the Registrar's documentation: if a file is on disk and not listed here, it is undocumented; if it is listed here and not on disk, the guide describes something that no longer exists.
 
-**Totals:** 300 files — 15 root · 85 backend · 9 skills · 191 app source.
+**Totals:** 303 files — 15 root · 86 backend · 9 skills · 193 app source.
 
 **Verification.** Run `node src/docs/verify-manifest.mjs` from the repository root. It walks the working tree (ignoring `node_modules`, `.git`, `dist`), compares it against the entries below, prints any file missing from the manifest and any entry with no file behind it, and exits non-zero on drift. A clean run prints `OK` and the two matching counts.
 
@@ -28,7 +28,7 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `tailwind.config.js` — token-to-class mapping, font roles, keyframes.
 - `vite.config.js` — Vite build with the Base44 plugin, React, HMR and analytics hooks.
 
-## 2. Base44 backend (85)
+## 2. Base44 backend (86)
 
 ### 2.1 Configuration (2)
 
@@ -83,7 +83,7 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `base44/entities/ValueAnchor.jsonc` — multi-year value anchors with steering design and progress.
 - `base44/entities/ValueAxiom.jsonc` — value axioms indexing assets against a defined metric.
 
-### 2.3 Backend functions (32)
+### 2.3 Backend functions (33)
 
 - `base44/functions/agentOps/entry.ts` — agent registrar: register, deploy, pause and record runs; app-user session or `x-agent-key`.
 - `base44/functions/analyzeBusiness/entry.ts` — turns a URL and company name into a dossier: sections, forecast, milestones and funding sources.
@@ -101,6 +101,7 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `base44/functions/ipWealthStrategy/entry.ts` — assigns hold, flip or build to every seed with a written rationale.
 - `base44/functions/liquidateIp/entry.ts` — builds the liquidation prospectus, named buyers and offer terms for a seed.
 - `base44/functions/markDossierReadyForReview/entry.ts` — promotes a dossier to ready-for-review and logs the event.
+- `base44/functions/mixSeeds/entry.ts` — finds combinations of seeds that compound as one ecosystem, and writes the chosen mix as a new seed.
 - `base44/functions/payments-webhook/entry.ts` — verifies Base44 Payments JWTs, records the purchase and holds the grant hook.
 - `base44/functions/refineDossierSection/entry.ts` — rewrites a single dossier section against operator guidance.
 - `base44/functions/runDeploymentKit/entry.ts` — produces deployment records for a seed's codebase.
@@ -142,7 +143,7 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `skills/antislop-layoutmobile/SKILL.md` — mobile layout rules.
 - `skills/antislop-ui/SKILL.md` — interface rules.
 
-## 4. App source (191)
+## 4. App source (193)
 
 ### 4.1 Entry and shell (4)
 
@@ -206,10 +207,12 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `src/components/hf/RewriteSection.jsx` — rewrite a dossier section through inference.
 - `src/components/hf/ScoreSeedButton.jsx` — score a seed through inference.
 
-### 4.9 IP Factory (4)
+### 4.9 IP Factory (6)
 
 - `src/components/ipFactory/AgentRegistryPanel.jsx` — register, deploy, pause agents and copy their contract.
 - `src/components/ipFactory/CodebaseExportPanel.jsx` — verify and download full codebase bundles.
+- `src/components/ipFactory/MixComboCard.jsx` — one seed combination: thesis, shared loop, roles and merged stack.
+- `src/components/ipFactory/MixSeedsDialog.jsx` — mix scan, the combination list and ecosystem creation.
 - `src/components/ipFactory/RunCost.jsx` — hunt cost estimate and last-run yield.
 - `src/components/ipFactory/SeedDetail.jsx` — full seed body and its instrument, prospectus and pack actions.
 

@@ -90,7 +90,17 @@ Filter by strategy and page through the ledger. Each seed card shows its asymmet
 
 A seed flagged **Incomplete** is missing required fields; use **Complete this seed** to fill the blueprint before spending on instruments.
 
-### 7.3 What the dossier pack contains
+### 7.3 Mixing seeds into one ecosystem
+
+**Mix seeds** reads the current ledger and returns the combinations that hold together as one product: two or three seeds serving the same buyer through a shared data spine, a shared distribution surface or a shared economic loop. Each combination arrives with the merged product's name, the thesis, the shared loop, what each member contributes, the merged tech stack and a merged Postgres schema. A pairing where one member would collapse into a feature of another is rejected before it reaches you, and a schema that is not a real merge is rejected the same way.
+
+A weak pairing is not offered. When nothing in the ledger compounds, the panel says so rather than inventing a bundle.
+
+**Create ecosystem** writes the combination as a new seed on the build ledger, marked **Mix of N**. From that point it is an ordinary seed with one difference: it is already merged. Architect it, draft its instruments, build its liquidation prospectus, download its dossier pack and export its codebase exactly as for any other seed, and both the pack and the codebase describe the ecosystem rather than its parts. The member seeds stay untouched, so each one can still be filed and sold on its own.
+
+Finding combinations costs one synthesis call. Creating the mix costs nothing further.
+
+### 7.4 What the dossier pack contains
 
 ```
 <Seed> Dossier Pack.zip
@@ -107,7 +117,7 @@ A seed flagged **Incomplete** is missing required fields; use **Complete this se
 
 Nothing is packaged until every document passes its own check. A blank instrument, a section under a minimum length, a placeholder where a substantive paragraph belongs, or a missing grant or loan document blocks the download and names the document and the reason. The PDFs are drafts for filing and for submission, not executed instruments: a patent draft is not a filed application, and a trademark packet is not a registered mark.
 
-### 7.4 Full codebases
+### 7.5 Full codebases
 
 **Verify & download** packages every seed's codebase, and refuses to package any that fails verification. Verification is three passes per codebase:
 
@@ -117,15 +127,15 @@ Nothing is packaged until every document passes its own check. A blank instrumen
 
 A generated repository contains an Express API, a Postgres migration, token authentication, owner-scoped record routes, list, create and detail screens for every collection, a contract test suite, `verify.sh`, `AGENTS.md`, `ACCEPTANCE.md` and `DEPLOYMENT.md`. `./verify.sh` is the runtime proof; static verification cannot execute the database.
 
-### 7.5 Brand kit
+### 7.6 Brand kit
 
 Save a brand name, tagline, logo, palette and font pairing, and every exported codebase and site is rendered in it. With no brand saved, the default palette ships.
 
-### 7.6 Agent registry
+### 7.7 Agent registry
 
 Register an agent, deploy it, pause it, and record its runs. Each agent row carries its kind (external or in-app), its parent agent, the seed it serves, its run count, its success rate and its last outcome. Registering returns a written contract the agent can follow: run the pack's `verify.sh` first, deploy the API on one origin behind TLS, register itself with the `x-agent-key` header, report every run. Deploying your own agents means registering each one with `parentAgent` set to the agent that spawned it.
 
-### 7.7 The Registrar's documentation, per seed
+### 7.8 The Registrar's documentation, per seed
 
 Every seed carries its own documentation, written by the same generator that builds that seed's codebase. Open any seed and the **Seed documentation** block offers three documents:
 

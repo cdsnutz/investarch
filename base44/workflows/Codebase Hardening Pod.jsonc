@@ -1,0 +1,47 @@
+{
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 3 * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "name": "Codebase Hardening Pod",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "codebase_hardening_pod",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "harden_blueprints": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "hardenCodebase",
+            "args": {
+              "action": "sweep"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Harden codebases",
+            "description": "Four pods, three seeds per run"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Nightly hardening pass over the seed ledger: the structure, contracts, security and enhancement pods review each blueprint, apply their fixes, and record the verdict on the seed."
+}

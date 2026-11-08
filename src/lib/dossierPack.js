@@ -181,6 +181,143 @@ export async function buildDossierPack({ seed, filings, prospectus, codebase, ca
     }));
   }
 
+  const blueprint = seed.blueprint || {};
+  const stack = Array.isArray(blueprint.tech_stack) ? blueprint.tech_stack : [];
+  const leads = Array.isArray(seed.buyer_leads) ? seed.buyer_leads : [];
+  const mixLine = Array.isArray(seed.source_seed_titles) && seed.source_seed_titles.length
+    ? `Merged ecosystem of ${seed.source_seed_titles.join(' + ')}`
+    : 'Single-asset seed';
+
+  if (seed.funding_playbook) {
+    zip.file(`${base}/08_Funding_Playbook.pdf`, buildPdf({
+      title: `Funding Playbook: ${seed.title}`,
+      subtitle: 'Instruments, evidence and disqualifiers, in the order they should be attempted',
+      sections: splitIntoSections(seed.funding_playbook),
+      footer: 'Funding Playbook — Confidential'
+    }));
+  }
+
+  if (seed.acquisition_playbook || leads.length) {
+    const leadSections = leads.map((lead, i) => ({
+      heading: `${i + 1}. ${lead.company}`,
+      body: [
+        lead.why_fit ? `Why it fits: ${lead.why_fit}` : '',
+        lead.contact_role ? `Who to reach: ${lead.contact_role}` : '',
+        lead.approach ? `Opening move: ${lead.approach}` : '',
+        lead.evidence_to_lead_with ? `Lead with: ${lead.evidence_to_lead_with}` : ''
+      ].filter(Boolean).join('\n')
+    }));
+    zip.file(`${base}/09_Acquisition_Playbook.pdf`, buildPdf({
+      title: `Acquisition Playbook: ${seed.title}`,
+      subtitle: `${leads.length} named buyer${leads.length === 1 ? '' : 's'}, the packaging argument, and the path to term sheet`,
+      sections: [...splitIntoSections(seed.acquisition_playbook || ''), ...leadSections],
+      footer: 'Acquisition Playbook — Confidential'
+    }));
+  }
+
+  zip.file(`${base}/10_Seed_Architecture.pdf`, buildPdf({
+    title: `Seed Architecture: ${seed.title}`,
+    subtitle: mixLine,
+    sections: [
+      { heading: 'Asset', body: `${seed.title}\n${mixLine}\nVerdict: ${seed.strategy || 'hold'}${seed.asymmetric_score != null ? ` · asymmetry ${seed.asymmetric_score}/10` : ''}` },
+      { heading: 'Technology Stack', body: stack.length ? stack.join('\n') : 'No stack recorded.' },
+      { heading: 'Repository Layout', body: kit.map((f) => f.path).join('\n') },
+      { heading: 'Runtime and Deployment', body: splitIntoSections(buildDeploymentGuide(seed)).map((s) => `${s.heading}\n${s.body}`).join('\n\n') }
+    ],
+    footer: 'Seed Architecture — Confidential'
+  }));
+
+  zip.file(`${base}/11_Seed_Logic.pdf`, buildPdf({
+    title: `Seed Logic: ${seed.title}`,
+    subtitle: 'The mechanisms the generated application runs on',
+    sections: [
+      { heading: 'Core Logic', body: blueprint.core_logic || 'No core logic recorded.' },
+      ...(seed.mix_thesis ? [{ heading: 'Ecosystem Thesis', body: seed.mix_thesis }] : []),
+      ...(seed.ecosystem_interlocks ? [{ heading: 'Interlocks', body: seed.ecosystem_interlocks }] : []),
+      { heading: 'Gap the Logic Closes', body: seed.gap || '' },
+      { heading: 'Solution', body: seed.solution || '' }
+    ],
+    footer: 'Seed Logic — Confidential'
+  }));
+
+  const tables = (String(blueprint.db_schema || '').match(/create\s+table\s+"?([\w.]+)"?/gi) || []).map((m) => m.replace(/create\s+table\s+/i, '').replace(/"/g, ''));
+  zip.file(`${base}/12_Seed_Data_Model.pdf`, buildPdf({
+    title: `Seed Data Model: ${seed.title}`,
+    subtitle: `${tables.length} table${tables.length === 1 ? '' : 's'} in the generated Postgres schema`,
+    sections: [
+      { heading: 'Tables', body: tables.length ? tables.join('\n') : 'No tables recorded.' },
+      { heading: 'Schema (PostgreSQL DDL)', body: blueprint.db_schema || 'No schema recorded.' }
+    ],
+    footer: 'Seed Data Model — Confidential'
+  }));
+
+  zip.file(`${base}/13_Seed_Strategy.pdf`, buildPdf({
+    title: `Seed Strategy: ${seed.title}`,
+    subtitle: `Portfolio verdict: ${seed.strategy || 'hold'}`,
+    sections: [
+      { heading: 'Verdict', body: `${(seed.strategy || 'hold').toUpperCase()} — ${seed.strategy_note || 'no rationale recorded'}` },
+      { heading: 'Scores', body: [`Asymmetry: ${seed.asymmetric_score ?? '–'}/10`, seed.mix_score != null ? `Mix compounding: ${seed.mix_score}/10` : '', `Status: ${seed.status || 'seed'}`, seed.yield_date ? `Yielded: ${seed.yield_date}` : ''].filter(Boolean).join('\n') },
+      ...(mixLine ? [{ heading: 'Ecosystem', body: mixLine }] : []),
+      { heading: 'Go-to-Market Plan', body: seed.mini_plan || 'No plan recorded.' }
+    ],
+    footer: 'Seed Strategy — Confidential'
+  }));
+
+  zip.file(`${base}/14_Seed_Marketing_Plan.pdf`, buildPdf({
+    title: `Marketing Plan: ${seed.title}`,
+    subtitle: 'Buyer, wedge, first channel and the retention signal that proves it',
+    sections: splitIntoSections(seed.marketing_plan || seed.mini_plan || 'No marketing plan recorded.'),
+    footer: 'Marketing Plan — Confidential'
+  }));
+
+  zip.file(`${base}/15_Seed_Research_Brief.pdf`, buildPdf({
+    title: `Research Brief: ${seed.title}`,
+    subtitle: 'What the record shows, what is assumed, and what would falsify it',
+    sections: [
+      ...splitIntoSections(seed.research_brief || ''),
+      { heading: 'Pain Signal on Record', body: seed.pain_signal || 'No pain signal recorded.' },
+      { heading: 'Source Channel', body: seed.source_channel || 'Not recorded.' }
+    ],
+    footer: 'Research Brief — Confidential'
+  }));
+
+  if (seed.hardening_report) {
+    const report = seed.hardening_report;
+    const pods = Array.isArray(report.pods) ? report.pods : [];
+    zip.file(`${base}/16_Codebase_Hardening_Report.pdf`, buildPdf({
+      title: `Codebase Hardening Report: ${seed.title}`,
+      subtitle: `Verdict: ${report.verdict || 'conditional'} · ${report.score ?? '–'}/100 · ${report.date ? String(report.date).slice(0, 10) : 'undated'}`,
+      sections: [
+        { heading: 'Summary', body: report.summary || '' },
+        ...pods.map((pod) => ({
+          heading: `Pod: ${pod.pod}`,
+          body: [
+            ...(pod.findings || []).map((f) => `Finding: ${f}`),
+            ...(pod.fixes || []).map((f) => `Fix applied: ${f}`)
+          ].join('\n')
+        }))
+      ],
+      footer: 'Codebase Hardening Report — Confidential'
+    }));
+  }
+
+  ['USER_GUIDE.md', 'TECHNICAL_GUIDE.md', 'MANIFEST.md'].forEach((name) => {
+    const doc = kit.find((f) => f.path === name);
+    if (doc) zip.file(`${base}/Documentation/${name}`, doc.content);
+  });
+
+  zip.file(`${base}/Data/schema.sql`, blueprint.db_schema || '-- no schema recorded');
+  zip.file(`${base}/Data/seed_record.json`, JSON.stringify(seed, null, 2));
+
+  const packed = Object.keys(zip.files).filter((path) => !zip.files[path].dir).sort();
+  zip.file(`${base}/PACK_MANIFEST.md`, [
+    `# ${base} — Dossier Pack Manifest`,
+    '',
+    `${packed.length} files in this pack, listed below. Every document is generated from the seed record; nothing here is a placeholder.`,
+    '',
+    ...packed.map((path) => `- \`${path.replace(`${base}/`, '')}\``)
+  ].join('\n'));
+
   const blob = await zip.generateAsync({ type: 'blob' });
   return blob;
 }

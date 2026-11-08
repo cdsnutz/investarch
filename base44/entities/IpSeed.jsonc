@@ -89,6 +89,89 @@
     },
     "mix_score": {
       "type": "number"
+    },
+    "funding_playbook": {
+      "type": "string"
+    },
+    "acquisition_playbook": {
+      "type": "string"
+    },
+    "marketing_plan": {
+      "type": "string"
+    },
+    "research_brief": {
+      "type": "string"
+    },
+    "buyer_leads": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "company": {
+            "type": "string"
+          },
+          "why_fit": {
+            "type": "string"
+          },
+          "contact_role": {
+            "type": "string"
+          },
+          "approach": {
+            "type": "string"
+          },
+          "evidence_to_lead_with": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "hardening_report": {
+      "type": "object",
+      "properties": {
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "conditional",
+            "blocked"
+          ]
+        },
+        "score": {
+          "type": "number"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        },
+        "generator": {
+          "type": "string"
+        },
+        "pods": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "pod": {
+                "type": "string"
+              },
+              "findings": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "fixes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "required": [

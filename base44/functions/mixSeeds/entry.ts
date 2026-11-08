@@ -2,6 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 
 const MAX_SEEDS = 60;
 const MAX_COMBINATIONS = 6;
+const AUTO_CREATE = 3;
 
 const clip = (value, limit = 220) => String(value || '').replace(/\s+/g, ' ').trim().slice(0, limit);
 const keyOf = (ids) => [...ids].sort().join('|');
@@ -138,6 +139,32 @@ function normalize(raw, pool) {
   };
 }
 
+async function persist(base44, combo) {
+  const interlocks = [
+    combo.shared_value_loop,
+    ...combo.roles.map((role) => `${role.seed_title}: ${role.role}`)
+  ].filter(Boolean).join('\n\n');
+
+  return base44.entities.IpSeed.create({
+    title: combo.title,
+    gap: combo.gap,
+    solution: combo.solution,
+    pain_signal: combo.pain_signal,
+    mini_plan: combo.mini_plan,
+    blueprint: combo.blueprint,
+    asymmetric_score: combo.asymmetric_score,
+    mix_score: combo.mix_score,
+    mix_thesis: combo.thesis,
+    ecosystem_interlocks: interlocks,
+    source_seed_ids: combo.member_ids,
+    source_seed_titles: combo.member_titles,
+    source_channel: 'seed mix',
+    strategy: 'build',
+    status: 'seed',
+    yield_date: new Date().toISOString().slice(0, 10)
+  });
+}
+
 export default async function (req) {
   try {
     const base44 = createClientFromRequest(req);
@@ -145,7 +172,7 @@ export default async function (req) {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json().catch(() => ({}));
-    const action = body?.action === 'create' ? 'create' : 'find';
+    const action = body?.action === 'create' || body?.action === 'auto' ? body.action : 'find';
 
     const { items } = await base44.entities.IpSeed.filter({}, { sort: '-created_date', limit: MAX_SEEDS });
     const seeds = items || [];
@@ -162,30 +189,7 @@ export default async function (req) {
         return Response.json({ error: 'These seeds are already mixed into one ecosystem.' }, { status: 409 });
       }
 
-      const interlocks = [
-        combo.shared_value_loop,
-        ...combo.roles.map((role) => `${role.seed_title}: ${role.role}`)
-      ].filter(Boolean).join('\n\n');
-
-      const created = await base44.entities.IpSeed.create({
-        title: combo.title,
-        gap: combo.gap,
-        solution: combo.solution,
-        pain_signal: combo.pain_signal,
-        mini_plan: combo.mini_plan,
-        blueprint: combo.blueprint,
-        asymmetric_score: combo.asymmetric_score,
-        mix_score: combo.mix_score,
-        mix_thesis: combo.thesis,
-        ecosystem_interlocks: interlocks,
-        source_seed_ids: combo.member_ids,
-        source_seed_titles: combo.member_titles,
-        source_channel: 'seed mix',
-        strategy: 'build',
-        status: 'seed',
-        yield_date: new Date().toISOString().slice(0, 10)
-      });
-
+      const created = await persist(base44, combo);
       return Response.json({ seed: created });
     }
 
@@ -216,13 +220,29 @@ export default async function (req) {
     if (!combinations.length) {
       return Response.json({
         combinations: [],
+        created: [],
         scanned: pool.length,
         reason: 'No combination in this ledger compounds. Every pairing would fold one seed into another. Hunt more seeds, then mix again.'
       });
     }
 
     combinations.sort((a, b) => b.mix_score - a.mix_score);
-    return Response.json({ combinations: combinations.slice(0, MAX_COMBINATIONS), scanned: pool.length });
+    const ranked = combinations.slice(0, MAX_COMBINATIONS);
+
+    if (action === 'auto') {
+      const created = [];
+      for (const combo of ranked.slice(0, AUTO_CREATE)) {
+        try {
+          const seed = await persist(base44, combo);
+          created.push({ id: seed.id, title: seed.title, mix_score: combo.mix_score, members: combo.member_titles });
+        } catch (error) {
+          console.log('mixSeeds auto persist failed:', combo.title, error?.message);
+        }
+      }
+      return Response.json({ created, combinations: ranked.length, scanned: pool.length });
+    }
+
+    return Response.json({ combinations: ranked, scanned: pool.length });
   } catch (error) {
     console.log('mixSeeds failed:', error?.message);
     return Response.json({ error: error.message }, { status: 500 });

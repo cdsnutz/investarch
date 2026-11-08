@@ -4,7 +4,7 @@ Version 1.0 · 8 November 2026 · Compiled by the Registrar.
 
 This manifest enumerates every file in the application repository, grouped by area, with the role each file plays. It is the completeness check for the Registrar's documentation: if a file is on disk and not listed here, it is undocumented; if it is listed here and not on disk, the guide describes something that no longer exists.
 
-**Totals:** 327 files — 15 root · 94 backend · 19 skills · 199 app source.
+**Totals:** 331 files — 15 root · 94 backend · 19 skills · 203 app source.
 
 **Verification.** Run `node src/docs/verify-manifest.mjs` from the repository root. It walks the working tree (ignoring `node_modules`, `.git`, `dist`), compares it against the entries below, prints any file missing from the manifest and any entry with no file behind it, and exits non-zero on drift. A clean run prints `OK` and the two matching counts.
 
@@ -104,7 +104,7 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `base44/functions/ipWealthStrategy/entry.ts` — assigns hold, flip or build to every seed with a written rationale.
 - `base44/functions/liquidateIp/entry.ts` — builds the liquidation prospectus, named buyers and offer terms for a seed.
 - `base44/functions/markDossierReadyForReview/entry.ts` — promotes a dossier to ready-for-review and logs the event.
-- `base44/functions/mixSeeds/entry.ts` — finds combinations of seeds that compound as one ecosystem, and writes the chosen mix as a new seed.
+- `base44/functions/mixSeeds/entry.ts` — finds combinations of seeds that compound as one ecosystem, writes the chosen mix as a new seed, and in `auto` mode ranks and writes the strongest combinations without a manual pick.
 - `base44/functions/payments-webhook/entry.ts` — verifies Base44 Payments JWTs, records the purchase and holds the grant hook.
 - `base44/functions/refineDossierSection/entry.ts` — rewrites a single dossier section against operator guidance.
 - `base44/functions/runDeploymentKit/entry.ts` — produces deployment records for a seed's codebase.
@@ -233,11 +233,13 @@ Bundled from `antislop-skillset@3.3.4`.
 - `src/components/hf/RewriteSection.jsx` — rewrite a dossier section through inference.
 - `src/components/hf/ScoreSeedButton.jsx` — score a seed through inference.
 
-### 4.9 IP Factory (8)
+### 4.9 IP Factory (10)
 
 - `src/components/ipFactory/AgentRegistryPanel.jsx` — register, deploy, pause agents and copy their contract.
 - `src/components/ipFactory/BuyerLeadsPanel.jsx` — named buyers by category, each with its written pitch and a copy action.
 - `src/components/ipFactory/CodebaseExportPanel.jsx` — verify and download full codebase bundles.
+- `src/components/ipFactory/EcosystemRanking.jsx` — the ranked ecosystems, each with its rank, compounding score, members and full record, shown above the seed ledger.
+- `src/components/ipFactory/RebuildCodebasesButton.jsx` — rebuilds every codebase: hardening until it clears the 83 floor, then the antislop audit with its findings patched and re-audited.
 - `src/components/ipFactory/MixComboCard.jsx` — one seed combination: thesis, shared loop, roles and merged stack.
 - `src/components/ipFactory/MixSeedsDialog.jsx` — mix scan, the combination list and ecosystem creation.
 - `src/components/ipFactory/PlaybookSection.jsx` — funding and acquisition playbooks, named buyer leads with pitches, marketing plan, research brief and the hardening verdict.
@@ -337,7 +339,7 @@ Bundled from `antislop-skillset@3.3.4`.
 - `src/hooks/useDossierBuild.js` — dossier build and refinement state.
 - `src/hooks/useHuggingFace.js` — connector-backed inference state.
 
-### 4.16 Library (27)
+### 4.16 Library (28)
 
 - `src/lib/AuthContext.jsx` — auth provider, session state and public settings.
 - `src/lib/PageNotFound.jsx` — 404 page with a real 404 status.
@@ -350,6 +352,7 @@ Bundled from `antislop-skillset@3.3.4`.
 - `src/lib/authReturnTo.js` — safe post-login destination resolution.
 - `src/lib/buildKit.js` — project configuration, hand-off docs and file assembly for generated repos.
 - `src/lib/codebaseExport.js` — audits generated codebases and packages them as ZIP archives.
+- `src/lib/codebaseRegen.js` — rebuilds every codebase: hardens each blueprint to the 83 floor, then runs the antislop audit, patches the source copy it flags and regenerates.
 - `src/lib/dossierAudit.js` — verifies every dossier document before packaging.
 - `src/lib/dossierPack.js` — assembles the dossier ZIP: PDFs, kit, codebase, QA report.
 - `src/lib/exporter.js` — dossier download helpers.
@@ -367,7 +370,7 @@ Bundled from `antislop-skillset@3.3.4`.
 - `src/lib/syndicateMap.js` — clusters seeds that share a named buyer or a market vector, for combined-round syndicates; buyer links come from buyer leads, prospectus targets and tracked funders named in a seed's playbook.
 - `src/lib/utils.js` — class-name merge helper.
 
-### 4.17 Generated-code kit (9)
+### 4.17 Generated-code kit (10)
 
 - `src/lib/kit/audit.js` — structure, syntax and contract passes for generated files.
 - `src/lib/kit/brand.js` — brand defaults, normalization and brand assets.
@@ -377,6 +380,7 @@ Bundled from `antislop-skillset@3.3.4`.
 - `src/lib/kit/model.js` — single source of truth for the generated data model.
 - `src/lib/kit/pagesRecords.js` — generated list, create and detail screens per collection.
 - `src/lib/kit/server.js` — generated Express server, routes and migration.
+- `src/lib/kit/slopAudit.js` — antislop pass over a generated codebase: every finding names its file, phrase and the house rule that caught it.
 - `src/lib/kit/tests.js` — generated ownership and contract tests.
 
 ### 4.18 Pages (37)

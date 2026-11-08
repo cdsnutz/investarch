@@ -12,9 +12,11 @@ import BrandKitPanel from '@/components/brand/BrandKitPanel';
 import { Badge } from '@/components/ui/badge';
 import { HUNT_PRESETS } from '@/lib/ipVectors';
 import MixSeedsDialog from '@/components/ipFactory/MixSeedsDialog';
+import EcosystemRanking from '@/components/ipFactory/EcosystemRanking';
+import RebuildCodebasesButton from '@/components/ipFactory/RebuildCodebasesButton';
 
 const STAGES = [
-  'Signal Miner: sweeping 34 market vectors — launch feeds, app charts, repos, dockets…',
+  'Signal Miner: sweeping 96 market vectors — launch feeds, app charts, repos, dockets…',
   'Filtering for asymmetric market lacunae…',
   'Synthesizer: drafting 120 IP-seeds across five parallel batches…',
   'Portfolio Strategist: issuing Hold / Flip / Build verdicts…'
@@ -39,18 +41,22 @@ export default function IpFactory() {
   const [brand, setBrand] = useState(null);
   const [sweeping, setSweeping] = useState(false);
   const [sweepNote, setSweepNote] = useState('');
+  const [ecosystems, setEcosystems] = useState([]);
+  const [mixNote, setMixNote] = useState('');
 
   const load = useCallback(async (ledger = 'all') => {
     const today = new Date().toISOString().slice(0, 10);
-    const [seedPage, filingPage, prospectusPage, todayCount, holdCount, flipCount, buildCount] = await Promise.all([
+    const [seedPage, filingPage, prospectusPage, todayCount, holdCount, flipCount, buildCount, ecosystemPage] = await Promise.all([
       base44.entities.IpSeed.filter(ledger === 'all' ? {} : { strategy: ledger }, { sort: '-created_date', limit: PAGE_SIZE }),
       base44.entities.IpFiling.filter({}, { sort: '-created_date', limit: 300 }),
       base44.entities.IpProspectus.filter({}, { sort: '-created_date', limit: 300 }),
       base44.entities.IpSeed.count({ yield_date: today }),
       base44.entities.IpSeed.count({ strategy: 'hold' }),
       base44.entities.IpSeed.count({ strategy: 'flip' }),
-      base44.entities.IpSeed.count({ strategy: 'build' })
+      base44.entities.IpSeed.count({ strategy: 'build' }),
+      base44.entities.IpSeed.filter({ source_channel: 'seed mix' }, { sort: '-mix_score', limit: 3 })
     ]);
+    setEcosystems(ecosystemPage.items || []);
     setSeeds(seedPage.items || []);
     setCursor(seedPage.next_cursor || null);
     setHasMore(Boolean(seedPage.has_more));
@@ -82,6 +88,30 @@ export default function IpFactory() {
       .then((page) => setBrand((page.items || [])[0] || null))
       .catch(() => setBrand(null));
   }, []);
+
+  // The ledger mixes itself once a day: the current seeds are read for combinations
+  // that compound, and the strongest are written as ecosystems.
+  useEffect(() => {
+    if (!seeds) return;
+    const today = new Date().toISOString().slice(0, 10);
+    const key = 'investarch:auto-mix';
+    try {
+      if (localStorage.getItem(key) === today) return;
+    } catch {
+      return;
+    }
+    const unmixed = seeds.filter((s) => !(s.source_seed_ids || []).length);
+    if (unmixed.length < 3) return;
+    try { localStorage.setItem(key, today); } catch { /* private mode */ }
+    base44.functions.invoke('mixSeeds', { action: 'auto' })
+      .then((res) => {
+        const created = res?.data?.created || [];
+        if (!created.length) return;
+        setMixNote(`${created.length} ecosystem${created.length === 1 ? '' : 's'} found automatically and ranked above the ledger.`);
+        load(filter);
+      })
+      .catch(() => {});
+  }, [seeds, filter, load]);
 
   useEffect(() => {
     if (!running) { setStage(''); return; }
@@ -127,6 +157,7 @@ export default function IpFactory() {
   filings.forEach((f) => { (filingsBySeed[f.seed_id] = filingsBySeed[f.seed_id] || []).push(f); });
   const prospectusBySeed = {};
   prospectuses.forEach((p) => { prospectusBySeed[p.seed_id] = p; });
+  const listed = seeds ? seeds.filter((s) => !(s.source_seed_ids || []).length) : null;
 
   return (
     <div className="p-4 sm:p-6 md:p-12 max-w-6xl mx-auto">
@@ -135,7 +166,7 @@ export default function IpFactory() {
           <h1 className="text-2xl md:text-3xl font-semibold tracking-tight flex items-center gap-2.5">
             <Radar className="size-6 text-emerald-500" /> IP Factory
           </h1>
-          <p className="text-sm text-muted-foreground mt-2 max-w-xl">The Market Hunter sweeps thirty-four market vectors, from the frontier — AI agents, developer tooling, new compute, consumer breakouts — for live pain-signals opened in the last twelve months, skips anything already in the portfolio, and converts the sharpest lacunae into a yield of 120 IP-seeds, each with its own path to first thousand users. The Registrar then turns each seed into a legal asset: patents written as claims, trademark packets, deeds, and a liquidation prospectus naming its buyers.</p>
+          <p className="text-sm text-muted-foreground mt-2 max-w-xl">The Market Hunter sweeps ninety-six market vectors, from the frontier — AI agents, developer tooling, new compute, consumer breakouts — for live pain-signals opened in the last twelve months, skips anything already in the portfolio, and converts the sharpest lacunae into a yield of 120 IP-seeds, each with its own path to first thousand users. The Registrar then turns each seed into a legal asset: patents written as claims, trademark packets, deeds, and a liquidation prospectus naming its buyers.</p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 text-center w-full sm:w-auto">
           <div className="rounded-lg border bg-card px-3 py-2.5 sm:px-4 sm:py-3">
@@ -167,6 +198,7 @@ export default function IpFactory() {
           {sweeping ? <Loader2 className="size-4 mr-2 animate-spin" /> : <Users className="size-4 mr-2" />}
           {sweeping ? 'Drafting buyer leads' : 'Sweep buyer leads'}
         </Button>
+        <RebuildCodebasesButton seeds={seeds || []} brand={brand} onDone={() => load(filter)} />
         <Tabs value={filter} onValueChange={setFilter} className="w-full sm:w-auto">
           <TabsList className="w-full sm:w-auto">
             <TabsTrigger value="all" className="flex-1 sm:flex-none">All</TabsTrigger>
@@ -215,19 +247,28 @@ export default function IpFactory() {
       )}
 
       {sweepNote && <p className="text-sm text-emerald-700 mb-4">{sweepNote}</p>}
+      {mixNote && <p className="text-sm text-emerald-700 mb-4">{mixNote}</p>}
       {error && <p className="text-sm text-destructive mb-4">{error}</p>}
+
+      <EcosystemRanking
+        ecosystems={ecosystems}
+        filingsBySeed={filingsBySeed}
+        prospectusBySeed={prospectusBySeed}
+        onRefresh={() => load(filter)}
+        brand={brand}
+      />
 
       {seeds === null ? (
         <div className="space-y-6">
           {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-96 rounded-xl" />)}
         </div>
-      ) : seeds.length === 0 ? (
+      ) : listed.length === 0 ? (
         <div className="rounded-xl border bg-card p-10 text-center text-sm text-muted-foreground">
           No seeds{filter !== 'all' ? ` on the ${filter} ledger` : ''} yet. Run the hunt to harvest the market.
         </div>
       ) : (
         <div className="space-y-4 sm:space-y-6">
-          {seeds.map((s) => (
+          {listed.map((s) => (
             <div key={s.id} className="rounded-xl border bg-card p-4 sm:p-6">
               <div className="mb-4">
                 <h3 className="text-lg sm:text-xl font-semibold leading-snug break-words">{s.title}</h3>

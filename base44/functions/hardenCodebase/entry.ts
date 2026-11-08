@@ -42,7 +42,7 @@ const REVIEW_PROMPT = [
   'enhancement — the two to four changes that most raise this asset\'s value: a table that unlocks a revenue surface, a computed column that removes a reconciliation step, an audit trail a buyer will demand in diligence.',
   '',
   'Then return hardened_blueprint: the complete corrected data model as valid PostgreSQL DDL. Keep every table that already exists, add what you argued for, keep foreign keys intact. Do not summarise it — return the full DDL. tech_stack is the corrected stack list. core_logic restates the mechanisms in one paragraph including the changes you made.',
-  'Score 0 to 100 the codebase this blueprint would produce today. verdict is pass at 80 and above, conditional from 55 to 79, blocked below 55. Findings and fixes must be concrete sentences about this schema, never generic advice.'
+  'Score 0 to 100 the codebase this blueprint would produce today. The release floor is 83: if your score lands below 83, correct the schema and the core logic further and score again until the blueprint clears 83, then report only that final score. verdict is pass at 80 and above, conditional from 55 to 79, blocked below 55. Findings and fixes must be concrete sentences about this schema, never generic advice.'
 ].join('\n');
 
 function toReport(raw) {

@@ -12,6 +12,8 @@ const PATTERNS = [
   /\b(arguably|potentially|it could be said that|to some extent)\s*/gi
 ];
 
+export const SLOP_PATTERNS = PATTERNS;
+
 export function scrub(text) {
   if (typeof text !== 'string') return text;
   let out = text;

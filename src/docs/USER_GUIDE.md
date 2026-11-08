@@ -100,6 +100,8 @@ A weak pairing is not offered. When nothing in the ledger compounds, the panel s
 
 Finding combinations costs one synthesis call. Creating the mix costs nothing further.
 
+**Automatic mixing.** The ledger mixes itself once a day. When IP Factory opens, it reads the current seeds, writes up to three of the strongest combinations as ecosystems without a click, and ranks them under **Top ranked ecosystems** above the seed ledger, highest compounding score first. Each card carries its rank, its compounding score, the members it merges and its full record, so its instruments, prospectus, dossier pack and codebase export are one action away. The members stay where they are and are not listed twice.
+
 ### 7.4 What the dossier pack contains
 
 ```
@@ -149,6 +151,8 @@ A generated repository contains an Express API, a Postgres migration, token auth
 Mixed ecosystems are packaged the same way, from the merged seed rather than its members: one schema, one route set, one brand, one `MANIFEST.md` describing the combined app.
 
 **Harden codebase** runs the bench before the export rather than after a failed one. Four pods work in order over the seed's blueprint — structure (tables, keys, uniqueness, indexes), contracts (schema, logic and screens agreeing), security (isolation, trust boundaries, delete behaviour) — then enhancement, which proposes the two to four changes that most raise the asset's value. The bench records a verdict and a score out of 100 on the seed, keeps every existing table when it rewrites the model, and the next export is generated from the hardened schema. The same bench runs unattended every night over up to three seeds that have no report yet; the verdict appears on the seed and on the activity ledger.
+
+**Rebuild all codebases**, beside **Sweep buyer leads**, takes the whole ledger in one pass. Each blueprint is hardened until it clears 83 out of 100, then the generated file set is read by the antislop audit, which names the file, the phrase and the house rule it broke. The copy that produced each finding is scrubbed at its source, the codebase is rebuilt and the audit runs again, so the export carries no slop. The dialog reports the score reached, the findings patched and anything still below the floor.
 
 ### 7.6 Brand kit
 

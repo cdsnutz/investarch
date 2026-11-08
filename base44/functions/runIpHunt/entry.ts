@@ -103,6 +103,16 @@ Count is non-negotiable: EXACTLY ${SEEDS_PER_BATCH} seeds, even where that means
 
 COMPOSITION: at least half the yield must attack a frontier-technology or software-development gap opened by something that shipped in the last 12 months, and every seed must be able to name the mechanism by which it reaches its first thousand users — a shareable artifact, an invite loop, a workflow it sits inside, or a marketplace it plugs into. Reject any seed that only works if someone discovers it. Prefer seeds where the buyer is already paying for a worse workaround.${memoryBlock}`;
 
+const REQUIRED_SEED_FIELDS = ['title', 'gap', 'solution', 'mini_plan', 'pain_signal', 'source_channel'];
+const seedIsComplete = (seed) => {
+  if (!seed) return false;
+  if (REQUIRED_SEED_FIELDS.some((key) => !String(seed[key] || '').trim())) return false;
+  if (typeof seed.asymmetric_score !== 'number') return false;
+  const bp = seed.blueprint || {};
+  if (!Array.isArray(bp.tech_stack) || !bp.tech_stack.length) return false;
+  return Boolean(String(bp.db_schema || '').trim() && String(bp.core_logic || '').trim());
+};
+
 const rotate = (arr, by) => (arr.length ? arr.slice(by % arr.length).concat(arr.slice(0, by % arr.length)) : arr);
 const dedupeBy = (items, keyOf) => {
   const seen = new Set();
@@ -184,16 +194,43 @@ export default async function(req) {
       }))
     );
 
+    // A batch is judged on complete seeds only. Any batch that threw or came back
+    // without a single complete seed is re-run once, so a failure shortens nothing.
+    const weakBatches = seedResults
+      .map((r, i) => ((r.status === 'fulfilled' ? (r.value?.seeds || []) : []).filter(seedIsComplete).length === 0 ? i : -1))
+      .filter((i) => i >= 0);
+
+    if (weakBatches.length) {
+      const repairs = await Promise.allSettled(weakBatches.map((i) => base44.asServiceRole.integrations.Core.InvokeLLM({
+        prompt: `${seedPromptFor({
+          index: i + 1,
+          total: SEED_BATCHES,
+          signals: batches[i].pool,
+          leadBriefs: vectorBriefBlock(batches[i].lead),
+          memoryBlock: memoryBlockFor(heldTitles.slice(0, SEED_MEMORY))
+        })}
+
+STRICT COMPLETION: a previous attempt at this batch came back empty or with fields missing. Every seed you return must fill every field, with no empty string and no empty array. Count remains EXACTLY ${SEEDS_PER_BATCH}.`,
+        response_json_schema: SEEDS_SCHEMA
+      })));
+      repairs.forEach((r, k) => {
+        if (r.status === 'fulfilled' && (r.value?.seeds || []).filter(seedIsComplete).length) {
+          seedResults[weakBatches[k]] = r;
+        }
+      });
+    }
+
     const produced = seedResults.flatMap((r) => (r.status === 'fulfilled' ? (r.value?.seeds || []) : []));
-    if (!produced.length) {
+    const completeSeeds = produced.filter(seedIsComplete);
+    if (!completeSeeds.length) {
       const reason = seedResults.find((r) => r.status === 'rejected');
-      return Response.json({ error: `Synthesizer returned no seeds.${reason ? ` ${reason.reason?.message || ''}` : ''}` }, { status: 502 });
+      return Response.json({ error: `Synthesizer returned no complete seeds.${reason ? ` ${reason.reason?.message || ''}` : ''}` }, { status: 502 });
     }
 
     // Drop anything that duplicates a title already held, so every yield is net-new IP.
     const heldSet = new Set(heldTitles.map((t) => t.toLowerCase()));
-    const fresh = dedupeBy(produced, (s) => s.title).filter((s) => !heldSet.has(String(s.title || '').trim().toLowerCase()));
-    const toStore = (fresh.length ? fresh : dedupeBy(produced, (s) => s.title))
+    const fresh = dedupeBy(completeSeeds, (s) => s.title).filter((s) => !heldSet.has(String(s.title || '').trim().toLowerCase()));
+    const toStore = (fresh.length ? fresh : dedupeBy(completeSeeds, (s) => s.title))
       .filter((s) => String(s.title || '').trim());
 
     const yieldDate = new Date().toISOString().slice(0, 10);
@@ -219,9 +256,12 @@ export default async function(req) {
       signals_found: signals.length,
       seeds_created: (created || []).length || records.length,
       batches: seedResults.map((r) => (r.status === 'fulfilled' ? (r.value?.seeds || []).length : 0)),
-      model_calls: signalCalls + seedCalls,
+      model_calls: signalCalls + seedCalls + weakBatches.length,
       web_search_calls: signalCalls,
-      credits_estimate: signalCalls + seedCalls,
+      credits_estimate: signalCalls + seedCalls + weakBatches.length,
+      retried_batches: weakBatches.length,
+      incomplete_seeds: produced.length - completeSeeds.length,
+      seed_success_rate: Math.round((completeSeeds.length / produced.length) * 100),
       yield_date: yieldDate
     });
   } catch (error) {

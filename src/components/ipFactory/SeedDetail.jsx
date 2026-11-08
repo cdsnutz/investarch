@@ -8,6 +8,8 @@ import JSZip from 'jszip';
 import { buildDossierPack } from '@/lib/dossierPack';
 import { buildKitFiles } from '@/lib/buildKit';
 import { buildAgentReadme, buildDeploymentGuide, buildAcceptanceGuide } from '@/lib/agentDocs';
+import { missingSeedFields } from '@/lib/seedComplete';
+import { buildAgentDeployGuide } from '@/lib/agentDeploy';
 
 function Block({ title, children }) {
   return (
@@ -66,6 +68,7 @@ export function SeedBody({ seed, filings, prospectus, onRefresh }) {
     zip.file('AGENTS.md', buildAgentReadme(seed, cb));
     zip.file('ACCEPTANCE.md', buildAcceptanceGuide(seed, cb));
     zip.file('DEPLOYMENT.md', buildDeploymentGuide(seed));
+    zip.file('AGENT_DEPLOY.md', buildAgentDeployGuide({ agentName: seed.title, seedTitle: seed.title, repoName: cb.repo_name }));
     zip.file('Developer_Onboarding_Guide.md', cb.onboarding_guide || '');
     zip.file('User_Manual.md', cb.user_manual || '');
     const blob = await zip.generateAsync({ type: 'blob', platform: 'UNIX' });
@@ -83,6 +86,10 @@ export function SeedBody({ seed, filings, prospectus, onRefresh }) {
 
   const liquidate = () => run('liquidate', async () => {
     await base44.functions.invoke('liquidateIp', { seedId: seed.id });
+  });
+
+  const completeSeed = () => run('complete', async () => {
+    await base44.functions.invoke('completeIpSeed', { seedId: seed.id });
   });
 
   const buildPack = () => run('pack', async () => {
@@ -109,9 +116,22 @@ export function SeedBody({ seed, filings, prospectus, onRefresh }) {
   });
 
   const bp = seed.blueprint || {};
+  const missing = missingSeedFields(seed);
 
   return (
     <div className="space-y-5">
+      {missing.length > 0 && (
+        <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 space-y-2">
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="bg-amber-100 text-amber-800 text-[10px]">Incomplete seed</Badge>
+          </div>
+          <p className="text-xs text-amber-900">Missing: {missing.join(', ')}.</p>
+          <Button size="sm" variant="outline" onClick={completeSeed} disabled={!!busy}>
+            {busy === 'complete' ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : null}
+            Complete this seed
+          </Button>
+        </div>
+      )}
       <div className="space-y-3">
         <Block title="The Gap">{seed.gap}</Block>
         {seed.pain_signal && <Block title="Pain-Signal">{seed.pain_signal}</Block>}

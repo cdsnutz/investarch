@@ -1,0 +1,141 @@
+{
+  "name": "AgentDeployment",
+  "type": "object",
+  "properties": {
+    "agent_name": {
+      "type": "string"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "external_agent",
+        "in_app_agent"
+      ],
+      "enumColors": [
+        "blue",
+        "purple"
+      ],
+      "default": "external_agent"
+    },
+    "parent_agent": {
+      "type": "string"
+    },
+    "seed_id": {
+      "type": "string"
+    },
+    "seed_title": {
+      "type": "string"
+    },
+    "repo_name": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "registered",
+        "deployed",
+        "paused",
+        "failed"
+      ],
+      "enumColors": [
+        "gray",
+        "green",
+        "yellow",
+        "red"
+      ],
+      "default": "registered"
+    },
+    "deploy_target": {
+      "type": "string",
+      "enum": [
+        "ip_factory",
+        "external",
+        "both"
+      ],
+      "enumColors": [
+        "green",
+        "gray",
+        "blue"
+      ],
+      "default": "ip_factory"
+    },
+    "runs": {
+      "type": "number",
+      "default": 0
+    },
+    "successes": {
+      "type": "number",
+      "default": 0
+    },
+    "failures": {
+      "type": "number",
+      "default": 0
+    },
+    "success_rate": {
+      "type": "number"
+    },
+    "last_run": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_outcome": {
+      "type": "string"
+    },
+    "last_note": {
+      "type": "string"
+    },
+    "deployed_date": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "agent_name",
+    "kind"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

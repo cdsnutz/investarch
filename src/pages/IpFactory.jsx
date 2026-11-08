@@ -6,6 +6,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, Radar, Crosshair, BrainCircuit } from 'lucide-react';
 import { SeedBody } from '@/components/ipFactory/SeedDetail';
 import RunCost from '@/components/ipFactory/RunCost';
+import AgentRegistryPanel from '@/components/ipFactory/AgentRegistryPanel';
 import { Badge } from '@/components/ui/badge';
 import { HUNT_PRESETS } from '@/lib/ipVectors';
 
@@ -165,6 +166,8 @@ export default function IpFactory() {
           ))}
         </div>
       </div>
+
+      <AgentRegistryPanel onChanged={() => load(filter)} />
 
       {running && (
         <div className="rounded-xl border bg-card p-8 flex flex-col items-center text-center mb-6">

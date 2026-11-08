@@ -1,6 +1,7 @@
 // The buyer archive: one profile per company, carrying the buyer-lead record the factory
 // already holds plus the OSINT read of that company's current situation.
 import JSZip from 'jszip';
+import { researchSummary } from '@/lib/buyerSummary';
 
 const text = (value) => String(value ?? '').trim();
 const section = (title, body) => (text(body) ? `## ${title}\n\n${text(body)}\n\n` : '');
@@ -27,6 +28,7 @@ export function buyerMarkdown(buyer, intel) {
     section('Recent Public Moves', bulletList(row?.recent_moves)),
     section('The Buying Trigger', row?.buying_trigger),
     section('Unique Insight', row?.unique_insight),
+    section('Sources Read', bulletList(row?.sources)),
     section('Where to Verify Before Sending', row?.osint_angle),
     section('Why This Asset Fits Them', buyer.why_fit),
     section('Who Owns the Budget', buyer.contact_role),
@@ -39,7 +41,7 @@ export function buyerMarkdown(buyer, intel) {
   ].filter(Boolean).join('\n');
 }
 
-export async function buildBuyerArchive({ buyers, intel = {}, onProgress }) {
+export async function buildBuyerArchive({ buyers, intel = {}, onProgress, failures = [] }) {
   const zip = new JSZip();
   const used = new Set();
   let files = 0;
@@ -69,6 +71,11 @@ export async function buildBuyerArchive({ buyers, intel = {}, onProgress }) {
     })
   ].join('\n'));
   files += 1;
+
+  const summary = researchSummary(buyers, intel, { failures });
+  zip.file('Buyers/RESEARCH_SUMMARY.md', summary.markdown);
+  zip.file('Buyers/RESEARCH_SUMMARY.pdf', summary.pdf);
+  files += 2;
 
   zip.file('Buyers/buyers.json', JSON.stringify(
     buyers.map((buyer) => ({ ...buyer, intel: intel[buyer.company.toLowerCase()] || null })),
@@ -102,6 +109,7 @@ export async function buildBuyerArchive({ buyers, intel = {}, onProgress }) {
     files,
     researched,
     total: buyers.length,
+    summary,
     filename: `investarch-buyers-${new Date().toISOString().slice(0, 10)}.zip`
   };
 }

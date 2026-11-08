@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { Download, Layers, Search, Loader2 } from 'lucide-react';
+import { Download, Layers, Search, Loader2, FileDown } from 'lucide-react';
 import { buildSeedArchive, isEcosystem } from '@/lib/seedArchive';
 import { collectBuyers, researchBuyers } from '@/lib/buyerIntel';
 import { buildBuyerArchive } from '@/lib/buyerArchive';
@@ -29,6 +29,10 @@ function save(blob, filename) {
 
 const megabytes = (bytes) => `${Math.max(bytes / 1048576, 0.1).toFixed(1)} MB`;
 
+// Rendered PDFs weigh roughly a thousand times their Markdown. The ledger holds thousands of
+// seeds, so PDF sets cover the most recent slice and say how many were left to the Markdown export.
+const PDF_SEED_CAP = 80;
+
 export default function ExportArchives({ brand }) {
   const [busy, setBusy] = useState('');
   const [note, setNote] = useState('');
@@ -42,9 +46,13 @@ export default function ExportArchives({ brand }) {
     setError('');
     try {
       const all = await pageAll(base44.entities.IpSeed);
-      const subset = scope === 'seeds' ? all.filter((seed) => !isEcosystem(seed)) : all.filter(isEcosystem);
+      const subset = scope === 'seeds'
+        ? all.filter((seed) => !isEcosystem(seed))
+        : scope === 'ecosystems'
+          ? all.filter(isEcosystem)
+          : all.slice(0, PDF_SEED_CAP);
       if (!subset.length) {
-        setNote(`No ${scope} on the ledger yet.`);
+        setNote(scope === 'pdfs' ? 'No seeds on the ledger yet.' : `No ${scope} on the ledger yet.`);
         return;
       }
 
@@ -64,15 +72,18 @@ export default function ExportArchives({ brand }) {
         filingsBySeed,
         prospectusBySeed,
         brand,
-        root: scope === 'seeds' ? 'Seeds' : 'Ecosystems',
+        format: scope === 'pdfs' ? 'pdf' : 'markdown',
+        root: scope === 'seeds' ? 'Seeds' : scope === 'ecosystems' ? 'Ecosystems' : 'PDF Sets',
         onProgress: (done, total, title) => setNote(`Packaging ${done} of ${total} · ${title}`)
       });
 
       save(archive.blob, archive.filename);
       setNote('');
       setResult({
-        label: scope === 'seeds' ? 'Seeds' : 'Ecosystems',
-        text: `${subset.length} ${scope} · ${archive.files} files · ${megabytes(archive.blob.size)}`,
+        label: scope === 'seeds' ? 'Seeds' : scope === 'ecosystems' ? 'Ecosystems' : 'Dossier PDF sets',
+        text: scope === 'pdfs'
+          ? `${subset.length} of ${all.length} seeds · ${archive.files} files · ${megabytes(archive.blob.size)} · PDF sets are capped, so the rest of the ledger is in the Markdown export`
+          : `${subset.length} ${scope} · ${archive.files} files · ${megabytes(archive.blob.size)}`,
         skipped: archive.skipped
       });
     } catch (problem) {
@@ -101,12 +112,12 @@ export default function ExportArchives({ brand }) {
       });
 
       setNote('Assembling the buyer book…');
-      const archive = await buildBuyerArchive({ buyers, intel });
+      const archive = await buildBuyerArchive({ buyers, intel, failures });
       save(archive.blob, archive.filename);
       setNote('');
       setResult({
         label: 'Buyers',
-        text: `${archive.total} buyers · ${archive.researched} researched · ${archive.files} files · ${megabytes(archive.blob.size)}`,
+        text: `${archive.total} buyers · ${archive.researched} researched · verified ${archive.summary.verified} / likely ${archive.summary.likely} / thin ${archive.summary.thin} · ${archive.summary.sourced} with source URLs · ${archive.files} files · ${megabytes(archive.blob.size)}`,
         skipped: failures.map((failure) => ({
           title: failure.buyers.join(', '),
           reason: failure.reason
@@ -139,6 +150,15 @@ export default function ExportArchives({ brand }) {
       >
         {busy === 'ecosystems' ? <Loader2 className="size-4 mr-2 animate-spin" /> : <Layers className="size-4 mr-2" />}
         Export all ecosystems
+      </Button>
+      <Button
+        variant="outline"
+        onClick={() => runSeedArchive('pdfs')}
+        disabled={Boolean(busy)}
+        className="w-full sm:w-auto"
+      >
+        {busy === 'pdfs' ? <Loader2 className="size-4 mr-2 animate-spin" /> : <FileDown className="size-4 mr-2" />}
+        Export dossier PDF sets
       </Button>
       <Button
         variant="outline"

@@ -16,9 +16,10 @@ const INTEL_SCHEMA = {
           buying_trigger: { type: 'string' },
           unique_insight: { type: 'string' },
           osint_angle: { type: 'string' },
+          sources: { type: 'array', items: { type: 'string' } },
           confidence: { type: 'string', enum: ['verified', 'likely', 'thin'] }
         },
-        required: ['company', 'snapshot', 'recent_moves', 'buying_trigger', 'unique_insight', 'osint_angle', 'confidence']
+        required: ['company', 'snapshot', 'recent_moves', 'buying_trigger', 'unique_insight', 'osint_angle', 'sources', 'confidence']
       }
     }
   },
@@ -40,6 +41,7 @@ const INTEL_PROMPT = [
   '- buying_trigger: the specific situation inside the company that makes this asset worth a budget line this quarter, tied to one of the moves above.',
   '- unique_insight: the non-obvious observation. Nothing the buyer would read on their own homepage: a structural gap in their product line, a stack or compliance constraint, an org change that moved the budget, or a customer segment they cannot serve today. One paragraph, falsifiable, and name the source you saw it in.',
   '- osint_angle: the exact public sources an operator should re-check before the first send — company filings, careers page, changelog or docs, procurement portals, patent and trademark registries, regulator dockets, conference talks.',
+  '- sources: two to four full https URLs for pages you actually opened and that carry the claims above — the press release, filing, changelog, procurement record or article. A URL that merely exists is not a source: it must be the page the claim came from. If you cannot name a URL for the insight, return an empty array and set confidence to "thin" rather than citing something you did not read.',
   '- confidence: "verified", "likely" or "thin".',
   '',
   'Return one profile per company listed, in the same order, using the company name exactly as given.'
@@ -60,6 +62,9 @@ function normalizeRow(row: any) {
     buying_trigger: clean(row?.buying_trigger),
     unique_insight: clean(row?.unique_insight),
     osint_angle: clean(row?.osint_angle),
+    sources: Array.isArray(row?.sources)
+      ? row.sources.map(clean).filter((url: string) => /^https?:\/\/\S+\.\S+/i.test(url)).slice(0, 5)
+      : [],
     confidence
   };
 }

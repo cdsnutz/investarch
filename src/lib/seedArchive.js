@@ -1,11 +1,13 @@
 // Bulk archive of every seed: its dossier documents, its verified codebase and its buyer book.
 //
-// Documents ship as Markdown, not PDF. A four-hundred-seed archive of rendered PDFs runs to
-// hundreds of megabytes and minutes of rendering, while the same text compresses to a few
-// megabytes and opens in any editor. The single-seed "Download dossier pack" still renders PDFs.
+// Documents ship as Markdown by default, or as a PDF set when the caller asks for one.
+// Markdown is the default because the ledger holds thousands of seeds: rendered PDFs for all of
+// them run to hundreds of megabytes and minutes of rendering, while the same text compresses to
+// a few megabytes. PDF sets are therefore capped by the caller.
 import JSZip from 'jszip';
 import { appSlug } from '@/lib/scaffoldKit';
 import { buildKitFiles } from '@/lib/buildKit';
+import { renderDossierPdfs } from '@/lib/dossierPdf';
 import { buildAgentReadme, buildAcceptanceGuide, buildDeploymentGuide } from '@/lib/agentDocs';
 
 const text = (value) => String(value ?? '').trim();
@@ -175,11 +177,11 @@ export function seedCodebase(seed, brand) {
   ];
 }
 
-function manifestFor(seed, entries) {
+function manifestFor(seed, entries, format) {
   return [
     `# ${seed.title} — Archive Manifest`,
     '',
-    `${entries.length} files in this folder. Documents are Markdown renderings of the dossier pack; the codebase is the verified generated application.`,
+    `${entries.length} files in this folder. Documents are ${format === 'pdf' ? 'PDF renderings' : 'Markdown renderings'} of the dossier pack; the codebase is the verified generated application.`,
     '',
     ...entries.map((entry) => `- \`${entry.path}\``)
   ].join('\n');
@@ -191,6 +193,7 @@ export async function buildSeedArchive({
   prospectusBySeed = {},
   brand = null,
   root = 'Seeds',
+  format = 'markdown',
   onProgress
 }) {
   const zip = new JSZip();
@@ -207,10 +210,11 @@ export async function buildSeedArchive({
     used.add(folder);
     const base = `${root}/${folder}`;
 
-    const entries = seedDocuments(seed, {
+    const authored = seedDocuments(seed, {
       filings: filingsBySeed[seed.id] || [],
       prospectus: prospectusBySeed[seed.id] || null
     });
+    const entries = format === 'pdf' ? renderDossierPdfs(authored, seed.title) : authored;
 
     try {
       entries.push(...seedCodebase(seed, brand));
@@ -227,7 +231,7 @@ export async function buildSeedArchive({
       zip.file(`${base}/${entry.path}`, entry.content);
       files += 1;
     });
-    zip.file(`${base}/MANIFEST.md`, manifestFor(seed, entries));
+    zip.file(`${base}/MANIFEST.md`, manifestFor(seed, entries, format));
     files += 1;
 
     await new Promise((resolve) => setTimeout(resolve, 0));
@@ -243,6 +247,6 @@ export async function buildSeedArchive({
     blob,
     files,
     skipped,
-    filename: `investarch-${root.toLowerCase()}-${new Date().toISOString().slice(0, 10)}.zip`
+    filename: `investarch-${root.toLowerCase().replace(/\s+/g, '-')}${format === 'pdf' ? '-pdf' : ''}-${new Date().toISOString().slice(0, 10)}.zip`
   };
 }

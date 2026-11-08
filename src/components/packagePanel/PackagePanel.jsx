@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Loader2, PackageOpen } from 'lucide-react';
 import { buildPdf } from '@/lib/pdfBuilder';
+import { buildKitFiles } from '@/lib/buildKit';
 import JSZip from 'jszip';
 
 const STAGES = [
@@ -152,7 +153,13 @@ export default function PackagePanel({ project, funding }) {
     ipYieldDocs(data.ipYield).forEach((d) => docs.push(d));
     const zip = new JSZip();
     docs.forEach((d) => zip.file(d.name, buildPdf(d.args)));
-    (data.codebase?.files || []).forEach((f) => zip.file(`02_Technical_Vault/Codebase/${f.path}`, f.content));
+    buildKitFiles({ title: project.company_name || project.url || 'Codebase' }, data.codebase).forEach((f) =>
+      zip.file(`02_Technical_Vault/Codebase/${f.path}`, f.content)
+    );
+    (data.codebase?.files || []).forEach((f) => {
+      if (f.path === 'package.json') return;
+      zip.file(`02_Technical_Vault/Codebase/${f.path}`, f.content);
+    });
     return zip.generateAsync({ type: 'blob' });
   };
 

@@ -484,7 +484,7 @@ What ships runnable, what each agent must write, and how every piece is verified
 
 ## 1. What already runs
 
-These files are complete. Do not rewrite them: extend them. On a clean checkout \`npm install && npm run db:migrate && npm run db:seed && npm verifies\` is the target state.
+These files are complete. Do not rewrite them: extend them. On a clean checkout \`npm install && npm run db:migrate && npm run db:seed && npm run verify\` is the target state.
 
 | Path | Purpose |
 | --- | --- |

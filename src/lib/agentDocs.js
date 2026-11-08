@@ -150,27 +150,24 @@ Documentation and tooling you follow rather than port: \`AGENTS.md\`, \`ROADMAP.
 
 ## 2. Bootstrap the project
 
+The skeleton is already complete and runs: \`package.json\` with pinned dependencies, \`eslint.config.js\`, \`vite.config.js\`, \`index.html\`, \`src/\`, \`server/app.js\`, \`server/index.js\`, \`server/routes/index.js\`, \`database/migrate.js\`, \`database/migrations/001_init.sql\`, \`vitest.config.js\` and \`tests/\`. Do not scaffold a new project on top of it.
+
 \`\`\`bash
-npm create vite@latest app -- --template react
-cd app
-npm pkg set type=module
-npm i express pg dotenv bcryptjs jsonwebtoken zod
-npm i -D vitest supertest nodemon eslint @eslint/js eslint-plugin-react-hooks
-npm pkg set scripts.dev="node --watch server/index.js" \\
-  scripts.start="node server/index.js" \\
-  scripts.build="vite build" \\
-  scripts.test="vitest run" \\
-  scripts.lint="eslint ." \\
-  scripts.db:migrate="node database/migrate.js" \\
-  scripts.db:seed="node database/seed.js"
-mkdir -p server/routes server/services server/middleware database/migrations src/pages src/components tests
+npm install
+cp .env.example .env          # fill DATABASE_URL, AUTH_SECRET (openssl rand -hex 32), APP_URL
+npm test                      # three tests pass, no database required
+npm run db:migrate            # applies 001_init.sql
+npm run db:seed               # demo dataset plus credentials
+npm run dev                   # listening on http://localhost:3000
+curl -s localhost:3000/health # {"ok":true,...}
+npm run dev:web               # http://localhost:5173, shell reports the API version
 \`\`\`
+
+\`MANIFEST.md\` lists every dependency, path and script with its purpose, and states which agent writes which file. \`AGENT_ORDERS.md\` holds one work contract per agent: owned paths, tasks, commands and hand-off evidence.
 
 If AGENTS.md section 4 names a different framework, database or package manager, substitute it here and keep the section order.
 
-Create \`server/index.js\` with a \`GET /health\` route returning \`{"ok":true}\` and one error handler that logs and returns JSON.
-
-Check: \`npm run dev\` starts and \`curl localhost:3000/health\` returns 200.
+Check: \`npm test\` passes and \`curl localhost:3000/health\` returns 200 before you write any feature code.
 
 ## 3. Port the scaffold
 
@@ -192,6 +189,7 @@ Check: \`npm run build\` passes and \`node server/index.js\` boots with no missi
 
 ## 4. Data layer
 
+- \`database/migrations/001_init.sql\` already holds the baseline: \`users\` plus every entity in AGENTS.md section 5, owner-scoped, indexed, with an \`updated_at\` trigger. Read it against section 5 and close every gap in \`002_*.sql\`.
 - One table per entity in AGENTS.md section 5. Copy the columns it names verbatim.
 - Every table carries \`id uuid primary key default gen_random_uuid()\`, \`created_at timestamptz default now()\`, \`updated_at timestamptz default now()\`, and \`owner_id uuid not null references users(id)\` unless the entity is explicitly public.
 - One numbered migration per change: \`001_init.sql\`, \`002_add_x.sql\`. Never edit a migration that already ran.

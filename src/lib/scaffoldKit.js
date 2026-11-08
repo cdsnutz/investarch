@@ -249,7 +249,7 @@ Exit: \`npm install\` succeeds.
 ## Phase 1: Foundation
 - [ ] Run SCAFFOLD.md sections 2 and 3: bootstrap the project, then port every scaffold file.
 - [ ] Project structure, lint, formatter and test runner configured.
-- [ ] Add \`npm\` scripts: dev, build, start, test, lint, db:migrate.
+- [ ] Confirm the shipped scripts run: dev, dev:web, build, start, test, lint, db:migrate, db:seed, verify.
 - [ ] \`GET /health\` returns 200.
 Exit: \`npm run lint && npm test && npm run build\` pass.
 

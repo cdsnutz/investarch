@@ -2,6 +2,7 @@ import JSZip from 'jszip';
 import { buildPdf } from '@/lib/pdfBuilder';
 import { buildAgentReadme, buildDeploymentGuide, buildScaffoldGuide, buildAcceptanceGuide } from '@/lib/agentDocs';
 import { buildEnvExample, buildRoadmap, antislopFiles, devproDeployFiles, buildSeedScript } from '@/lib/scaffoldKit';
+import { buildKitFiles } from '@/lib/buildKit';
 
 function splitIntoSections(text) {
   const sections = [];
@@ -112,8 +113,14 @@ export async function buildDossierPack({ seed, filings, prospectus, codebase, ca
   zip.file(`${base}/Codebase/.env.example`, buildEnvExample(seed));
   [...antislopFiles(), ...devproDeployFiles()].forEach((f) => zip.file(`${base}/Codebase/${f.path}`, f.content, f.path.endsWith('.sh') ? { unixPermissions: '755' } : undefined));
 
+  const kit = buildKitFiles(seed, codebase);
+  kit.forEach((f) => zip.file(`${base}/Codebase/${f.path}`, f.content));
+
   if (codebase?.files?.length) {
-    (codebase.files || []).forEach((f) => zip.file(`${base}/Codebase/${f.path}`, f.content));
+    (codebase.files || []).forEach((f) => {
+      if (f.path === 'package.json') return;
+      zip.file(`${base}/Codebase/${f.path}`, f.content);
+    });
     zip.file(`${base}/Codebase/Developer_Onboarding_Guide.md`, codebase.onboarding_guide || '');
     zip.file(`${base}/Codebase/User_Manual.md`, codebase.user_manual || '');
   }

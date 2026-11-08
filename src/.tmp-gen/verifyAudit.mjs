@@ -75,7 +75,7 @@ const faults = [
   ['leaked secret', (files) => patch(files, 'src/brand.js', (c) => c + '\nexport const KEY = "sk_live_8f2b1c9d7e";\n'), 'secret'],
   ['invalid package.json', (files) => patch(files, 'package.json', (c) => c.slice(0, -4)), 'syntax'],
   ['css variable never defined', (files) => patch(files, 'src/index.css', (c) => c + '\n.ghost { color: var(--nope); }\n'), 'syntax'],
-  ['sql trailing comma', (files) => patch(files, 'database/migrations/001_init.sql', (c) => c.replace('"owner_id" uuid not null references users(id) on delete cascade,\n', '"owner_id" uuid not null references users(id) on delete cascade,\n  ,\n')), 'syntax'],
+  ['sql trailing comma', (files) => patch(files, 'database/migrations/001_init.sql', (c) => c.replace('on delete cascade,\n', 'on delete cascade,\n  ,\n')), 'syntax'],
   ['brand palette lost', (files) => patch(files, 'src/index.css', (c) => c.replace('#123355', '#000000')), 'brand']
 ];
 

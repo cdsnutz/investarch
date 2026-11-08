@@ -88,6 +88,37 @@ export function appSlug(seed) {
   return (seed.title || 'app').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 32) || 'app';
 }
 
+// Splits a CREATE TABLE body on top-level commas, so a schema written on one line parses the
+// same as one written a column per line, and `numeric(10,2)` stays one column.
+function splitColumns(body) {
+  const parts = [];
+  let depth = 0;
+  let quote = null;
+  let current = '';
+  for (const ch of body) {
+    if (quote) {
+      current += ch;
+      if (ch === quote) quote = null;
+      continue;
+    }
+    if (ch === "'" || ch === '"') {
+      quote = ch;
+      current += ch;
+      continue;
+    }
+    if (ch === '(') depth += 1;
+    if (ch === ')') depth -= 1;
+    if (ch === ',' && depth === 0) {
+      parts.push(current);
+      current = '';
+      continue;
+    }
+    current += ch;
+  }
+  parts.push(current);
+  return parts;
+}
+
 // Reads table and column names out of a schema draft written as CREATE TABLE statements.
 export function parseTables(dbSchema) {
   const tables = [];
@@ -96,8 +127,7 @@ export function parseTables(dbSchema) {
   while ((match = re.exec(dbSchema || ''))) {
     const name = match[1];
     if (/^(users?|migrations|sessions|accounts)$/i.test(name)) continue;
-    const cols = match[2]
-      .split('\n')
+    const cols = splitColumns(match[2])
       .map((l) => l.trim())
       .filter(Boolean)
       .filter((l) => !/^(primary key|foreign key|constraint|unique|check|index|--)/i.test(l))

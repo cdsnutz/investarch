@@ -376,6 +376,7 @@ function scanSql(source) {
   }
   if (depth !== 0) problems.push('parentheses never balance (' + depth + ' left open)');
   if (/,\s*\)/.test(source)) problems.push('a column list ends with a trailing comma');
+  if (/,\s*,/.test(source)) problems.push('an empty column entry sits between two commas');
   const dollars = (source.match(/\$\$/g) || []).length;
   if (dollars % 2 !== 0) problems.push('a dollar-quoted function body is never closed');
   for (const match of source.matchAll(/create table if not exists "([^"]+)"/g)) {

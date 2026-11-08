@@ -269,4 +269,6 @@ Three documents and one verifier:
 - `FILE_MANIFEST.md` — every file, grouped, with its role, and the counts.
 - `verify-manifest.mjs` — walks the tree, compares set membership both ways, prints any file on disk the manifest omits and any entry with no file, exits non-zero on drift.
 
-Regenerating the manifest after any structural change is not optional: it is the check that the guides still describe the code that exists. Current state: 298 files, verified clean.
+Regenerating the manifest after any structural change is not optional: it is the check that the guides still describe the code that exists. Current state: 299 files, verified clean.
+
+These three documents describe InvestArch itself. Documentation **of a seed's generated application** is produced per seed by `src/lib/seedDocs.js` and surfaced by `src/components/docs/SeedDocsSection.jsx` inside that seed: the user guide and technical guide come from `kit/docs.js`, and the file manifest is walked from the emitted file set (`seedFileSet`) so it matches the export exactly, with `AUDIT.md` the only file added at packaging time.

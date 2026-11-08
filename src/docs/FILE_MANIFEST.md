@@ -4,7 +4,7 @@ Version 1.0 · 8 November 2026 · Compiled by the Registrar.
 
 This manifest enumerates every file in the application repository, grouped by area, with the role each file plays. It is the completeness check for the Registrar's documentation: if a file is on disk and not listed here, it is undocumented; if it is listed here and not on disk, the guide describes something that no longer exists.
 
-**Totals:** 298 files — 15 root · 85 backend · 9 skills · 189 app source.
+**Totals:** 299 files — 15 root · 85 backend · 9 skills · 190 app source.
 
 **Verification.** Run `node src/docs/verify-manifest.mjs` from the repository root. It walks the working tree (ignoring `node_modules`, `.git`, `dist`), compares it against the entries below, prints any file missing from the manifest and any entry with no file behind it, and exits non-zero on drift. A clean run prints `OK` and the two matching counts.
 
@@ -142,7 +142,7 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `skills/antislop-layoutmobile/SKILL.md` — mobile layout rules.
 - `skills/antislop-ui/SKILL.md` — interface rules.
 
-## 4. App source (189)
+## 4. App source (190)
 
 ### 4.1 Entry and shell (4)
 
@@ -188,9 +188,10 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `src/components/dashboard/SignalFeed.jsx` — latest live signals.
 - `src/components/dashboard/StatStrip.jsx` — portfolio counters.
 
-### 4.6 Documentation (1)
+### 4.6 Documentation (2)
 
-- `src/components/docs/DocMarkdown.jsx` — markdown renderer used by the Registrar panel.
+- `src/components/docs/DocMarkdown.jsx` — markdown renderer used by the per-seed documentation.
+- `src/components/docs/SeedDocsSection.jsx` — one seed's user guide, technical guide and file manifest, readable and downloadable.
 
 ### 4.7 Dossier (4)
 
@@ -205,11 +206,10 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `src/components/hf/RewriteSection.jsx` — rewrite a dossier section through inference.
 - `src/components/hf/ScoreSeedButton.jsx` — score a seed through inference.
 
-### 4.9 IP Factory (5)
+### 4.9 IP Factory (4)
 
 - `src/components/ipFactory/AgentRegistryPanel.jsx` — register, deploy, pause agents and copy their contract.
 - `src/components/ipFactory/CodebaseExportPanel.jsx` — verify and download full codebase bundles.
-- `src/components/ipFactory/RegistrarDocsPanel.jsx` — this documentation set, readable and downloadable in app.
 - `src/components/ipFactory/RunCost.jsx` — hunt cost estimate and last-run yield.
 - `src/components/ipFactory/SeedDetail.jsx` — full seed body and its instrument, prospectus and pack actions.
 
@@ -302,7 +302,7 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `src/hooks/useDossierBuild.js` — dossier build and refinement state.
 - `src/hooks/useHuggingFace.js` — connector-backed inference state.
 
-### 4.16 Library (25)
+### 4.16 Library (26)
 
 - `src/lib/AuthContext.jsx` — auth provider, session state and public settings.
 - `src/lib/PageNotFound.jsx` — 404 page with a real 404 status.
@@ -326,6 +326,7 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `src/lib/query-client.js` — TanStack Query client.
 - `src/lib/readinessHistory.js` — readiness trend series.
 - `src/lib/scaffoldKit.js` — scaffold assets, demo data and roadmap for generated repos.
+- `src/lib/seedDocs.js` — derives one seed's user guide, technical guide and file manifest from the generator.
 - `src/lib/seedComplete.js` — required-field rules for a complete seed.
 - `src/lib/seedReadiness.js` — funding readiness scoring per seed.
 - `src/lib/utils.js` — class-name merge helper.

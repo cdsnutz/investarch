@@ -8,7 +8,6 @@ import { SeedBody } from '@/components/ipFactory/SeedDetail';
 import RunCost from '@/components/ipFactory/RunCost';
 import AgentRegistryPanel from '@/components/ipFactory/AgentRegistryPanel';
 import CodebaseExportPanel from '@/components/ipFactory/CodebaseExportPanel';
-import RegistrarDocsPanel from '@/components/ipFactory/RegistrarDocsPanel';
 import BrandKitPanel from '@/components/brand/BrandKitPanel';
 import { Badge } from '@/components/ui/badge';
 import { HUNT_PRESETS } from '@/lib/ipVectors';
@@ -181,8 +180,6 @@ export default function IpFactory() {
       <CodebaseExportPanel seeds={seeds || []} brand={brand} />
 
       <AgentRegistryPanel onChanged={() => load(filter)} />
-
-      <RegistrarDocsPanel />
 
       {running && (
         <div className="rounded-xl border bg-card p-8 flex flex-col items-center text-center mb-6">

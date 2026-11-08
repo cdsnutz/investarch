@@ -125,9 +125,15 @@ Save a brand name, tagline, logo, palette and font pairing, and every exported c
 
 Register an agent, deploy it, pause it, and record its runs. Each agent row carries its kind (external or in-app), its parent agent, the seed it serves, its run count, its success rate and its last outcome. Registering returns a written contract the agent can follow: run the pack's `verify.sh` first, deploy the API on one origin behind TLS, register itself with the `x-agent-key` header, report every run. Deploying your own agents means registering each one with `parentAgent` set to the agent that spawned it.
 
-### 7.7 The Registrar's documentation
+### 7.7 The Registrar's documentation, per seed
 
-The last panel holds this guide, the technical guide and the file manifest, readable in place and downloadable as markdown. That panel is the authority for what the app contains.
+Every seed carries its own documentation, written by the same generator that builds that seed's codebase. Open any seed and the **Seed documentation** block offers three documents:
+
+- **User guide**: every screen of that generated application, every field, and every message its user can see.
+- **Technical guide**: that application's stack, data model, API reference, authentication and ownership rules, tests and extension points, with its known limits stated.
+- **File manifest**: every file the export writes for that seed, by directory, with sizes, counted from the emitted file set rather than transcribed.
+
+Read in place, or download the active document as markdown to hand to a counterparty. Because the documents come from the generator, a seed's documentation cannot describe a file that does not ship.
 
 ## 8. Command Center (`/command-center`)
 

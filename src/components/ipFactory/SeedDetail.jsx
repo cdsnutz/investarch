@@ -7,6 +7,7 @@ import { Loader2, Download, Scale, Tag, FileSignature, Handshake, Wrench, FileAr
 import { buildDossierPack } from '@/lib/dossierPack';
 import { downloadSeedCodebase } from '@/lib/codebaseExport';
 import { missingSeedFields } from '@/lib/seedComplete';
+import SeedDocsSection from '@/components/docs/SeedDocsSection';
 
 function Block({ title, children }) {
   return (
@@ -168,6 +169,8 @@ export function SeedBody({ seed, filings, prospectus, onRefresh, brand }) {
         </div>
       )}
 
+      <SeedDocsSection seed={seed} brand={brand} codebase={codebase || seed.blueprint} />
+
       {codebase?.onboarding_guide && (
         <Block title="Developer Onboarding">{codebase.onboarding_guide}</Block>
       )}
@@ -205,7 +208,7 @@ export function SeedBody({ seed, filings, prospectus, onRefresh, brand }) {
   );
 }
 
-export default function SeedDetail({ seed, filings, prospectus, open, onClose, onRefresh }) {
+export default function SeedDetail({ seed, filings, prospectus, brand, open, onClose, onRefresh }) {
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
@@ -217,7 +220,7 @@ export default function SeedDetail({ seed, filings, prospectus, open, onClose, o
             {seed.yield_date && <span className="text-xs">Yield: {seed.yield_date}</span>}
           </DialogDescription>
         </DialogHeader>
-        <SeedBody seed={seed} filings={filings} prospectus={prospectus} onRefresh={onRefresh} />
+        <SeedBody seed={seed} filings={filings} prospectus={prospectus} onRefresh={onRefresh} brand={brand} />
       </DialogContent>
     </Dialog>
   );

@@ -3,11 +3,12 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Loader2, Download, Scale, Tag, FileSignature, Handshake, Wrench, FileArchive } from 'lucide-react';
+import { Loader2, Scale, Tag, FileSignature, Handshake, Wrench, FileArchive, BookOpenCheck, ShieldCheck } from 'lucide-react';
 import { buildDossierPack } from '@/lib/dossierPack';
 import { downloadSeedCodebase } from '@/lib/codebaseExport';
 import { missingSeedFields } from '@/lib/seedComplete';
 import SeedDocsSection from '@/components/docs/SeedDocsSection';
+import PlaybookSection from '@/components/ipFactory/PlaybookSection';
 
 function Block({ title, children }) {
   return (
@@ -80,11 +81,21 @@ export function SeedBody({ seed, filings, prospectus, onRefresh, brand }) {
     await base44.functions.invoke('completeIpSeed', { seedId: seed.id });
   });
 
+  const draftPlaybooks = () => run('playbooks', async () => {
+    await base44.functions.invoke('draftSeedPlaybooks', { seedId: seed.id });
+  });
+
+  const harden = () => run('harden', async () => {
+    await base44.functions.invoke('hardenCodebase', { action: 'seed', seedId: seed.id });
+  });
+
   const buildPack = () => run('pack', async () => {
     const missing = ['patent', 'trademark', 'deed', 'copyright'].filter((t) => !(filings || []).some((f) => f.filing_type === t));
     const capitalReq = base44.functions.invoke('draftCapitalPack', { seedId: seed.id });
+    const playbookReq = base44.functions.invoke('draftSeedPlaybooks', { seedId: seed.id }).catch(() => ({ data: {} }));
     await Promise.all(missing.map((t) => base44.functions.invoke('draftIpFiling', { seedId: seed.id, filingType: t })));
     const capital = (await capitalReq).data;
+    const playbooks = (await playbookReq).data?.playbooks || {};
     let prospectusRec = prospectus;
     if (!prospectusRec) {
       const res = await base44.functions.invoke('liquidateIp', { seedId: seed.id });
@@ -93,7 +104,7 @@ export function SeedBody({ seed, filings, prospectus, onRefresh, brand }) {
     const arch = await base44.functions.invoke('architectSeed', { seedId: seed.id });
     const codebase = arch.data || {};
     const fresh = await base44.entities.IpFiling.filter({ seed_id: seed.id }, { limit: 20 });
-    const blob = await buildDossierPack({ seed, filings: fresh.items || [], prospectus: prospectusRec, codebase, capital, brand });
+    const blob = await buildDossierPack({ seed: { ...seed, ...playbooks }, filings: fresh.items || [], prospectus: prospectusRec, codebase, capital, brand });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -166,18 +177,26 @@ export function SeedBody({ seed, filings, prospectus, onRefresh, brand }) {
         <Button size="sm" variant="outline" onClick={liquidate} disabled={!!busy}>
           {busy === 'liquidate' ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <Handshake className="size-3.5 mr-1.5" />} Liquidation prospectus
         </Button>
+        <Button size="sm" variant="outline" onClick={draftPlaybooks} disabled={!!busy}>
+          {busy === 'playbooks' ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <BookOpenCheck className="size-3.5 mr-1.5" />} Funding & buyer playbooks
+        </Button>
+        <Button size="sm" variant="outline" onClick={harden} disabled={!!busy}>
+          {busy === 'harden' ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <ShieldCheck className="size-3.5 mr-1.5" />} Harden codebase
+        </Button>
         <Button size="sm" onClick={buildPack} disabled={!!busy}>
           {busy === 'pack' ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <FileArchive className="size-3.5 mr-1.5" />} Download dossier pack (PDFs)
         </Button>
       </div>
       {busy === 'pack' && (
-        <p className="text-xs text-muted-foreground">Drafting any missing filings, grant applications, the loan proposal and the prospectus, rebuilding the codebase, then assembling the pack. This can take a few minutes.</p>
+        <p className="text-xs text-muted-foreground">Drafting any missing filings, the funding and buyer playbooks, grant applications, the loan proposal and the prospectus, hardening the blueprint, rebuilding the codebase, then assembling the pack. This can take a few minutes.</p>
       )}
       {error && (
         <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-3">
           <p className="text-xs text-destructive">{error}</p>
         </div>
       )}
+
+      <PlaybookSection seed={seed} />
 
       <SeedDocsSection seed={seed} brand={brand} codebase={codebase || seed.blueprint} />
 

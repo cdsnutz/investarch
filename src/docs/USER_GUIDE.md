@@ -109,11 +109,30 @@ Finding combinations costs one synthesis call. Creating the mix costs nothing fu
   03_Deed_of_Ownership.pdf
   04_Copyright_Registration_Application.pdf
   05_Liquidation_Prospectus.pdf
+  06_Developer_Onboarding_Guide.pdf
+  07_Small_Business_Loan_Proposal.pdf
+  08_Funding_Playbook.pdf       (how this asset gets funded, instrument by instrument)
+  09_Acquisition_Playbook.pdf   (how it is sold to a larger company, with named buyers)
+  10_Seed_Architecture.pdf
+  11_Seed_Logic.pdf
+  12_Seed_Data_Model.pdf
+  13_Seed_Strategy.pdf
+  14_Seed_Marketing_Plan.pdf
+  15_Seed_Research_Brief.pdf
+  16_Codebase_Hardening_Report.pdf
   Grants/<program>.pdf          (one per matched grant program)
-  Loan_Proposal.pdf
   Codebase/                     (the generated repository, files and guides)
+  Documentation/                (USER_GUIDE.md, TECHNICAL_GUIDE.md, MANIFEST.md)
+  Data/                         (schema.sql and the seed record as JSON)
+  PACK_MANIFEST.md              (every file in the pack, listed)
   QA_REPORT.md                  (what was verified, and what was not)
 ```
+
+Documents 10 to 15 are generated from the seed record itself: the stack and repository layout, the mechanisms, the PostgreSQL schema with its table list, the portfolio verdict, the first-thousand-users plan, and the split between what the record shows and what is assumed.
+
+Document 08 orders the instruments by what should be attempted first, states the evidence each funder scores and the disqualifier that ends an application. Document 09 names the buyer categories that pay for this capability, gives the packaging argument and valuation logic, then lists six to ten specific, currently operating companies with why each fits, the role to approach, the opening move and the proof to lead with. Both are grounded in live sources when they are drafted, and neither states a funding amount or a contact that the sources did not support. Use them as the working script: an outreach list you can act on, not a promise of capital.
+
+If a seed has never been through the hardening bench, document 16 is absent and the pack says so in `QA_REPORT.md`. Press **Harden codebase** on the seed to produce it.
 
 Nothing is packaged until every document passes its own check. A blank instrument, a section under a minimum length, a placeholder where a substantive paragraph belongs, or a missing grant or loan document blocks the download and names the document and the reason. The PDFs are drafts for filing and for submission, not executed instruments: a patent draft is not a filed application, and a trademark packet is not a registered mark.
 
@@ -126,6 +145,10 @@ Nothing is packaged until every document passes its own check. A blank instrumen
 3. **Contracts**: the data model in the SQL migration, the server validation and the screens agree on every field, and the generated tests match the routes.
 
 A generated repository contains an Express API, a Postgres migration, token authentication, owner-scoped record routes, list, create and detail screens for every collection, a contract test suite, `verify.sh`, `AGENTS.md`, `ACCEPTANCE.md` and `DEPLOYMENT.md`. `./verify.sh` is the runtime proof; static verification cannot execute the database.
+
+Mixed ecosystems are packaged the same way, from the merged seed rather than its members: one schema, one route set, one brand, one `MANIFEST.md` describing the combined app.
+
+**Harden codebase** runs the bench before the export rather than after a failed one. Four pods work in order over the seed's blueprint — structure (tables, keys, uniqueness, indexes), contracts (schema, logic and screens agreeing), security (isolation, trust boundaries, delete behaviour) — then enhancement, which proposes the two to four changes that most raise the asset's value. The bench records a verdict and a score out of 100 on the seed, keeps every existing table when it rewrites the model, and the next export is generated from the hardened schema. The same bench runs unattended every night over up to three seeds that have no report yet; the verdict appears on the seed and on the activity ledger.
 
 ### 7.6 Brand kit
 

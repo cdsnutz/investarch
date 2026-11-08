@@ -134,6 +134,8 @@ Every function authenticates with the caller's session unless noted. `writes` na
 | `completeIpSeed` | `seedId` | `IpSeed` blueprint fields |
 | `draftIpFiling` | `seedId`, `filingType` | `IpFiling` |
 | `draftCapitalPack` | `seedId` | grants and loan proposal (returned) |
+| `draftSeedPlaybooks` | `seedId` | `IpSeed` funding playbook, acquisition playbook, marketing plan, research brief, buyer leads |
+| `hardenCodebase` | `seedId`, or `action: "sweep"` | `IpSeed.hardening_report`, upgraded `IpSeed.blueprint`, `ActivityEvent` |
 | `liquidateIp` | `seedId` | `IpProspectus` |
 | `runDeploymentKit` | `seedId` | `Deployment[]` |
 | `runGhostValidation` | `seedId` | `GhostValidation[]` |

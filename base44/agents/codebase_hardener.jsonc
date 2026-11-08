@@ -18,16 +18,35 @@
     },
     {
       "function_name": "hardenCodebase",
-      "description": "Run the structure, contracts, security and enhancement pods on one seed and write the verdict and upgraded blueprint."
+      "description": "Run the four hardening pods on a seed and write the verdict and upgraded blueprint."
     },
     {
       "function_name": "architectSeed",
-      "description": "Rebuild a seed's codebase blueprint, user manual and onboarding guide after a hardening upgrade."
+      "description": "Rebuild a seed's codebase blueprint and guides after a hardening upgrade."
     },
     {
       "function_name": "draftSeedPlaybooks",
-      "description": "Draft the funding playbook, acquisition playbook, marketing plan, research brief and named buyer leads for a seed."
+      "description": "Draft the funding playbook, acquisition playbook, marketing plan, research brief and buyer leads."
     }
   ],
+  "context_files": [],
+  "app_user_connector_configs": [],
+  "selected_skill_names": [],
+  "selected_workspace_skill_ids": [],
+  "model": "automatic",
+  "whatsapp_greeting": null,
+  "telegram_greeting": null,
+  "line_greeting": null,
+  "memory_config": {
+    "enabled": true,
+    "scope": "both",
+    "include_other_conversation_context": false,
+    "instructions": null
+  },
+  "voice_config": {
+    "voice_id": null
+  },
+  "emails_settings": null,
+  "allow_anonymous_access": false,
   "name": "codebase_hardener"
 }

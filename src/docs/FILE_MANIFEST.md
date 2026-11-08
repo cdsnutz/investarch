@@ -4,7 +4,7 @@ Version 1.0 · 8 November 2026 · Compiled by the Registrar.
 
 This manifest enumerates every file in the application repository, grouped by area, with the role each file plays. It is the completeness check for the Registrar's documentation: if a file is on disk and not listed here, it is undocumented; if it is listed here and not on disk, the guide describes something that no longer exists.
 
-**Totals:** 303 files — 15 root · 86 backend · 9 skills · 193 app source.
+**Totals:** 311 files — 15 root · 90 backend · 12 skills · 194 app source.
 
 **Verification.** Run `node src/docs/verify-manifest.mjs` from the repository root. It walks the working tree (ignoring `node_modules`, `.git`, `dist`), compares it against the entries below, prints any file missing from the manifest and any entry with no file behind it, and exits non-zero on drift. A clean run prints `OK` and the two matching counts.
 
@@ -28,7 +28,7 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `tailwind.config.js` — token-to-class mapping, font roles, keyframes.
 - `vite.config.js` — Vite build with the Base44 plugin, React, HMR and analytics hooks.
 
-## 2. Base44 backend (86)
+## 2. Base44 backend (90)
 
 ### 2.1 Configuration (2)
 
@@ -83,7 +83,7 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `base44/entities/ValueAnchor.jsonc` — multi-year value anchors with steering design and progress.
 - `base44/entities/ValueAxiom.jsonc` — value axioms indexing assets against a defined metric.
 
-### 2.3 Backend functions (33)
+### 2.3 Backend functions (35)
 
 - `base44/functions/agentOps/entry.ts` — agent registrar: register, deploy, pause and record runs; app-user session or `x-agent-key`.
 - `base44/functions/analyzeBusiness/entry.ts` — turns a URL and company name into a dossier: sections, forecast, milestones and funding sources.
@@ -96,7 +96,9 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `base44/functions/draftCapitalPack/entry.ts` — drafts grant applications and a small-business loan proposal for a seed.
 - `base44/functions/draftFundingLetters/entry.ts` — drafts outreach subject, body and application narrative per matched funder.
 - `base44/functions/draftIpFiling/entry.ts` — drafts one instrument (patent, trademark, deed, copyright) for a seed.
+- `base44/functions/draftSeedPlaybooks/entry.ts` — drafts the funding playbook, acquisition playbook, marketing plan, research brief and named buyer leads, grounded in live sources.
 - `base44/functions/generateReadinessPackage/entry.ts` — assembles the capital-readiness package for a dossier.
+- `base44/functions/hardenCodebase/entry.ts` — runs the structure, contracts, security and enhancement pods on a seed's blueprint, records the verdict and applies the upgraded model.
 - `base44/functions/hfInference/entry.ts` — Hugging Face inference through the app-user connector: score, rewrite or complete a field.
 - `base44/functions/ipWealthStrategy/entry.ts` — assigns hold, flip or build to every seed with a written rationale.
 - `base44/functions/liquidateIp/entry.ts` — builds the liquidation prospectus, named buyers and offer terms for a seed.
@@ -126,12 +128,17 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `base44/shared/seedTargets.ts` — buyer and target resolution helpers for liquidation and prospectus work.
 - `base44/shared/v9Core.ts` — core scoring and strategy constants used across generators.
 
-### 2.5 Workflows (2)
+### 2.5 Workflows (3)
 
+- `base44/workflows/Codebase Hardening Pod.jsonc` — nightly hardening sweep over the seed ledger.
 - `base44/workflows/Dossier Ready For Review.jsonc` — fires when a dossier is promoted and runs the readiness function.
 - `base44/workflows/Sovereign IP Hunt.jsonc` — scheduled hunt that runs the hunter and strategy assignment.
 
-## 3. Agent skills (9)
+### 2.6 Agents (1)
+
+- `base44/agents/codebase_hardener.jsonc` — the hardening bench: reads a seed, runs the pods, rebuilds the codebase and refreshes the funding and buyer playbooks.
+
+## 3. Agent skills (12)
 
 - `skills/antislop/SKILL.md` — house rule against generic AI copy.
 - `skills/antislop/VERSION` — skill version marker.
@@ -142,8 +149,11 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `skills/antislop-human/contrast-mcp.py` — contrast audit over MCP.
 - `skills/antislop-layoutmobile/SKILL.md` — mobile layout rules.
 - `skills/antislop-ui/SKILL.md` — interface rules.
+- `skills/pods/contracts.md` — Contracts pod: schema, logic and screens must agree.
+- `skills/pods/security.md` — Security pod: isolation, trust boundaries, delete behaviour.
+- `skills/pods/structure.md` — Structure pod: tables, keys, uniqueness, indexes.
 
-## 4. App source (193)
+## 4. App source (194)
 
 ### 4.1 Entry and shell (4)
 
@@ -207,12 +217,13 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `src/components/hf/RewriteSection.jsx` — rewrite a dossier section through inference.
 - `src/components/hf/ScoreSeedButton.jsx` — score a seed through inference.
 
-### 4.9 IP Factory (6)
+### 4.9 IP Factory (7)
 
 - `src/components/ipFactory/AgentRegistryPanel.jsx` — register, deploy, pause agents and copy their contract.
 - `src/components/ipFactory/CodebaseExportPanel.jsx` — verify and download full codebase bundles.
 - `src/components/ipFactory/MixComboCard.jsx` — one seed combination: thesis, shared loop, roles and merged stack.
 - `src/components/ipFactory/MixSeedsDialog.jsx` — mix scan, the combination list and ecosystem creation.
+- `src/components/ipFactory/PlaybookSection.jsx` — funding and acquisition playbooks, named buyer leads, marketing plan, research brief and the hardening verdict.
 - `src/components/ipFactory/RunCost.jsx` — hunt cost estimate and last-run yield.
 - `src/components/ipFactory/SeedDetail.jsx` — full seed body and its instrument, prospectus and pack actions.
 

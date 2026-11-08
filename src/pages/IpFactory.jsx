@@ -11,7 +11,7 @@ import { HUNT_PRESETS } from '@/lib/ipVectors';
 const STAGES = [
   'Signal Miner: sweeping 24 market vectors — launch feeds, app charts, repos, dockets…',
   'Filtering for asymmetric market lacunae…',
-  'Synthesizer: drafting 24 IP-seeds with blueprints…',
+  'Synthesizer: drafting 120 IP-seeds across five parallel batches…',
   'Portfolio Strategist: issuing Hold / Flip / Build verdicts…'
 ];
 
@@ -27,9 +27,9 @@ export default function IpFactory() {
 
   const load = useCallback(async () => {
     const [seedPage, filingPage, prospectusPage] = await Promise.all([
-      base44.entities.IpSeed.filter({}, { sort: '-created_date', limit: 100 }),
-      base44.entities.IpFiling.filter({}, { sort: '-created_date', limit: 100 }),
-      base44.entities.IpProspectus.filter({}, { sort: '-created_date', limit: 100 })
+      base44.entities.IpSeed.filter({}, { sort: '-created_date', limit: 400 }),
+      base44.entities.IpFiling.filter({}, { sort: '-created_date', limit: 300 }),
+      base44.entities.IpProspectus.filter({}, { sort: '-created_date', limit: 300 })
     ]);
     setSeeds(seedPage.items || []);
     setFilings(filingPage.items || []);
@@ -76,7 +76,7 @@ export default function IpFactory() {
           <h1 className="text-2xl md:text-3xl font-semibold tracking-tight flex items-center gap-2.5">
             <Radar className="size-6 text-emerald-500" /> IP Factory
           </h1>
-          <p className="text-sm text-muted-foreground mt-2 max-w-xl">The Market Hunter sweeps twenty-four market vectors, weighted toward the frontier — AI agents, developer tooling, new compute, consumer breakouts — for live pain-signals opened in the last twelve months, skips anything already in the portfolio, and converts the sharpest lacunae into 24 IP-seeds per yield, each with its own path to first thousand users. The Registrar then turns each seed into a legal asset: patents written as claims, trademark packets, deeds, and a liquidation prospectus naming its buyers.</p>
+          <p className="text-sm text-muted-foreground mt-2 max-w-xl">The Market Hunter sweeps twenty-four market vectors, weighted toward the frontier — AI agents, developer tooling, new compute, consumer breakouts — for live pain-signals opened in the last twelve months, skips anything already in the portfolio, and converts the sharpest lacunae into a yield of 120 IP-seeds, each with its own path to first thousand users. The Registrar then turns each seed into a legal asset: patents written as claims, trademark packets, deeds, and a liquidation prospectus naming its buyers.</p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
           <div className="rounded-lg border bg-card px-4 py-3">
@@ -137,7 +137,7 @@ export default function IpFactory() {
           <BrainCircuit className="size-6 text-emerald-500 mb-3" />
           <div className="font-medium">Sovereign IP Hunt</div>
           <div className="text-sm text-muted-foreground mt-1.5 h-5">{stage}</div>
-          <p className="text-xs text-muted-foreground/70 mt-3">Signal mining with live web context, then synthesis — about a minute.</p>
+          <p className="text-xs text-muted-foreground/70 mt-3">Signal mining with live web context, then 120 seeds synthesized in five parallel batches — a couple of minutes.</p>
         </div>
       )}
 

@@ -1,9 +1,13 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import { resolveVectors, vectorBriefBlock, DEFAULT_PRESET } from "../../shared/ipVectors.ts";
 
-const SIGNAL_TARGET = 18;
-const SEED_TARGET = 24;
+const SIGNAL_BATCHES = 2;
+const SIGNALS_PER_BATCH = 20;
+const SEED_BATCHES = 5;
+const SEEDS_PER_BATCH = 24;
+const YIELD_TARGET = SEED_BATCHES * SEEDS_PER_BATCH;
 const PORTFOLIO_MEMORY = 150;
+const SEED_MEMORY = 80;
 
 const SIGNALS_SCHEMA = {
   type: "object",
@@ -59,36 +63,12 @@ const SEEDS_SCHEMA = {
   required: ["seeds"]
 };
 
-export default async function(req) {
-  try {
-    const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    const db = base44.entities;
+const signalPromptFor = (slice, briefs, memoryBlock) => `You are a market SIGINT operator running live reconnaissance across the following market vectors, using public channels: forums and subreddits, X posts, app-store and vendor review sites, patent and trademark filings, regulatory dockets, procurement portals, GitHub issue backlogs and trade-association threads.
 
-    const payload = await req.json().catch(() => ({}));
-    const preset = payload?.preset || DEFAULT_PRESET;
-    const vectors = resolveVectors(preset);
-    const briefs = vectorBriefBlock(vectors);
-
-    // Novelty memory: what the portfolio already holds, so a new yield goes hunting
-    // in untouched territory instead of restating yesterday's seeds.
-    const held = await db.IpSeed.filter({}, { limit: 300, fields: ['title'] });
-    const heldTitles = (held.items || [])
-      .map((s) => String(s.title || '').trim())
-      .filter(Boolean)
-      .slice(0, PORTFOLIO_MEMORY);
-    const memoryBlock = heldTitles.length
-      ? `\nALREADY IN THE PORTFOLIO — do not restate, rename or lightly re-angle any of these. Find different lacunae:\n${heldTitles.map((t) => `- ${t}`).join('\n')}\n`
-      : '';
-
-    // --- Stage 1: The Signal Miner — live market SIGINT across the selected vectors ---
-    const signalPrompt = `You are a market SIGINT operator running live reconnaissance across the following market vectors, using public channels: forums and subreddits, X posts, app-store and vendor review sites, patent and trademark filings, regulatory dockets, procurement portals, GitHub issue backlogs and trade-association threads.
-
-VECTORS IN SCOPE (${vectors.length}):
+VECTORS IN SCOPE (${slice.length}):
 ${briefs}
 
-Identify ${SIGNAL_TARGET} DISTINCT, currently-live PAIN-SIGNALS spread across these vectors: cover as many vectors as the count allows, and never return two signals from the same sub-segment. A qualifying signal is a clearly-stated or strongly-implied market demand with NO competent technical answer, or where existing solutions are thin wrappers, abandoned, badly documented, or universally complained about.
+Identify ${SIGNALS_PER_BATCH} DISTINCT, currently-live PAIN-SIGNALS spread across these vectors: cover as many vectors as the count allows, and never return two signals from the same sub-segment. A qualifying signal is a clearly-stated or strongly-implied market demand with NO competent technical answer, or where existing solutions are thin wrappers, abandoned, badly documented, or universally complained about.
 
 WEIGHTING — this factory hunts the bleeding edge. Bias the sweep toward: capability that shipped or broke into mainstream use in the last 12 months (agents, generated code, on-device models, new platform surfaces) where the tooling has not caught up; the daily friction of building and shipping software itself; and consumer demand that can compound through sharing, invites or visible output. Where a vector is mature, only report a signal if a new capability has just reopened the problem. Actively name the specific gap an incumbent's newest release left behind.
 
@@ -102,16 +82,10 @@ For each signal return:
 
 Rules: no invented quotes attributed to real people. If evidence is inferential rather than quoted, label it as inferred. Density over breadth: every signal must name a specific failed solution or a specific unmet demand. Frontier and software vectors may dominate the yield; include at least one signal from the physical or public vectors if they are in scope.${memoryBlock}`;
 
-    const signalsRes = await base44.asServiceRole.integrations.Core.InvokeLLM({
-      prompt: signalPrompt,
-      add_context_from_internet: true,
-      response_json_schema: SIGNALS_SCHEMA
-    });
-    const signals = (signalsRes?.signals || []).slice(0, SIGNAL_TARGET);
-    if (!signals.length) return Response.json({ error: 'Signal Miner returned no signals.' }, { status: 502 });
+const seedPromptFor = ({ index, total, signals, leadBriefs, memoryBlock }) => `You are the Synthesizer of an IP Factory, working batch ${index} of ${total}. Below are ${signals.length} live market pain-signals from the Signal Miner. Convert them into EXACTLY ${SEEDS_PER_BATCH} IP-SEEDS by applying Asymmetric Innovation: do not merely solve the stated problem — position each solution as the category-owning answer ("Category King") that makes incumbents look obsolete.
 
-    // --- Stage 2: The Synthesizer — asymmetric innovation into the seed yield ---
-    const seedPrompt = `You are the Synthesizer of an IP Factory. Below are ${signals.length} live market pain-signals from the Signal Miner, spanning ${vectors.length} market vectors. Convert them into EXACTLY ${SEED_TARGET} IP-SEEDS by applying Asymmetric Innovation: do not merely solve the stated problem — position each solution as the category-owning answer ("Category King") that makes incumbents look obsolete.
+LEAD WITH THESE VECTORS (other batches cover the rest — do not cluster on one):
+${leadBriefs}
 
 PAIN-SIGNALS:
 ${JSON.stringify(signals)}
@@ -126,21 +100,103 @@ For each seed return:
 7. mini_plan — a high-density business case, 90 to 140 words: buyer, wedge, revenue mechanism, why-now, the adoption loop (exactly how the first hundred users arrive and how it spreads), and the moat. Institutional tone. No filler adjectives.
 8. blueprint — full-stack app architecture: tech_stack (4 to 6 concrete choices), db_schema (the core tables with key columns, one compact paragraph), core_logic (the hardest algorithmic piece and how it works, one compact paragraph).
 
-Count is non-negotiable: EXACTLY ${SEED_TARGET} seeds, even where that means two or three different solutions attacking the SAME signal from different angles (different buyer, different wedge, different revenue mechanism). Spread the yield across the scoped vectors rather than clustering in one. No two seeds in the same micro-category. Every sentence must carry utility — zero filler.
+Count is non-negotiable: EXACTLY ${SEEDS_PER_BATCH} seeds, even where that means two or three different solutions attacking the SAME signal from different angles (different buyer, different wedge, different revenue mechanism). No two seeds in this batch share a micro-category, and assume ${(total - 1) * SEEDS_PER_BATCH} seeds are being produced alongside yours — stay in your own territory. Every sentence must carry utility — zero filler.
 
 COMPOSITION: at least half the yield must attack a frontier-technology or software-development gap opened by something that shipped in the last 12 months, and every seed must be able to name the mechanism by which it reaches its first thousand users — a shareable artifact, an invite loop, a workflow it sits inside, or a marketplace it plugs into. Reject any seed that only works if someone discovers it. Prefer seeds where the buyer is already paying for a worse workaround.${memoryBlock}`;
 
-    const seedsRes = await base44.asServiceRole.integrations.Core.InvokeLLM({
-      prompt: seedPrompt,
-      response_json_schema: SEEDS_SCHEMA
+const rotate = (arr, by) => (arr.length ? arr.slice(by % arr.length).concat(arr.slice(0, by % arr.length)) : arr);
+const dedupeBy = (items, keyOf) => {
+  const seen = new Set();
+  return items.filter((item) => {
+    const key = String(keyOf(item) || '').trim().toLowerCase();
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+};
+
+export default async function(req) {
+  try {
+    const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me();
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const db = base44.entities;
+
+    const payload = await req.json().catch(() => ({}));
+    const preset = payload?.preset || DEFAULT_PRESET;
+    const vectors = resolveVectors(preset);
+    const briefs = vectorBriefBlock(vectors);
+
+    // Novelty memory: what the portfolio already holds, so a new yield goes hunting
+    // in untouched territory instead of restating yesterday's seeds.
+    const held = await db.IpSeed.filter({}, { limit: 400, fields: ['title'] });
+    const heldTitles = (held.items || [])
+      .map((s) => String(s.title || '').trim())
+      .filter(Boolean)
+      .slice(0, PORTFOLIO_MEMORY);
+    const memoryBlockFor = (titles) => (titles.length
+      ? `\nALREADY IN THE PORTFOLIO — do not restate, rename or lightly re-angle any of these. Find different lacunae:\n${titles.map((t) => `- ${t}`).join('\n')}\n`
+      : '');
+
+    // --- Stage 1: The Signal Miner — parallel sweeps across the selected vectors ---
+    const signalSlices = Array.from({ length: SIGNAL_BATCHES }, (_, i) => {
+      const per = Math.ceil(vectors.length / SIGNAL_BATCHES);
+      const slice = vectors.slice(i * per, (i + 1) * per);
+      return slice.length ? slice : vectors;
     });
-    const seeds = (seedsRes?.seeds || []).slice(0, SEED_TARGET);
-    if (!seeds.length) return Response.json({ error: 'Synthesizer returned no seeds.' }, { status: 502 });
+
+    const signalResults = await Promise.allSettled(
+      signalSlices.map((slice) => base44.asServiceRole.integrations.Core.InvokeLLM({
+        prompt: signalPromptFor(slice, vectorBriefBlock(slice), memoryBlockFor(heldTitles.slice(0, SEED_MEMORY))),
+        add_context_from_internet: true,
+        response_json_schema: SIGNALS_SCHEMA
+      }))
+    );
+
+    const signals = dedupeBy(
+      signalResults.flatMap((r) => (r.status === 'fulfilled' ? (r.value?.signals || []) : [])),
+      (s) => s.pain_signal
+    ).slice(0, SIGNAL_BATCHES * SIGNALS_PER_BATCH);
+
+    if (signals.length < 4) {
+      const reason = signalResults.find((r) => r.status === 'rejected');
+      return Response.json({ error: `Signal Miner returned no usable signals.${reason ? ` ${reason.reason?.message || ''}` : ''}` }, { status: 502 });
+    }
+
+    // --- Stage 2: The Synthesizer — ${SEED_BATCHES} parallel batches, one large yield ---
+    const batches = Array.from({ length: SEED_BATCHES }, (_, i) => {
+      const assigned = signals.filter((_, idx) => idx % SEED_BATCHES === i);
+      const pool = assigned.length >= 2 ? assigned : signals;
+      const lead = rotate(vectors, i * Math.max(1, Math.floor(vectors.length / SEED_BATCHES)))
+        .slice(0, Math.max(2, Math.ceil(vectors.length / SEED_BATCHES)));
+      return { pool, lead };
+    });
+
+    const seedResults = await Promise.allSettled(
+      batches.map((b, i) => base44.asServiceRole.integrations.Core.InvokeLLM({
+        prompt: seedPromptFor({
+          index: i + 1,
+          total: SEED_BATCHES,
+          signals: b.pool,
+          leadBriefs: vectorBriefBlock(b.lead),
+          memoryBlock: memoryBlockFor(heldTitles.slice(0, SEED_MEMORY))
+        }),
+        response_json_schema: SEEDS_SCHEMA
+      }))
+    );
+
+    const produced = seedResults.flatMap((r) => (r.status === 'fulfilled' ? (r.value?.seeds || []) : []));
+    if (!produced.length) {
+      const reason = seedResults.find((r) => r.status === 'rejected');
+      return Response.json({ error: `Synthesizer returned no seeds.${reason ? ` ${reason.reason?.message || ''}` : ''}` }, { status: 502 });
+    }
 
     // Drop anything that duplicates a title already held, so every yield is net-new IP.
     const heldSet = new Set(heldTitles.map((t) => t.toLowerCase()));
-    const fresh = seeds.filter((s) => !heldSet.has(String(s.title || '').trim().toLowerCase()));
-    const toStore = fresh.length ? fresh : seeds;
+    const fresh = dedupeBy(produced, (s) => s.title).filter((s) => !heldSet.has(String(s.title || '').trim().toLowerCase()));
+    const toStore = (fresh.length ? fresh : dedupeBy(produced, (s) => s.title))
+      .filter((s) => String(s.title || '').trim())
+      .slice(0, YIELD_TARGET);
 
     const yieldDate = new Date().toISOString().slice(0, 10);
     const records = toStore.map((s) => ({
@@ -162,6 +218,7 @@ COMPOSITION: at least half the yield must attack a frontier-technology or softwa
       vectors: vectors.length,
       signals_found: signals.length,
       seeds_created: (created || []).length || records.length,
+      batches: seedResults.map((r) => (r.status === 'fulfilled' ? (r.value?.seeds || []).length : 0)),
       yield_date: yieldDate
     });
   } catch (error) {

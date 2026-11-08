@@ -1,7 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import { resolveVectors, vectorBriefBlock, DEFAULT_PRESET } from "../../shared/ipVectors.ts";
 
-const SIGNAL_TARGET = 16;
+const SIGNAL_TARGET = 18;
 const SEED_TARGET = 24;
 const PORTFOLIO_MEMORY = 150;
 
@@ -16,9 +16,11 @@ const SIGNALS_SCHEMA = {
           vector: { type: "string" },
           pain_signal: { type: "string" },
           gap_summary: { type: "string" },
-          source_channel: { type: "string" }
+          source_channel: { type: "string" },
+          why_now: { type: "string" },
+          distribution_hook: { type: "string" }
         },
-        required: ["vector", "pain_signal", "gap_summary", "source_channel"]
+        required: ["vector", "pain_signal", "gap_summary", "source_channel", "why_now", "distribution_hook"]
       }
     }
   },
@@ -88,13 +90,17 @@ ${briefs}
 
 Identify ${SIGNAL_TARGET} DISTINCT, currently-live PAIN-SIGNALS spread across these vectors: cover as many vectors as the count allows, and never return two signals from the same sub-segment. A qualifying signal is a clearly-stated or strongly-implied market demand with NO competent technical answer, or where existing solutions are thin wrappers, abandoned, badly documented, or universally complained about.
 
+WEIGHTING — this factory hunts the bleeding edge. Bias the sweep toward: capability that shipped or broke into mainstream use in the last 12 months (agents, generated code, on-device models, new platform surfaces) where the tooling has not caught up; the daily friction of building and shipping software itself; and consumer demand that can compound through sharing, invites or visible output. Where a vector is mature, only report a signal if a new capability has just reopened the problem. Actively name the specific gap an incumbent's newest release left behind.
+
 For each signal return:
 1. vector — the vector id from the list above that it belongs to.
 2. pain_signal — a verbatim-style quote or tight paraphrase of the complaint/demand, with enough context to be verifiable (name the community, product, docket or domain it comes from).
 3. gap_summary — the precise market lacuna: what buyers want, what exists today, and why what exists fails.
 4. source_channel — where this signal lives (e.g. "r/FreightBrokers thread on detention billing", "1-star reviews of X in the App Store", "USPTO filings in class 705").
+5. why_now — the specific technology, platform policy or behavior shift in the last 12 months that makes this solvable now and not before. Name the release, rule or trend.
+6. distribution_hook — the one mechanism that makes this spread: the shareable artifact, the invite loop, the network effect, or the workflow it replaces on day one. If there is no credible hook, say "no hook" rather than inventing one.
 
-Rules: no invented quotes attributed to real people. If evidence is inferential rather than quoted, label it as inferred. Density over breadth: every signal must name a specific failed solution or a specific unmet demand. Prefer regulated and operationally messy domains where incumbents are slow, over a crowded consumer app idea.${memoryBlock}`;
+Rules: no invented quotes attributed to real people. If evidence is inferential rather than quoted, label it as inferred. Density over breadth: every signal must name a specific failed solution or a specific unmet demand. Frontier and software vectors may dominate the yield; include at least one signal from the physical or public vectors if they are in scope.${memoryBlock}`;
 
     const signalsRes = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt: signalPrompt,
@@ -117,10 +123,12 @@ For each seed return:
 4. source_channel — where the signal was observed.
 5. solution — the technical approach in 2-3 sentences. It must be implementable with a normal web stack; no hand-waving ("AI" is not an architecture).
 6. asymmetric_score — 1 to 10: how hard the gap is to close for incumbents versus how valuable closing it is. Score truthfully; most seeds should land 4 to 8.
-7. mini_plan — a high-density business case, 90 to 140 words: buyer, wedge, revenue mechanism, why-now, and the moat. Institutional tone. No filler adjectives.
+7. mini_plan — a high-density business case, 90 to 140 words: buyer, wedge, revenue mechanism, why-now, the adoption loop (exactly how the first hundred users arrive and how it spreads), and the moat. Institutional tone. No filler adjectives.
 8. blueprint — full-stack app architecture: tech_stack (4 to 6 concrete choices), db_schema (the core tables with key columns, one compact paragraph), core_logic (the hardest algorithmic piece and how it works, one compact paragraph).
 
-Count is non-negotiable: EXACTLY ${SEED_TARGET} seeds, even where that means two or three different solutions attacking the SAME signal from different angles (different buyer, different wedge, different revenue mechanism). Spread the yield across the scoped vectors rather than clustering in one. No two seeds in the same micro-category. Every sentence must carry utility — zero filler.${memoryBlock}`;
+Count is non-negotiable: EXACTLY ${SEED_TARGET} seeds, even where that means two or three different solutions attacking the SAME signal from different angles (different buyer, different wedge, different revenue mechanism). Spread the yield across the scoped vectors rather than clustering in one. No two seeds in the same micro-category. Every sentence must carry utility — zero filler.
+
+COMPOSITION: at least half the yield must attack a frontier-technology or software-development gap opened by something that shipped in the last 12 months, and every seed must be able to name the mechanism by which it reaches its first thousand users — a shareable artifact, an invite loop, a workflow it sits inside, or a marketplace it plugs into. Reject any seed that only works if someone discovers it. Prefer seeds where the buyer is already paying for a worse workaround.${memoryBlock}`;
 
     const seedsRes = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt: seedPrompt,

@@ -11,6 +11,72 @@ export type IpVector = {
 
 export const IP_VECTORS: IpVector[] = [
   {
+    id: 'agentic_ai',
+    label: 'AI agents & autonomy',
+    brief: 'Agent orchestration, tool calling, long-term memory, agent payments and identity, guardrails, evals for nondeterministic systems, agent-to-agent handoff.',
+    channels: ['Hugging Face trending models and spaces', 'r/LocalLLaMA and r/AI_Agents threads', 'arXiv and model release notes', 'agent framework GitHub issue backlogs']
+  },
+  {
+    id: 'dev_experience',
+    label: 'AI-assisted development',
+    brief: 'Coding assistants, repo context and retrieval, automated review, test synthesis, migration and refactor tooling, spec-to-code pipelines, agentic CI.',
+    channels: ['Hacker News front page and Show HN', 'r/ExperiencedDevs and r/vibecoding threads', 'IDE extension one-star reviews', 'GitHub Copilot and Cursor community complaints']
+  },
+  {
+    id: 'dataai',
+    label: 'Data & applied AI operations',
+    brief: 'Model evaluation, data quality and lineage, retrieval infrastructure, inference routing and cost control, model governance and audit trails.',
+    channels: ['r/MachineLearning and r/LLMDevs threads', 'EU AI Act and NIST framework guidance', 'MLOps vendor review complaints', 'open-source eval and observability issue trackers']
+  },
+  {
+    id: 'devinfra',
+    label: 'Developer & infrastructure software',
+    brief: 'CI/CD, observability, data pipelines, API platforms, self-hosted operations, migration and upgrade tooling.',
+    channels: ['Hacker News and r/devops threads', 'GitHub issue backlogs on popular projects', 'cloud provider deprecation notices', 'Stack Overflow unanswered high-view questions']
+  },
+  {
+    id: 'security',
+    label: 'Security & identity',
+    brief: 'Identity and access, threat detection, secrets management, software supply chain, compliance evidence collection.',
+    channels: ['CISA advisories and KEV catalog', 'r/netsec and r/cybersecurity threads', 'SOC 2 and ISO audit finding patterns', 'bug-bounty disclosure writeups']
+  },
+  {
+    id: 'frontier_compute',
+    label: 'Frontier compute',
+    brief: 'GPU allocation and scheduling, inference cost routing, edge and on-device compute, accelerator abstraction, experimental quantum and bio-compute interfaces.',
+    channels: ['cloud GPU pricing and availability trackers', 'r/hardware and r/MLQuestions threads', 'accelerator vendor launch notes', 'arXiv systems papers']
+  },
+  {
+    id: 'robotics_embodied',
+    label: 'Robotics & embodied systems',
+    brief: 'Robot fleet operations, teleoperation, sim-to-real pipelines, embodied data collection, warehouse and mobile robot coordination.',
+    channels: ['r/robotics and ROS Discourse threads', 'robot vendor integration complaints', 'DARPA and NSF program solicitations', 'embodied AI benchmark leaderboards']
+  },
+  {
+    id: 'spatial_xr',
+    label: 'Spatial & immersive',
+    brief: 'AR and VR applications, 3D capture and reconstruction, spatial commerce, headset enterprise deployment, mixed-reality collaboration.',
+    channels: ['visionOS and Quest store review complaints', 'r/virtualreality and r/augmentedreality threads', 'enterprise XR pilot case studies', '3D capture creator forums']
+  },
+  {
+    id: 'viral_consumer',
+    label: 'Viral consumer apps',
+    brief: 'New social formats, single-purpose utilities with shareable output, habit loops, group and invite mechanics, breakouts on the app-store charts.',
+    channels: ['App Store and Google Play top-chart movements', 'TikTok and Reels trend audio and format analysis', 'r/AppIdeas and r/SideProject threads', 'Product Hunt daily leaderboard comments']
+  },
+  {
+    id: 'creator_economy',
+    label: 'Creators & monetization',
+    brief: 'Creator tooling, audience analytics, clipping and repurposing pipelines, sponsorship marketplaces, payout and rights management.',
+    channels: ['r/NewTubers, r/Twitch and r/InstagramMarketing threads', 'creator platform policy and payout changes', 'sponsorship marketplace complaints', 'clipping and editing community threads']
+  },
+  {
+    id: 'growth_ops',
+    label: 'Growth & distribution',
+    brief: 'Attribution and incrementality, referral mechanics, app-store optimization, lifecycle messaging, product-led growth instrumentation.',
+    channels: ['r/marketing and r/SaaS growth threads', 'ASA and ASO benchmark reports', 'attribution vendor migration complaints', 'indie hacker revenue breakdown threads']
+  },
+  {
     id: 'fintech',
     label: 'Regulated finance',
     brief: 'Payments, lending, treasury operations, KYC/AML, reconciliation, embedded finance, capital markets plumbing.',
@@ -87,24 +153,6 @@ export const IP_VECTORS: IpVector[] = [
     label: 'Nonprofits & grantmaking',
     brief: 'Grant discovery, grant reporting compliance, donor operations, program measurement, fiscal sponsorship.',
     channels: ['r/nonprofit and r/grantwriting threads', 'foundation reporting requirement changes', 'NTEN and TechSoup member threads', '990 filing and audit findings']
-  },
-  {
-    id: 'devinfra',
-    label: 'Developer & infrastructure software',
-    brief: 'CI/CD, observability, data pipelines, API platforms, self-hosted operations, migration and upgrade tooling.',
-    channels: ['Hacker News and r/devops threads', 'GitHub issue backlogs on popular projects', 'cloud provider deprecation notices', 'Stack Overflow unanswered high-view questions']
-  },
-  {
-    id: 'security',
-    label: 'Security & identity',
-    brief: 'Identity and access, threat detection, secrets management, software supply chain, compliance evidence collection.',
-    channels: ['CISA advisories and KEV catalog', 'r/netsec and r/cybersecurity threads', 'SOC 2 and ISO audit finding patterns', 'bug-bounty disclosure writeups']
-  },
-  {
-    id: 'dataai',
-    label: 'Data & applied AI operations',
-    brief: 'Model evaluation, data quality and lineage, retrieval infrastructure, agent operations, model governance and audit trails.',
-    channels: ['r/MachineLearning and r/LLMDevs threads', 'EU AI Act and NIST framework guidance', 'MLOps vendor review complaints', 'open-source eval and observability issue trackers']
   }
 ];
 
@@ -115,14 +163,14 @@ export type IpPreset = {
   vectors: string[];
 };
 
-const ALL = IP_VECTORS.map((v) => v.id);
-
 export const IP_PRESETS: IpPreset[] = [
-  { id: 'all', label: 'All markets', blurb: 'Every vector in the taxonomy', vectors: ALL },
+  { id: 'all', label: 'All markets', blurb: 'Every vector in the taxonomy', vectors: IP_VECTORS.map((v) => v.id) },
+  { id: 'frontier', label: 'Frontier tech', blurb: 'Agents, dev tools, compute, robotics, spatial', vectors: ['agentic_ai', 'dev_experience', 'dataai', 'devinfra', 'security', 'frontier_compute', 'robotics_embodied', 'spatial_xr'] },
+  { id: 'viral', label: 'Viral & consumer', blurb: 'Consumer breakouts, creators, growth', vectors: ['viral_consumer', 'creator_economy', 'growth_ops', 'dev_experience'] },
+  { id: 'software', label: 'Software & data', blurb: 'Dev infra, security, applied AI, agents', vectors: ['devinfra', 'security', 'dataai', 'dev_experience', 'agentic_ai', 'frontier_compute'] },
   { id: 'regulated', label: 'Regulated & money', blurb: 'Finance, insurance, legal, healthcare', vectors: ['fintech', 'insuretech', 'legal', 'healthcare'] },
   { id: 'physical', label: 'Physical economy', blurb: 'Logistics, industrial, energy, food, construction, trades', vectors: ['logistics', 'industrial', 'energy', 'agrifood', 'construction', 'trades_smb'] },
-  { id: 'public', label: 'Public & institutional', blurb: 'Government, education, nonprofits', vectors: ['govtech', 'education', 'nonprofits'] },
-  { id: 'software', label: 'Software & data', blurb: 'Dev infra, security, applied AI', vectors: ['devinfra', 'security', 'dataai'] }
+  { id: 'public', label: 'Public & institutional', blurb: 'Government, education, nonprofits', vectors: ['govtech', 'education', 'nonprofits'] }
 ];
 
 export const DEFAULT_PRESET = 'all';

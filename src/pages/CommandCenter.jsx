@@ -5,6 +5,7 @@ import SimulatorPanel from '@/components/command/SimulatorPanel';
 import HunterPanel from '@/components/command/HunterPanel';
 import LedgerPanel from '@/components/command/LedgerPanel';
 import SeedBoardPanel from '@/components/command/SeedBoardPanel';
+import ReadinessTrendPanel from '@/components/command/ReadinessTrendPanel';
 
 export default function CommandCenter() {
   const [refreshKey, setRefreshKey] = useState(0);
@@ -13,6 +14,7 @@ export default function CommandCenter() {
       <PageHeader title="Command Center" subtitle="Pipeline state, entitlement, open market seeds, and the operations ledger." />
       <SeedBoardPanel refreshKey={refreshKey} />
       <div className="grid lg:grid-cols-2 gap-6">
+        <ReadinessTrendPanel refreshKey={refreshKey} />
         <PipelinePanel refreshKey={refreshKey} />
         <SimulatorPanel />
         <HunterPanel onChange={() => setRefreshKey((k) => k + 1)} />

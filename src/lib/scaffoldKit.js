@@ -88,12 +88,13 @@ export function buildRoadmap(seed) {
 Execute phases in order. Do not start a phase until every exit check of the previous one passes. Record progress by ticking boxes in this file.
 
 ## Phase 0: Orientation
-- [ ] Read AGENTS.md, DEPLOYMENT.md and this file in full.
+- [ ] Read AGENTS.md, SCAFFOLD.md, DEPLOYMENT.md and this file in full.
 - [ ] Load every skill in \`.agent/skills/\`. Apply antislop-code to all code, antislop-ui and antislop-layoutmobile to all screens, antislop-copywriting to all user-facing text.
 - [ ] Copy \`.env.example\` to \`.env\` and fill values.
 Exit: \`npm install\` succeeds.
 
 ## Phase 1: Foundation
+- [ ] Run SCAFFOLD.md sections 2 and 3: bootstrap the project, then port every scaffold file.
 - [ ] Project structure, lint, formatter and test runner configured.
 - [ ] Add \`npm\` scripts: dev, build, start, test, lint, db:migrate.
 - [ ] \`GET /health\` returns 200.

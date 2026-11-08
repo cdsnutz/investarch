@@ -4,7 +4,7 @@ Version 1.0 · 8 November 2026 · Compiled by the Registrar.
 
 This manifest enumerates every file in the application repository, grouped by area, with the role each file plays. It is the completeness check for the Registrar's documentation: if a file is on disk and not listed here, it is undocumented; if it is listed here and not on disk, the guide describes something that no longer exists.
 
-**Totals:** 299 files — 15 root · 85 backend · 9 skills · 190 app source.
+**Totals:** 300 files — 15 root · 85 backend · 9 skills · 191 app source.
 
 **Verification.** Run `node src/docs/verify-manifest.mjs` from the repository root. It walks the working tree (ignoring `node_modules`, `.git`, `dist`), compares it against the entries below, prints any file missing from the manifest and any entry with no file behind it, and exits non-zero on drift. A clean run prints `OK` and the two matching counts.
 
@@ -142,7 +142,7 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `skills/antislop-layoutmobile/SKILL.md` — mobile layout rules.
 - `skills/antislop-ui/SKILL.md` — interface rules.
 
-## 4. App source (190)
+## 4. App source (191)
 
 ### 4.1 Entry and shell (4)
 
@@ -225,10 +225,11 @@ This manifest enumerates every file in the application repository, grouped by ar
 - `src/components/packagePanel/PackagePanel.jsx` — dossier pack controls.
 - `src/components/shared/PageHeader.jsx` — page title block.
 
-### 4.12 Simulator (4)
+### 4.12 Simulator (5)
 
 - `src/components/simulator/GatePanel.jsx` — logic gates and verdicts.
 - `src/components/simulator/MarketIntelTab.jsx` — market vectors tab.
+- `src/components/simulator/VectorCard.jsx` — one forecast: evidence grade, why now, falsifier and re-check date.
 - `src/components/simulator/RunButton.jsx` — simulator run control with busy state.
 - `src/components/simulator/StrategyTab.jsx` — strategy output tab.
 

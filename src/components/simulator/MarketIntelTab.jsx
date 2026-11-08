@@ -2,8 +2,7 @@ import React from "react";
 import { Activity, Target, Grip } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import RunButton from "@/components/simulator/RunButton";
-
-const STATUS_LABEL = { observed: 'Observed', actionable: 'Actionable', struck: 'Struck', predicted: 'Predicted', staked: 'Staked', foundation_building: 'Foundation building', operational: 'Operational' };
+import VectorCard from "@/components/simulator/VectorCard";
 
 export default function MarketIntelTab({ data, onLoad, fmtUsd }) {
   const { signals = [], vectors = [], grip } = data || {};
@@ -47,25 +46,7 @@ export default function MarketIntelTab({ data, onLoad, fmtUsd }) {
         ) : (
           <div className="grid md:grid-cols-2 gap-3">
             {vectors.map((v) => (
-              <div key={v.id} className="rounded-lg border border-border bg-white p-4 space-y-2">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm font-medium text-slate-900">{v.vector_name}</span>
-                  <Badge variant="secondary">{STATUS_LABEL[v.status] || v.status}</Badge>
-                </div>
-                <div className="flex gap-3 text-[11px] text-slate-500">
-                  <span>{v.sector}</span>
-                  <span>Horizon {v.horizon_months} mo</span>
-                  <span>Arrival {v.arrival_probability}%</span>
-                  <span>Conviction {v.conviction_score}/10</span>
-                </div>
-                <p className="text-xs text-slate-600 leading-relaxed">{v.gold_rush_thesis}</p>
-                {(v.leading_indicators || []).length > 0 && (
-                  <ul className="text-[11px] text-slate-500 list-disc pl-4 space-y-0.5">
-                    {v.leading_indicators.slice(0, 3).map((li, i) => <li key={i}>{li}</li>)}
-                  </ul>
-                )}
-                <div className="text-[10px] text-slate-400">{(v.staked_assets || []).length} assets staked for this vector</div>
-              </div>
+              <VectorCard key={v.id} vector={v} />
             ))}
           </div>
         )}

@@ -11,6 +11,26 @@
     "gold_rush_thesis": {
       "type": "string"
     },
+    "why_now": {
+      "type": "string"
+    },
+    "falsifier": {
+      "type": "string"
+    },
+    "signal_grade": {
+      "type": "string",
+      "enum": [
+        "strong",
+        "moderate",
+        "weak"
+      ],
+      "enumColors": [
+        "green",
+        "yellow",
+        "red"
+      ],
+      "default": "moderate"
+    },
     "leading_indicators": {
       "type": "array",
       "items": {
@@ -51,6 +71,12 @@
       "default": "predicted"
     },
     "predicted_date": {
+      "type": "string"
+    },
+    "kill_date": {
+      "type": "string"
+    },
+    "oracle_run": {
       "type": "string"
     }
   },

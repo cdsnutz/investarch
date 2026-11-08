@@ -118,7 +118,7 @@ export async function buildDossierPack({ seed, filings, prospectus, codebase, ca
     zip.file(`${base}/Codebase/${f.path}`, f.content, f.executable ? { unixPermissions: '755' } : undefined)
   );
 
-  if (codebase?.files?.length) {
+  if (codebase) {
     (codebase.files || []).forEach((f) => {
       if (f.path === 'package.json') return;
       zip.file(`${base}/Codebase/${f.path}`, f.content);

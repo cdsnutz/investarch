@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Loader2, Download, Scale, Tag, FileSignature, Handshake, Wrench, FileArchive } from 'lucide-react';
 import JSZip from 'jszip';
 import { buildDossierPack } from '@/lib/dossierPack';
+import { buildKitFiles } from '@/lib/buildKit';
 
 function Block({ title, children }) {
   return (
@@ -57,13 +58,13 @@ export function SeedBody({ seed, filings, prospectus, onRefresh }) {
 
   const buildCodebase = () => run('build', async () => {
     const res = await base44.functions.invoke('architectSeed', { seedId: seed.id });
-    const cb = res.data;
+    const cb = res.data || {};
     setCodebase(cb);
     const zip = new JSZip();
-    (cb.files || []).forEach((f) => zip.file(f.path, f.content));
+    buildKitFiles(seed, cb).forEach((f) => zip.file(f.path, f.content, f.executable ? { unixPermissions: '755' } : undefined));
     zip.file('Developer_Onboarding_Guide.md', cb.onboarding_guide || '');
     zip.file('User_Manual.md', cb.user_manual || '');
-    const blob = await zip.generateAsync({ type: 'blob' });
+    const blob = await zip.generateAsync({ type: 'blob', platform: 'UNIX' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;

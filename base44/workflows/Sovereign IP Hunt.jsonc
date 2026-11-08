@@ -1,6 +1,6 @@
 {
   "name": "Sovereign IP Hunt",
-  "description": "Daily InvestArch IP cycle: the hunt yields 20 IP-seeds, strategy verdicts are assigned, War-Room maps disruptions, Ghost Validation tests demand, Treasury prices the portfolio, deployment kits are cut, the IP-protection watchdog scans for infringement, the capital allocator rebalances, and the execution order is issued",
+  "description": "Daily InvestArch IP cycle: the hunt sweeps all market vectors for 24 net-new IP-seeds, strategy verdicts are assigned, War-Room maps disruptions, Ghost Validation tests demand, Treasury prices the portfolio, deployment kits are cut, the IP-protection watchdog scans for infringement, the capital allocator rebalances, and the execution order is issued",
   "definition": {
     "document": {
       "dsl": "1.0.0",

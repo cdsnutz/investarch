@@ -6,11 +6,12 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, Radar, Crosshair, BrainCircuit } from 'lucide-react';
 import { SeedBody } from '@/components/ipFactory/SeedDetail';
 import { Badge } from '@/components/ui/badge';
+import { HUNT_PRESETS } from '@/lib/ipVectors';
 
 const STAGES = [
-  'Signal Miner: sweeping Reddit, X, app stores, patents, forums…',
+  'Signal Miner: sweeping 16 market vectors — forums, dockets, filings, portals…',
   'Filtering for asymmetric market lacunae…',
-  'Synthesizer: drafting 20 IP-seeds with blueprints…',
+  'Synthesizer: drafting 24 IP-seeds with blueprints…',
   'Portfolio Strategist: issuing Hold / Flip / Build verdicts…'
 ];
 
@@ -19,6 +20,7 @@ export default function IpFactory() {
   const [filings, setFilings] = useState([]);
   const [prospectuses, setProspectuses] = useState([]);
   const [filter, setFilter] = useState('all');
+  const [preset, setPreset] = useState('all');
   const [running, setRunning] = useState(false);
   const [stage, setStage] = useState('');
   const [error, setError] = useState('');
@@ -48,7 +50,7 @@ export default function IpFactory() {
     setRunning(true);
     setError('');
     try {
-      await base44.functions.invoke('runIpHunt', {});
+      await base44.functions.invoke('runIpHunt', { preset });
       await base44.functions.invoke('ipWealthStrategy', {});
       await load();
     } catch (err) {
@@ -74,7 +76,7 @@ export default function IpFactory() {
           <h1 className="text-2xl md:text-3xl font-semibold tracking-tight flex items-center gap-2.5">
             <Radar className="size-6 text-emerald-500" /> IP Factory
           </h1>
-          <p className="text-sm text-muted-foreground mt-2 max-w-xl">The Market Hunter sweeps live channels for pain-signals, converts the sharpest lacunae into 20 IP-seeds per yield, and the Registrar turns each seed into a legal asset: patents written as claims, trademark packets, deeds, and a liquidation prospectus naming its buyers.</p>
+          <p className="text-sm text-muted-foreground mt-2 max-w-xl">The Market Hunter sweeps sixteen market vectors — regulated finance to industrial operations — for live pain-signals, skips anything already in the portfolio, and converts the sharpest lacunae into 24 IP-seeds per yield. The Registrar then turns each seed into a legal asset: patents written as claims, trademark packets, deeds, and a liquidation prospectus naming its buyers.</p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
           <div className="rounded-lg border bg-card px-4 py-3">
@@ -109,6 +111,25 @@ export default function IpFactory() {
             <TabsTrigger value="build">Build</TabsTrigger>
           </TabsList>
         </Tabs>
+      </div>
+
+      <div className="mb-6">
+        <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-2">Hunt scope</div>
+        <div className="flex flex-wrap gap-2">
+          {HUNT_PRESETS.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => setPreset(p.id)}
+              disabled={running}
+              aria-pressed={preset === p.id}
+              className={`rounded-lg border px-3 py-2 text-left transition disabled:opacity-50 ${preset === p.id ? 'border-emerald-600 bg-emerald-50 text-emerald-900' : 'bg-card hover:border-foreground/30'}`}
+            >
+              <span className="block text-xs font-medium">{p.label}</span>
+              <span className="block text-[10px] text-muted-foreground">{p.blurb}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {running && (

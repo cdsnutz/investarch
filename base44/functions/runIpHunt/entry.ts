@@ -1,4 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
+import { resolveVectors, vectorBriefBlock, DEFAULT_PRESET } from "../../shared/ipVectors.ts";
+
+const SIGNAL_TARGET = 16;
+const SEED_TARGET = 24;
+const PORTFOLIO_MEMORY = 150;
 
 const SIGNALS_SCHEMA = {
   type: "object",
@@ -8,11 +13,12 @@ const SIGNALS_SCHEMA = {
       items: {
         type: "object",
         properties: {
+          vector: { type: "string" },
           pain_signal: { type: "string" },
           gap_summary: { type: "string" },
           source_channel: { type: "string" }
         },
-        required: ["pain_signal", "gap_summary", "source_channel"]
+        required: ["vector", "pain_signal", "gap_summary", "source_channel"]
       }
     }
   },
@@ -58,28 +64,48 @@ export default async function(req) {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
     const db = base44.entities;
 
-    // --- Stage 1: The Signal Miner — live market SIGINT for pain-signals ---
-    const signalPrompt = `You are a market SIGINT operator running live reconnaissance across consumer and developer channels (Reddit threads, X posts, app-store reviews, patent filings, niche forums).
+    const payload = await req.json().catch(() => ({}));
+    const preset = payload?.preset || DEFAULT_PRESET;
+    const vectors = resolveVectors(preset);
+    const briefs = vectorBriefBlock(vectors);
 
-Identify 12 DISTINCT, currently-live PAIN-SIGNALS: moments where a clearly-stated or strongly-implied market demand has NO competent technical answer, or where existing solutions are thin wrappers, abandoned, or universally complained about.
+    // Novelty memory: what the portfolio already holds, so a new yield goes hunting
+    // in untouched territory instead of restating yesterday's seeds.
+    const held = await db.IpSeed.filter({}, { limit: 300, fields: ['title'] });
+    const heldTitles = (held.items || [])
+      .map((s) => String(s.title || '').trim())
+      .filter(Boolean)
+      .slice(0, PORTFOLIO_MEMORY);
+    const memoryBlock = heldTitles.length
+      ? `\nALREADY IN THE PORTFOLIO — do not restate, rename or lightly re-angle any of these. Find different lacunae:\n${heldTitles.map((t) => `- ${t}`).join('\n')}\n`
+      : '';
+
+    // --- Stage 1: The Signal Miner — live market SIGINT across the selected vectors ---
+    const signalPrompt = `You are a market SIGINT operator running live reconnaissance across the following market vectors, using public channels: forums and subreddits, X posts, app-store and vendor review sites, patent and trademark filings, regulatory dockets, procurement portals, GitHub issue backlogs and trade-association threads.
+
+VECTORS IN SCOPE (${vectors.length}):
+${briefs}
+
+Identify ${SIGNAL_TARGET} DISTINCT, currently-live PAIN-SIGNALS spread across these vectors: cover as many vectors as the count allows, and never return two signals from the same sub-segment. A qualifying signal is a clearly-stated or strongly-implied market demand with NO competent technical answer, or where existing solutions are thin wrappers, abandoned, badly documented, or universally complained about.
 
 For each signal return:
-1. pain_signal — a verbatim-style quote or tight paraphrase of the complaint/demand, with enough context to be verifiable (name the community, product, or domain it comes from).
-2. gap_summary — the precise market lacuna: what buyers want, what exists today, and why what exists fails.
-3. source_channel — where this signal lives (e.g. "r/smallbusiness thread on invoicing", "1-star reviews of X on the App Store", "USPTO filings in Y class").
+1. vector — the vector id from the list above that it belongs to.
+2. pain_signal — a verbatim-style quote or tight paraphrase of the complaint/demand, with enough context to be verifiable (name the community, product, docket or domain it comes from).
+3. gap_summary — the precise market lacuna: what buyers want, what exists today, and why what exists fails.
+4. source_channel — where this signal lives (e.g. "r/FreightBrokers thread on detention billing", "1-star reviews of X in the App Store", "USPTO filings in class 705").
 
-Rules: no invented quotes attributed to real people. If evidence is inferential rather than quoted, label it as inferred. Density over breadth: every signal must name a specific failed solution or a specific unmet demand.`;
+Rules: no invented quotes attributed to real people. If evidence is inferential rather than quoted, label it as inferred. Density over breadth: every signal must name a specific failed solution or a specific unmet demand. Prefer regulated and operationally messy domains where incumbents are slow, over a crowded consumer app idea.${memoryBlock}`;
 
     const signalsRes = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt: signalPrompt,
       add_context_from_internet: true,
       response_json_schema: SIGNALS_SCHEMA
     });
-    const signals = (signalsRes?.signals || []).slice(0, 12);
+    const signals = (signalsRes?.signals || []).slice(0, SIGNAL_TARGET);
     if (!signals.length) return Response.json({ error: 'Signal Miner returned no signals.' }, { status: 502 });
 
-    // --- Stage 2: The Synthesizer — asymmetric innovation into 20 IP-seeds ---
-    const seedPrompt = `You are the Synthesizer of an IP Factory. Below are 12 live market pain-signals from the Signal Miner. Convert them into EXACTLY 20 IP-SEEDS by applying Asymmetric Innovation: do not merely solve the stated problem — position each solution as the category-owning answer ("Category King") that makes incumbents look obsolete.
+    // --- Stage 2: The Synthesizer — asymmetric innovation into the seed yield ---
+    const seedPrompt = `You are the Synthesizer of an IP Factory. Below are ${signals.length} live market pain-signals from the Signal Miner, spanning ${vectors.length} market vectors. Convert them into EXACTLY ${SEED_TARGET} IP-SEEDS by applying Asymmetric Innovation: do not merely solve the stated problem — position each solution as the category-owning answer ("Category King") that makes incumbents look obsolete.
 
 PAIN-SIGNALS:
 ${JSON.stringify(signals)}
@@ -94,17 +120,22 @@ For each seed return:
 7. mini_plan — a high-density business case, 90 to 140 words: buyer, wedge, revenue mechanism, why-now, and the moat. Institutional tone. No filler adjectives.
 8. blueprint — full-stack app architecture: tech_stack (4 to 6 concrete choices), db_schema (the core tables with key columns, one compact paragraph), core_logic (the hardest algorithmic piece and how it works, one compact paragraph).
 
-Count is non-negotiable: EXACTLY 20 seeds, even where that means two or three different solutions attacking the SAME signal from different angles (different buyer, different wedge, different revenue mechanism). No two seeds in the same micro-category. Every sentence must carry utility — zero filler.`;
+Count is non-negotiable: EXACTLY ${SEED_TARGET} seeds, even where that means two or three different solutions attacking the SAME signal from different angles (different buyer, different wedge, different revenue mechanism). Spread the yield across the scoped vectors rather than clustering in one. No two seeds in the same micro-category. Every sentence must carry utility — zero filler.${memoryBlock}`;
 
     const seedsRes = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt: seedPrompt,
       response_json_schema: SEEDS_SCHEMA
     });
-    const seeds = (seedsRes?.seeds || []).slice(0, 20);
+    const seeds = (seedsRes?.seeds || []).slice(0, SEED_TARGET);
     if (!seeds.length) return Response.json({ error: 'Synthesizer returned no seeds.' }, { status: 502 });
 
+    // Drop anything that duplicates a title already held, so every yield is net-new IP.
+    const heldSet = new Set(heldTitles.map((t) => t.toLowerCase()));
+    const fresh = seeds.filter((s) => !heldSet.has(String(s.title || '').trim().toLowerCase()));
+    const toStore = fresh.length ? fresh : seeds;
+
     const yieldDate = new Date().toISOString().slice(0, 10);
-    const records = seeds.map((s) => ({
+    const records = toStore.map((s) => ({
       title: s.title,
       gap: s.gap,
       pain_signal: s.pain_signal || '',
@@ -118,7 +149,13 @@ Count is non-negotiable: EXACTLY 20 seeds, even where that means two or three di
       yield_date: yieldDate
     }));
     const created = await db.IpSeed.bulkCreate(records);
-    return Response.json({ signals_found: signals.length, seeds_created: (created || []).length || records.length, yield_date: yieldDate });
+    return Response.json({
+      preset,
+      vectors: vectors.length,
+      signals_found: signals.length,
+      seeds_created: (created || []).length || records.length,
+      yield_date: yieldDate
+    });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

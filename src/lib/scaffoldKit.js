@@ -19,6 +19,8 @@ APP_URL=http://localhost:3000
 
 # Database
 DATABASE_URL=postgresql://user:password@localhost:5432/app
+# Same server, separate database: the ownership isolation suite only runs when this is set
+DATABASE_URL_TEST=
 
 # Auth (32+ random bytes: openssl rand -hex 32)
 AUTH_SECRET=

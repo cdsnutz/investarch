@@ -1,7 +1,8 @@
 // Assembles the complete generated application: root config, package manifest and the
 // hand-off documents (MANIFEST, AGENT_ORDERS) that describe what ships and who extends it.
 import { entityModel, primaryEntity, sqlColumn } from '@/lib/kit/model';
-import { appSlug } from '@/lib/scaffoldKit';
+import { appSlug, buildEnvExample, buildSeedScript } from '@/lib/scaffoldKit';
+import { buildMigrateScript } from '@/lib/kit/db';
 import { buildServerFiles } from '@/lib/kit/server';
 import { buildClientFiles } from '@/lib/kit/client';
 import { buildTestFiles } from '@/lib/kit/tests';
@@ -442,6 +443,9 @@ export function buildKitFiles(seed, codebase) {
     { path: 'index.html', content: buildIndexHtml(seed) },
     { path: '.gitignore', content: GITIGNORE },
     { path: 'src/main.jsx', content: MAIN_JSX },
+    { path: '.env.example', content: buildEnvExample(seed) },
+    { path: 'database/migrate.js', content: buildMigrateScript() },
+    { path: 'database/seed.js', content: buildSeedScript(seed) },
     ...buildClientFiles(seed),
     ...buildServerFiles(seed),
     ...buildTestFiles(seed),

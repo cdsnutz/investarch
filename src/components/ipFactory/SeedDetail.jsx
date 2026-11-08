@@ -7,6 +7,7 @@ import { Loader2, Download, Scale, Tag, FileSignature, Handshake, Wrench, FileAr
 import JSZip from 'jszip';
 import { buildDossierPack } from '@/lib/dossierPack';
 import { buildKitFiles } from '@/lib/buildKit';
+import { buildAgentReadme, buildDeploymentGuide, buildAcceptanceGuide } from '@/lib/agentDocs';
 
 function Block({ title, children }) {
   return (
@@ -62,6 +63,9 @@ export function SeedBody({ seed, filings, prospectus, onRefresh }) {
     setCodebase(cb);
     const zip = new JSZip();
     buildKitFiles(seed, cb).forEach((f) => zip.file(f.path, f.content, f.executable ? { unixPermissions: '755' } : undefined));
+    zip.file('AGENTS.md', buildAgentReadme(seed, cb));
+    zip.file('ACCEPTANCE.md', buildAcceptanceGuide(seed, cb));
+    zip.file('DEPLOYMENT.md', buildDeploymentGuide(seed));
     zip.file('Developer_Onboarding_Guide.md', cb.onboarding_guide || '');
     zip.file('User_Manual.md', cb.user_manual || '');
     const blob = await zip.generateAsync({ type: 'blob', platform: 'UNIX' });

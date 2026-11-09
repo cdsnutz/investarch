@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { Download, Layers, Search, Loader2, FileDown } from 'lucide-react';
+import { Download, Layers, Search, Loader2, FileDown, Contact } from 'lucide-react';
 import { buildSeedArchive, isEcosystem } from '@/lib/seedArchive';
 import { collectBuyers, researchBuyers } from '@/lib/buyerIntel';
 import { buildBuyerArchive } from '@/lib/buyerArchive';
+import { buildHubspotCsv } from '@/lib/hubspotCsv';
+import { rankBuyers } from '@/lib/buyerScore';
 
 async function pageAll(entity) {
   const records = [];
@@ -132,6 +134,48 @@ export default function ExportArchives({ brand }) {
     }
   };
 
+  // Uses the research already on file, so a re-export costs nothing and matches the buyer book.
+  const runHubspotCsv = async () => {
+    setBusy('hubspot');
+    setNote('Ranking researched buyers…');
+    setResult(null);
+    setError('');
+    try {
+      const [all, research] = await Promise.all([
+        pageAll(base44.entities.IpSeed),
+        pageAll(base44.entities.BuyerResearch)
+      ]);
+      const buyers = collectBuyers(all);
+      const intel = {};
+      research.forEach((record) => {
+        [record.company, record.company_name].forEach((key) => {
+          const clean = String(key || '').trim().toLowerCase();
+          if (clean) intel[clean] = record;
+        });
+      });
+
+      const { csv, count } = buildHubspotCsv(rankBuyers(buyers, intel));
+      if (!count) {
+        setNote('No high-conviction buyers yet. Run the buyer book export first, then this CSV.');
+        return;
+      }
+
+      save(new Blob([csv], { type: 'text/csv;charset=utf-8;' }), `investarch-hubspot-buyers-${new Date().toISOString().slice(0, 10)}.csv`);
+      setNote('');
+      setResult({
+        label: 'HubSpot',
+        text: `${count} high-conviction compan${count === 1 ? 'y' : 'ies'} · import as companies, mapping the research columns as custom properties`,
+        top: [],
+        skipped: []
+      });
+    } catch (problem) {
+      setNote('');
+      setError(problem?.message || 'The HubSpot CSV could not be built.');
+    } finally {
+      setBusy('');
+    }
+  };
+
   return (
     <>
       <Button
@@ -169,6 +213,15 @@ export default function ExportArchives({ brand }) {
       >
         {busy === 'buyers' ? <Loader2 className="size-4 mr-2 animate-spin" /> : <Search className="size-4 mr-2" />}
         Export all buyers
+      </Button>
+      <Button
+        variant="outline"
+        onClick={runHubspotCsv}
+        disabled={Boolean(busy)}
+        className="w-full sm:w-auto"
+      >
+        {busy === 'hubspot' ? <Loader2 className="size-4 mr-2 animate-spin" /> : <Contact className="size-4 mr-2" />}
+        Export HubSpot CSV
       </Button>
 
       {(note || result || error) && (

@@ -170,7 +170,7 @@ Bundled from `antislop-skillset@3.3.4`.
 - `skills/pods/security.md` — Security pod: isolation, trust boundaries, delete behaviour.
 - `skills/pods/structure.md` — Structure pod: tables, keys, uniqueness, indexes.
 
-## 4. App source (205)
+## 4. App source (206)
 
 ### 4.1 Entry and shell (4)
 
@@ -341,7 +341,7 @@ Bundled from `antislop-skillset@3.3.4`.
 - `src/hooks/useDossierBuild.js` — dossier build and refinement state.
 - `src/hooks/useHuggingFace.js` — connector-backed inference state.
 
-### 4.16 Library (33)
+### 4.16 Library (34)
 
 - `src/lib/AuthContext.jsx` — auth provider, session state and public settings.
 - `src/lib/PageNotFound.jsx` — 404 page with a real 404 status.
@@ -369,6 +369,7 @@ Bundled from `antislop-skillset@3.3.4`.
 - `src/lib/seedDocs.js` — derives one seed's user guide, technical guide and file manifest from the generator.
 - `src/lib/seedComplete.js` — required-field rules for a complete seed.
 - `src/lib/buyerArchive.js` — assembles the buyer book: one profile per company, an index table and the JSON record, with confidence stated per buyer.
+- `src/lib/buyerScore.js` — the conviction score: 100 points across evidence grade, source URLs, dated moves, trigger specificity, insight distinctiveness and portfolio fit, with a thin profile capped below the watch band; ranks the buyer book best first.
 - `src/lib/buyerSummary.js` — the research summary report: coverage, the evidence grade behind every finding, who to open first, and what to re-verify; emitted as Markdown and PDF.
 - `src/lib/dossierPdf.js` — parses a dossier document's title, subtitle and sections and renders it as a paginated PDF, so a seed can ship as a print-ready set instead of Markdown.
 - `src/lib/buyerIntel.js` — collects and deduplicates every named buyer across the ledger, then researches them in bounded batches through the buyerIntel function.

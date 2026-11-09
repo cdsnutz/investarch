@@ -117,7 +117,8 @@ export default function ExportArchives({ brand }) {
       setNote('');
       setResult({
         label: 'Buyers',
-        text: `${archive.total} buyers · ${archive.researched} researched · verified ${archive.summary.verified} / likely ${archive.summary.likely} / thin ${archive.summary.thin} · ${archive.summary.sourced} with source URLs · ${archive.files} files · ${megabytes(archive.blob.size)}`,
+        text: `${archive.total} buyers · ${archive.researched} researched · ${archive.highConviction} high conviction · verified ${archive.summary.verified} / likely ${archive.summary.likely} / thin ${archive.summary.thin} · ${archive.summary.sourced} with source URLs · ${archive.files} files · ${megabytes(archive.blob.size)}`,
+        top: archive.top,
         skipped: failures.map((failure) => ({
           title: failure.buyers.join(', '),
           reason: failure.reason
@@ -177,6 +178,16 @@ export default function ExportArchives({ brand }) {
           {result && (
             <div className="rounded-lg border bg-card p-3 space-y-1.5">
               <p className="font-medium">{result.label} archive downloaded · {result.text}</p>
+              {result.top?.length > 0 && (
+                <div className="text-muted-foreground space-y-1">
+                  <p>Highest conviction — open these first:</p>
+                  <ol className="list-decimal pl-4 space-y-0.5">
+                    {result.top.map((row) => (
+                      <li key={row.company}>{row.company} — {row.score}/100 · {row.label}</li>
+                    ))}
+                  </ol>
+                </div>
+              )}
               {result.skipped.length > 0 && (
                 <div className="text-muted-foreground space-y-1">
                   <p>{result.skipped.length} entr{result.skipped.length === 1 ? 'y was' : 'ies were'} incomplete and noted inside the archive:</p>

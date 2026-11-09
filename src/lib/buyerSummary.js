@@ -2,6 +2,7 @@
 // the evidence grade behind each finding, and the order to approach them in.
 // Everything here is derived from the profiles actually returned — nothing is added.
 import { buildPdf } from '@/lib/pdfBuilder';
+import { rankBuyers } from '@/lib/buyerScore';
 
 const text = (value) => String(value ?? '').trim();
 const GRADE = { verified: 'Verified', likely: 'Likely', thin: 'Thin' };
@@ -34,10 +35,10 @@ export function researchSummary(buyers, intel = {}, { failures = [], generatedAt
     if (row.confidence === 'verified') sectors[key].verified += 1;
   });
 
-  const queue = researched
-    .filter((entry) => entry.row.confidence !== 'thin')
-    .sort((a, b) => (b.row.sources?.length || 0) - (a.row.sources?.length || 0)
-      || (b.buyer.seeds?.length || 0) - (a.buyer.seeds?.length || 0))
+  const ranked = rankBuyers(buyers, intel);
+  const high = ranked.filter((entry) => entry.tier === 'high');
+  const queue = ranked
+    .filter((entry) => entry.row && entry.tier !== 'thin')
     .slice(0, 15);
 
   const recheck = researched.filter((entry) => entry.row.confidence !== 'verified');
@@ -49,6 +50,7 @@ export function researchSummary(buyers, intel = {}, { failures = [], generatedAt
       body: [
         `${rows.length} named buyers across the ledger. ${researched.length} carry a fresh public-source read, ${missing.length} were not researched, and ${failures.length} batch${failures.length === 1 ? '' : 'es'} failed.`,
         `${sourced} of ${researched.length} profiles (${share(sourced)}) attach at least one source URL. A profile without a URL is an assertion, not evidence.`,
+        `${high.length} of ${researched.length} (${share(high.length)}) cleared the high-conviction bar at 70 or above.`,
         `Generated ${date}.`
       ].join('\n\n')
     },
@@ -79,7 +81,7 @@ export function researchSummary(buyers, intel = {}, { failures = [], generatedAt
     {
       heading: 'Open first',
       body: queue.length
-        ? queue.map(({ buyer, row }, index) => `${index + 1}. ${buyer.company} — ${GRADE[row.confidence]} · ${(row.sources || []).length} source${(row.sources || []).length === 1 ? '' : 's'} · ${short(row.buying_trigger, 160)}`).join('\n')
+        ? queue.map(({ buyer, row, score, label }, index) => `${index + 1}. ${buyer.company} — ${score}/100 · ${label} · ${(row.sources || []).length} source${(row.sources || []).length === 1 ? '' : 's'} · ${short(row.buying_trigger, 160)}`).join('\n')
         : 'No profile reached likely or verified.'
     },
     {

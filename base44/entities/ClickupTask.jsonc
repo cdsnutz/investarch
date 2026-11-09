@@ -1,0 +1,80 @@
+{
+  "name": "ClickupTask",
+  "type": "object",
+  "properties": {
+    "mvp_id": {
+      "type": "string"
+    },
+    "seed_id": {
+      "type": "string"
+    },
+    "seed_title": {
+      "type": "string"
+    },
+    "task_id": {
+      "type": "string"
+    },
+    "task_name": {
+      "type": "string"
+    },
+    "list_id": {
+      "type": "string"
+    },
+    "task_url": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "pushed_date": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "mvp_id",
+    "task_id",
+    "pushed_date"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

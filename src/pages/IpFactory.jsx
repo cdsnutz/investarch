@@ -10,6 +10,7 @@ import AgentRegistryPanel from '@/components/ipFactory/AgentRegistryPanel';
 import CodebaseExportPanel from '@/components/ipFactory/CodebaseExportPanel';
 import GoldMvpPanel from '@/components/ipFactory/GoldMvpPanel';
 import HighConvictionMvpPanel from '@/components/ipFactory/HighConvictionMvpPanel';
+import ClickupSyncPanel from '@/components/clickup/ClickupSyncPanel';
 import BrandKitPanel from '@/components/brand/BrandKitPanel';
 import { Badge } from '@/components/ui/badge';
 import { HUNT_PRESETS } from '@/lib/ipVectors';
@@ -239,6 +240,7 @@ export default function IpFactory() {
       <BrandKitPanel brand={brand} onChange={setBrand} />
       <HighConvictionMvpPanel seeds={seeds || []} brand={brand} onForged={() => load(filter)} />
       <GoldMvpPanel seeds={seeds || []} brand={brand} onForged={() => load(filter)} />
+      <ClickupSyncPanel onPushed={() => load(filter)} />
       <CodebaseExportPanel seeds={seeds || []} brand={brand} />
 
       <AgentRegistryPanel onChanged={() => load(filter)} />

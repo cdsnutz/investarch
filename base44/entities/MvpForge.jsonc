@@ -113,6 +113,101 @@
         "type": "string"
       }
     },
+    "source_verification": {
+      "type": "object",
+      "properties": {
+        "checked_date": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "evidence_read": {
+          "type": "number"
+        },
+        "claims_total": {
+          "type": "number"
+        },
+        "claims_traced": {
+          "type": "number"
+        },
+        "queries": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "claims": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "claim": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string"
+              },
+              "source_url": {
+                "type": "string"
+              },
+              "evidence": {
+                "type": "string"
+              },
+              "verified": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "date": {
+                "type": "string"
+              },
+              "used_for": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "research": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "company": {
+                "type": "string"
+              },
+              "confidence": {
+                "type": "string"
+              },
+              "sources": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "inferences": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "score": {
       "type": "number"
     },

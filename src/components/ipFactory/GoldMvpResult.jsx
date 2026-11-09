@@ -2,7 +2,7 @@ import { CheckCircle2, AlertTriangle } from 'lucide-react';
 
 export default function GoldMvpResult({ result }) {
   if (!result) return null;
-  const { shipped, failures, forged, reused, waiting, filename } = result;
+  const { shipped, failures, forged, reused, waiting, filename, verification } = result;
 
   return (
     <div className="mt-3 space-y-2">
@@ -15,6 +15,12 @@ export default function GoldMvpResult({ result }) {
           {forged} teardown{forged === 1 ? '' : 's'} forged, {reused} reused, every app audited before packaging.
           {filename ? ` File: ${filename}` : ''}
         </p>
+        {verification?.claims > 0 && (
+          <p className="text-[11px] text-emerald-900/80 mt-1">
+            Source verification: {verification.traced} of {verification.claims} market claims traced to {verification.sources} live
+            page{verification.sources === 1 ? '' : 's'}, printed with their URL and evidence in every document in the pack.
+          </p>
+        )}
         {waiting > 0 && (
           <p className="text-[11px] text-emerald-900/80 mt-1">
             {waiting} seed{waiting === 1 ? '' : 's'} still await{" "}

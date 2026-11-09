@@ -12,6 +12,7 @@ import { buildAgentReadme, buildAcceptanceGuide, buildDeploymentGuide } from '@/
 import { buildAgentDeployGuide } from '@/lib/agentDeploy';
 import { buildMvpBrief } from '@/lib/mvpBrief';
 import { buildPortfolioIndex } from '@/lib/mvpIndex';
+import { buildSourceFooter } from '@/lib/mvpSources';
 
 export const forgeFolder = (seed) => appSlug(seed);
 
@@ -61,18 +62,22 @@ function packageApp(seed, spec, brandKit) {
 
 export function buildForgeFiles(seed, spec, brand) {
   const { files, report } = packageApp(seed, spec, brand);
+  // MVP_BRIEF.md carries the full register; every other hand-off document closes with the same
+  // sources so no claim travels in a pack without the page and quote behind it.
+  const footer = buildSourceFooter(spec);
+  const cited = (content) => `${String(content).trimEnd()}\n\n${footer}\n`;
   return {
     report,
     files: files.concat([
       { path: 'MVP_BRIEF.md', content: buildMvpBrief(seed, spec) },
-      { path: 'AGENTS.md', content: buildAgentReadme(seed, null) },
-      { path: 'ACCEPTANCE.md', content: buildAcceptanceGuide(seed, null) },
-      { path: 'DEPLOYMENT.md', content: buildDeploymentGuide(seed) },
+      { path: 'AGENTS.md', content: cited(buildAgentReadme(seed, null)) },
+      { path: 'ACCEPTANCE.md', content: cited(buildAcceptanceGuide(seed, null)) },
+      { path: 'DEPLOYMENT.md', content: cited(buildDeploymentGuide(seed)) },
       {
         path: 'AGENT_DEPLOY.md',
-        content: buildAgentDeployGuide({ agentName: seed.title, seedTitle: seed.title, repoName: null })
+        content: cited(buildAgentDeployGuide({ agentName: seed.title, seedTitle: seed.title, repoName: null }))
       },
-      { path: 'AUDIT.md', content: auditMarkdown(report, seed) }
+      { path: 'AUDIT.md', content: cited(auditMarkdown(report, seed)) }
     ])
   };
 }

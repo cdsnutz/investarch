@@ -1,5 +1,8 @@
 // The teardown that set the build's scope, shipped inside every forged app so the operator can
 // see exactly which competitors were read, what they leave open, and how this build answers it.
+// It closes with the source register: every market claim beside the page and quote behind it.
+import { buildVerificationSection, verificationOf } from '@/lib/mvpSources';
+
 const text = (value) => String(value ?? '').trim();
 
 const list = (items, fallback) => (Array.isArray(items) && items.length ? items : null) || fallback;
@@ -26,6 +29,7 @@ function screenRows(spec) {
 }
 
 export function buildMvpBrief(seed, spec) {
+  const verified = verificationOf(spec);
   return `# ${text(seed.title)}: Gold-standard MVP brief
 
 ${text(spec.headline)}
@@ -39,6 +43,7 @@ ${text(spec.subhead)}
 | Entry pricing | ${text(spec.pricing) || 'not set'} |
 | Teardown score | ${spec.score ?? 0}/100 |
 | Forged | ${text(spec.forged_date).slice(0, 10) || 'today'} |
+| Source verification | ${verified.traced}/${verified.total} claims traced to a page |
 
 ## Why this beats the field
 
@@ -72,10 +77,6 @@ ${list(spec.acceptance_criteria, []).map((item) => `- [ ] ${item}`).join('\n') |
 
 ${list(spec.risks, []).map((item) => `- ${item}`).join('\n') || '- No risk was recorded for this seed.'}
 
-## Evidence read
-
-${list(spec.sources, []).map((url) => `- ${url}`).join('\n') || '- No public source was captured.'}
-
-Every claim above traces to one of these pages. Do not add a competitor, a price or a metric that does not.
+${buildVerificationSection(spec)}
 `;
 }

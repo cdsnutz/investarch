@@ -50,7 +50,8 @@ export default function GoldMvpPanel({ seeds, brand, onForged }) {
         reused: entries.filter((entry) => entry.spec && !batch.some((seed) => seed.id === entry.seed.id)).length,
         waiting: entries.filter((entry) => !entry.spec).length,
         failures: [...failures, ...bundle.failures],
-        filename: bundle.filename
+        filename: bundle.filename,
+        verification: summarizeVerification(bundle.shipped.map((entry) => entry.spec))
       });
     } catch (problem) {
       setError(problem?.message || 'The forge could not finish.');

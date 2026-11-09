@@ -1,6 +1,34 @@
 // One index at the root of the archive: every forged app, the head of its market, and the single
 // advantage it was built to win on, so the portfolio can be read before any folder is opened.
+import { verificationOf } from '@/lib/mvpSources';
+
 const text = (value) => String(value ?? '').trim();
+
+function verificationBlock(entry, index) {
+  const record = verificationOf(entry.spec);
+  const lines = [
+    `### ${index + 1}. ${text(entry.seed.title)} · ${record.traced}/${record.total} claims traced`,
+    '',
+    record.summary,
+    ''
+  ];
+  if (record.claims.length) {
+    record.claims.forEach((row) => {
+      lines.push(`- ${text(row.claim)} · ${row.source_url || 'no page traced, treat as an assumption'}`);
+      if (row.evidence) lines.push(`  Evidence: ${row.evidence}`);
+    });
+    lines.push('');
+  }
+  if (record.sources.length) {
+    lines.push('Sources read:', '');
+    record.sources.forEach((row) => lines.push(`- ${row.url}${row.title ? ` · ${row.title}` : ''}`));
+    lines.push('');
+  }
+  if (!record.claims.length && !record.sources.length) {
+    lines.push('- No public source was captured. Every market statement in this application is an assumption.', '');
+  }
+  return lines.join('\n');
+}
 
 export function buildPortfolioIndex(shipped) {
   const stamp = new Date().toISOString().slice(0, 10);
@@ -21,6 +49,11 @@ Every folder in this archive is a runnable full-stack application: Express API w
 | --- | --- | --- | --- | --- | --- | --- |
 ${rows.join('\n')}
 
+## Source verification
+
+Every market claim in these applications was read from a live page before it was written, and the page is printed beside it. A claim with no page is labelled an assumption and must be treated as one.
+
+${shipped.map((entry, index) => verificationBlock(entry, index)).join('\n')}
 ## Opening one
 
 \`\`\`bash

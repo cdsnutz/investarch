@@ -73,7 +73,8 @@ export default function HighConvictionMvpPanel({ seeds, brand, onForged }) {
         reused: high.filter((seed) => saved[seed.id]).length,
         waiting: Math.max(0, high.length - bundle.shipped.length - failures.length),
         failures: [...failures, ...bundle.failures],
-        filename: bundle.filename
+        filename: bundle.filename,
+        verification: summarizeVerification(bundle.shipped.map((entry) => entry.spec))
       });
     } catch (problem) {
       setError(problem?.message || 'The build could not finish.');

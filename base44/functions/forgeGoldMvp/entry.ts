@@ -259,6 +259,22 @@ export default async function (req) {
     const seedId = clean(body?.seedId);
     if (!seedId) return Response.json({ error: 'seedId is required' }, { status: 400 });
 
+    // Research already on file for this seed's buyers. It aims the product; it is never a
+    // competitor claim, which still has to come from live evidence.
+    const research = (Array.isArray(body?.research) ? body.research : [])
+      .slice(0, 4)
+      .map((row: any) => ({
+        company: clean(row?.company).slice(0, 120),
+        confidence: clean(row?.confidence).slice(0, 20),
+        snapshot: clean(row?.snapshot).slice(0, 900),
+        recent_moves: (Array.isArray(row?.recent_moves) ? row.recent_moves : []).map(clean).filter(Boolean).slice(0, 4),
+        buying_trigger: clean(row?.buying_trigger).slice(0, 600),
+        unique_insight: clean(row?.unique_insight).slice(0, 900),
+        osint_angle: clean(row?.osint_angle).slice(0, 600),
+        sources: (Array.isArray(row?.sources) ? row.sources : []).map(clean).filter(Boolean).slice(0, 4)
+      }))
+      .filter((row: any) => row.company);
+
     const seed = await base44.entities.IpSeed.get(seedId).catch((error) => (error?.status === 404 ? null : Promise.reject(error)));
     if (!seed) return Response.json({ error: 'Seed not found' }, { status: 404 });
 
@@ -299,12 +315,20 @@ export default async function (req) {
       ecosystem_interlocks: clean(seed.ecosystem_interlocks)
     };
 
+    const researchBlock = research.length
+      ? `\n\nBUYER RESEARCH ALREADY ON FILE (dated public-source reads on the buyers; use it to aim the promise, the core loop and the wedge. Competitor names, prices and urls still come only from LIVE EVIDENCE)\n${JSON.stringify(
+        research,
+        null,
+        2
+      )}`
+      : '';
+
     const raw = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt: `${SPEC_PROMPT}\n\nSEED\n${JSON.stringify(brief, null, 2)}\n\nLIVE EVIDENCE (search results, one per line as JSON)\n${JSON.stringify(
         evidence.map((row) => ({ title: row.title, url: row.link, date: row.date, snippet: row.snippet })),
         null,
         2
-      )}`,
+      )}${researchBlock}`,
       model: 'gemini_3_8_flash',
       response_json_schema: SPEC_SCHEMA
     });

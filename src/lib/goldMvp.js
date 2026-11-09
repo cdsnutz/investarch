@@ -23,8 +23,11 @@ export async function loadForgeSpecs(seedIds) {
   return map;
 }
 
-export async function forgeSpec(seedId) {
-  const response = await base44.functions.invoke('forgeGoldMvp', { seedId });
+export async function forgeSpec(seedId, research) {
+  const response = await base44.functions.invoke('forgeGoldMvp', {
+    seedId,
+    research: Array.isArray(research) ? research : []
+  });
   return response?.data?.spec || null;
 }
 

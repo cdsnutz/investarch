@@ -20,6 +20,7 @@ import MixSeedsDialog from '@/components/ipFactory/MixSeedsDialog';
 import EcosystemRanking from '@/components/ipFactory/EcosystemRanking';
 import RebuildCodebasesButton from '@/components/ipFactory/RebuildCodebasesButton';
 import ExportArchives from '@/components/ipFactory/ExportArchives';
+import VerifiedExportButton from '@/components/ipFactory/VerifiedExportButton';
 
 const STAGES = [
   'Signal Miner: sweeping 96 market vectors — launch feeds, app charts, repos, dockets…',
@@ -212,6 +213,7 @@ export default function IpFactory() {
         </Button>
         <MixSeedsDialog onCreated={() => { setFilter('all'); load('all'); }} />
         <ExportArchives brand={brand} />
+        <VerifiedExportButton />
         <Button variant="outline" onClick={sweepLeads} disabled={sweeping} className="w-full sm:w-auto">
           {sweeping ? <Loader2 className="size-4 mr-2 animate-spin" /> : <Users className="size-4 mr-2" />}
           {sweeping ? 'Drafting buyer leads' : 'Sweep buyer leads'}

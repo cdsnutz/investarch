@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { Download, Layers, Search, Loader2, FileDown, Contact } from 'lucide-react';
+import { Download, Layers, Search, Loader2, FileDown, Contact, UploadCloud } from 'lucide-react';
 import { buildSeedArchive, isEcosystem } from '@/lib/seedArchive';
 import { collectBuyers, researchBuyers } from '@/lib/buyerIntel';
 import { buildBuyerArchive } from '@/lib/buyerArchive';
-import { buildHubspotCsv } from '@/lib/hubspotCsv';
+import { buildHubspotCsv, hubspotCompanies } from '@/lib/hubspotCsv';
 import { rankBuyers } from '@/lib/buyerScore';
 
 async function pageAll(entity) {
@@ -134,27 +134,31 @@ export default function ExportArchives({ brand }) {
     }
   };
 
-  // Uses the research already on file, so a re-export costs nothing and matches the buyer book.
+  // Ranked from the research already on file, so the CSV and the direct import share one buyer set.
+  const loadHighConviction = async () => {
+    const [all, research] = await Promise.all([
+      pageAll(base44.entities.IpSeed),
+      pageAll(base44.entities.BuyerResearch)
+    ]);
+    const buyers = collectBuyers(all);
+    const intel = {};
+    research.forEach((record) => {
+      [record.company, record.company_name].forEach((key) => {
+        const clean = String(key || '').trim().toLowerCase();
+        if (clean) intel[clean] = record;
+      });
+    });
+    return hubspotCompanies(rankBuyers(buyers, intel));
+  };
+
   const runHubspotCsv = async () => {
     setBusy('hubspot');
     setNote('Ranking researched buyers…');
     setResult(null);
     setError('');
     try {
-      const [all, research] = await Promise.all([
-        pageAll(base44.entities.IpSeed),
-        pageAll(base44.entities.BuyerResearch)
-      ]);
-      const buyers = collectBuyers(all);
-      const intel = {};
-      research.forEach((record) => {
-        [record.company, record.company_name].forEach((key) => {
-          const clean = String(key || '').trim().toLowerCase();
-          if (clean) intel[clean] = record;
-        });
-      });
-
-      const { csv, count } = buildHubspotCsv(rankBuyers(buyers, intel));
+      const companies = await loadHighConviction();
+      const { csv, count } = buildHubspotCsv(companies);
       if (!count) {
         setNote('No high-conviction buyers yet. Run the buyer book export first, then this CSV.');
         return;
@@ -171,6 +175,37 @@ export default function ExportArchives({ brand }) {
     } catch (problem) {
       setNote('');
       setError(problem?.message || 'The HubSpot CSV could not be built.');
+    } finally {
+      setBusy('');
+    }
+  };
+
+  const runHubspotImport = async () => {
+    setBusy('push');
+    setNote('Ranking researched buyers…');
+    setResult(null);
+    setError('');
+    try {
+      const companies = await loadHighConviction();
+      if (!companies.length) {
+        setNote('No high-conviction buyers yet. Run the buyer book export first.');
+        return;
+      }
+
+      setNote(`Writing ${companies.length} compan${companies.length === 1 ? 'y' : 'ies'} to HubSpot…`);
+      const response = await base44.functions.invoke('hubspotImportBuyers', { companies });
+      const data = response?.data || {};
+      const landed = data.landed || [];
+      setNote('');
+      setResult({
+        label: 'HubSpot',
+        text: `${landed.length} of ${companies.length} confirmed in HubSpot · ${data.created || 0} created · ${data.updated || 0} updated${landed.length ? ` · ${landed.slice(0, 6).map((row) => row.name).join(', ')}${landed.length > 6 ? ` and ${landed.length - 6} more` : ''}` : ''}`,
+        top: [],
+        skipped: data.failed || []
+      });
+    } catch (problem) {
+      setNote('');
+      setError(problem?.response?.data?.error || problem?.message || 'The HubSpot import failed.');
     } finally {
       setBusy('');
     }
@@ -222,6 +257,15 @@ export default function ExportArchives({ brand }) {
       >
         {busy === 'hubspot' ? <Loader2 className="size-4 mr-2 animate-spin" /> : <Contact className="size-4 mr-2" />}
         Export HubSpot CSV
+      </Button>
+      <Button
+        variant="outline"
+        onClick={runHubspotImport}
+        disabled={Boolean(busy)}
+        className="w-full sm:w-auto"
+      >
+        {busy === 'push' ? <Loader2 className="size-4 mr-2 animate-spin" /> : <UploadCloud className="size-4 mr-2" />}
+        Import to HubSpot
       </Button>
 
       {(note || result || error) && (

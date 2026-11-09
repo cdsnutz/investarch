@@ -1,7 +1,5 @@
-// HubSpot import sheet: only buyers that cleared the high-conviction bar, shaped for HubSpot's
-// company importer. Standard property labels are used where they exist so the columns map
-// themselves; the research columns ride along as custom properties, which the importer asks
-// you to create once.
+// HubSpot import sheet: only buyers that cleared the high-conviction bar, shaped once and used
+// twice — as a CSV for HubSpot's importer and as the payload for the in-app company import.
 const text = (value) => String(value ?? '').trim();
 const squash = (value) => text(value).replace(/\r?\n+/g, '; ');
 
@@ -10,29 +8,47 @@ const cell = (value) => {
   return /[",]/.test(clean) ? `"${clean.replace(/"/g, '""')}"` : clean;
 };
 
-// Directory and news hosts describe a company but are not that company's own domain, so they
-// never become its HubSpot domain name.
-const NOT_A_DOMAIN = [
-  'linkedin.com', 'crunchbase.com', 'pitchbook.com', 'tracxn.com', 'g2.com', 'capterra.com',
-  'glassdoor.com', 'wikipedia.org', 'twitter.com', 'x.com', 'facebook.com', 'youtube.com',
-  'bloomberg.com', 'reuters.com', 'techcrunch.com', 'medium.com', 'substack.com', 'reddit.com'
+const TWO_PART_SUFFIXES = ['co.uk', 'com.au', 'co.nz', 'com.br', 'co.jp', 'co.in', 'com.sg', 'co.za'];
+// Words that describe what a company does rather than who it is, so they never decide a domain.
+const GENERIC_TOKENS = [
+  'technologies', 'systems', 'solutions', 'software', 'services', 'group', 'company', 'labs',
+  'health', 'data', 'cloud', 'partners', 'global', 'digital', 'platform'
 ];
 
-function domainOf(row) {
+function registrable(host) {
+  const labels = host.split('.');
+  if (labels.length <= 2) return host;
+  const tail = labels.slice(-2).join('.');
+  return TWO_PART_SUFFIXES.includes(tail) ? labels.slice(-3).join('.') : tail;
+}
+
+// A company's own domain comes from a source host that carries its name — docebo.com for Docebo —
+// never from a news story or directory that merely writes about it.
+function domainOf(company, row) {
+  const slug = text(company).toLowerCase().replace(/[^a-z0-9]/g, '');
+  // Only the first significant word of the name decides the domain: "Oracle Hospitality" is
+  // oracle.com, never a publication that happens to be about hospitality.
+  const primary = text(company).toLowerCase().split(/[^a-z0-9]+/)
+    .find((token) => token.length >= 4 && !GENERIC_TOKENS.includes(token)) || '';
+  if (!slug) return '';
+
   for (const url of row?.sources || []) {
+    let host = '';
     try {
-      const host = new URL(text(url)).hostname.replace(/^www\./, '').toLowerCase();
-      if (host && !NOT_A_DOMAIN.some((blocked) => host === blocked || host.endsWith(`.${blocked}`))) {
-        return host;
-      }
+      host = new URL(text(url)).hostname.replace(/^www\./, '').toLowerCase();
     } catch {
       continue;
+    }
+    const domain = registrable(host);
+    const label = domain.split('.')[0];
+    if ((primary && label === primary) || slug === label || slug.startsWith(label) || label.startsWith(slug)) {
+      return domain;
     }
   }
   return '';
 }
 
-const HEADER = [
+export const HUBSPOT_COLUMNS = [
   'Company name',
   'Company domain name',
   'Website URL',
@@ -54,39 +70,46 @@ const HEADER = [
   'First-touch email'
 ];
 
-export function buildHubspotCsv(ranked) {
-  const high = (ranked || []).filter((entry) => entry.tier === 'high');
+// One object per high-conviction buyer, keyed by the CSV column labels so the sheet and the
+// API payload can never drift apart.
+export function hubspotCompanies(ranked) {
+  return (ranked || [])
+    .filter((entry) => entry.tier === 'high')
+    .map(({ buyer, row, score }) => {
+      const domain = domainOf(buyer.company, row);
+      return {
+        'Company name': buyer.company,
+        'Company domain name': domain,
+        'Website URL': domain ? `https://${domain}` : '',
+        'Description': row?.snapshot || buyer.why_fit,
+        'Lead source': 'InvestArch IP Factory',
+        'Buyer category': buyer.category,
+        'Conviction score': score,
+        'Evidence grade': row?.confidence || 'unresearched',
+        'Buying trigger': row?.buying_trigger || '',
+        'Unique insight': row?.unique_insight || '',
+        'Recent public moves': (row?.recent_moves || []).filter(Boolean).join('; '),
+        'Sources': (row?.sources || []).filter(Boolean).join('; '),
+        'Where to verify': row?.osint_angle || '',
+        'Linked IP assets': buyer.seeds.join('; '),
+        'Budget owner': buyer.contact_role || '',
+        'Opening move': buyer.approach || '',
+        'Proof to lead with': buyer.evidence_to_lead_with || '',
+        'First-touch subject': buyer.subject || '',
+        'First-touch email': buyer.pitch || ''
+      };
+    });
+}
 
-  const rows = high.map(({ buyer, row, score }) => {
-    const domain = domainOf(row);
-    return [
-      buyer.company,
-      domain,
-      domain ? `https://${domain}` : '',
-      row?.snapshot || buyer.why_fit,
-      'InvestArch IP Factory',
-      buyer.category,
-      score,
-      row?.confidence || 'unresearched',
-      row?.buying_trigger,
-      row?.unique_insight,
-      (row?.recent_moves || []).filter(Boolean).join('; '),
-      (row?.sources || []).filter(Boolean).join('; '),
-      row?.osint_angle,
-      buyer.seeds.join('; '),
-      buyer.contact_role,
-      buyer.approach,
-      buyer.evidence_to_lead_with,
-      buyer.subject,
-      buyer.pitch
-    ];
-  });
-
-  const csv = [HEADER, ...rows].map((line) => line.map(cell).join(',')).join('\n');
+export function buildHubspotCsv(companies) {
+  const rows = companies || [];
+  const csv = [HUBSPOT_COLUMNS, ...rows.map((row) => HUBSPOT_COLUMNS.map((column) => cell(row[column])))]
+    .map((line) => line.join(','))
+    .join('\n');
 
   return {
     csv: `${csv}\n`,
-    count: high.length,
-    companies: high.map((entry) => entry.buyer.company)
+    count: rows.length,
+    companies: rows.map((row) => row['Company name'])
   };
 }

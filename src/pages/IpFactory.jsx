@@ -51,6 +51,8 @@ export default function IpFactory() {
   const [sweepNote, setSweepNote] = useState('');
   const [ecosystems, setEcosystems] = useState([]);
   const [mixNote, setMixNote] = useState('');
+  // Arriving from the dashboard's research gaps, the seed to open is named in the URL.
+  const [focusId] = useState(() => new URLSearchParams(window.location.search).get('seed'));
 
   const load = useCallback(async (ledger = 'all') => {
     const today = new Date().toISOString().slice(0, 10);
@@ -65,13 +67,26 @@ export default function IpFactory() {
       base44.entities.IpSeed.filter({ source_channel: 'seed mix' }, { sort: '-mix_score', limit: 3 })
     ]);
     setEcosystems(ecosystemPage.items || []);
-    setSeeds(seedPage.items || []);
+    let listed = seedPage.items || [];
+    if (focusId && !listed.some((s) => s.id === focusId)) {
+      const focused = await base44.entities.IpSeed.get(focusId).catch(() => null);
+      if (focused?.id) listed = [focused, ...listed];
+    }
+    setSeeds(listed);
     setCursor(seedPage.next_cursor || null);
     setHasMore(Boolean(seedPage.has_more));
     setFilings(filingPage.items || []);
     setProspectuses(prospectusPage.items || []);
     setCounts({ today: todayCount, hold: holdCount, flip: flipCount, build: buildCount });
-  }, []);
+  }, [focusId]);
+
+  useEffect(() => {
+    if (!focusId || !seeds) return undefined;
+    const node = document.getElementById(`seed-${focusId}`);
+    if (!node) return undefined;
+    const timer = setTimeout(() => node.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+    return () => clearTimeout(timer);
+  }, [focusId, seeds]);
 
   const loadMore = async () => {
     if (!cursor || loadingMore) return;
@@ -292,7 +307,11 @@ export default function IpFactory() {
       ) : (
         <div className="space-y-4 sm:space-y-6">
           {listed.map((s) => (
-            <div key={s.id} className="rounded-xl border bg-card p-4 sm:p-6">
+            <div
+              key={s.id}
+              id={`seed-${s.id}`}
+              className={`rounded-xl border bg-card p-4 sm:p-6 scroll-mt-24 ${s.id === focusId ? 'ring-2 ring-emerald-500 border-emerald-300' : ''}`}
+            >
               <div className="mb-4">
                 <h3 className="text-lg sm:text-xl font-semibold leading-snug break-words">{s.title}</h3>
                 <div className="flex flex-wrap items-center gap-2 mt-2">

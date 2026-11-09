@@ -87,7 +87,10 @@ export default function ResearchGapsPanel() {
             <ul className="mt-4 space-y-3">
               {open.map((row) => (
                 <li key={row.id} className="border-b border-border last:border-0 pb-3 last:pb-0">
-                  <div className="flex items-start justify-between gap-3">
+                  <Link
+                    to={`/ip-factory?seed=${row.id}`}
+                    className="flex items-start justify-between gap-3 rounded-md -mx-2 px-2 py-1.5 hover:bg-muted/50 transition"
+                  >
                     <div className="min-w-0">
                       <div className="text-sm font-medium tracking-tight truncate">{row.title}</div>
                       <div className="text-xs text-muted-foreground mt-0.5">{row.nextStep}</div>
@@ -103,7 +106,7 @@ export default function ResearchGapsPanel() {
                         {row.researched}/{row.named || 0} read{row.verified ? ` · ${row.verified} verified` : ''}
                       </span>
                     </div>
-                  </div>
+                  </Link>
                 </li>
               ))}
             </ul>

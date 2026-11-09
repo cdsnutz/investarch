@@ -1,0 +1,41 @@
+{
+  "name": "New Seed Buyer Intel",
+  "description": "The moment a seed gains its named buyers, reads those companies out of HubSpot, stores the company details on file, and re-runs the public-source read wherever the CRM has moved past the last profile \u2014 so buyer research always starts from current intel.",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "IpSeed",
+      "events": [
+        "create",
+        "update"
+      ]
+    },
+    "condition": "${ ((.trigger.data.buyer_leads // []) | length) > 0 and (.trigger.event_type == \"create\" or ((.trigger.changed_fields // []) | index(\"buyer_leads\")) != null) }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "new_seed_buyer_intel",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "pull_buyer_intel": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "syncSeedBuyerIntel",
+            "args": {
+              "seed_id": "${ .trigger.entity_id }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Pull HubSpot buyer intel",
+            "description": "Company details for the seed's named buyers, then a grounded research pass"
+          }
+        }
+      }
+    ]
+  }
+}

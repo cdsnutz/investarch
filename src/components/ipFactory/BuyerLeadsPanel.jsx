@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { base44 } from '@/api/base44Client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Copy, Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { Copy, Check, ChevronDown, ChevronUp, Building2 } from 'lucide-react';
+import moment from 'moment';
 
 const CATEGORY_STYLE = {
   incumbent: 'bg-slate-100 text-slate-800',
@@ -31,8 +33,49 @@ function Pitch({ lead }) {
   );
 }
 
+function IntelLine({ intel }) {
+  if (!intel) return null;
+  const details = [
+    intel.industry,
+    intel.employees ? `${Number(intel.employees).toLocaleString('en-US')} staff` : '',
+    [intel.city, intel.country].filter(Boolean).join(', '),
+    intel.domain,
+    intel.lifecycle_stage
+  ].filter(Boolean);
+  const moved = intel.last_activity || intel.synced_date;
+  return (
+    <div className="flex items-start gap-1.5 text-[11px] text-muted-foreground">
+      <Building2 className="size-3 mt-0.5 shrink-0" />
+      <span>
+        HubSpot{details.length ? ` · ${details.join(' · ')}` : ''}
+        {moved ? <span className="text-muted-foreground/70"> · updated {moment(moved).fromNow()}</span> : null}
+      </span>
+    </div>
+  );
+}
+
 export default function BuyerLeadsPanel({ leads }) {
   const [open, setOpen] = useState(-1);
+  const [intel, setIntel] = useState({});
+
+  const keys = Array.from(new Set(
+    (Array.isArray(leads) ? leads : []).map((lead) => String(lead?.company || '').trim().toLowerCase()).filter(Boolean)
+  ));
+  const keySeed = keys.join('|');
+
+  useEffect(() => {
+    if (!keys.length) { setIntel({}); return; }
+    let live = true;
+    base44.entities.HubspotCompany.filter({ company: { $in: keys } }, { limit: keys.length })
+      .then((page) => {
+        const map = {};
+        (page.items || []).forEach((row) => { map[row.company] = row; });
+        if (live) setIntel(map);
+      })
+      .catch(() => { if (live) setIntel({}); });
+    return () => { live = false; };
+  }, [keySeed]);
+
   if (!Array.isArray(leads) || !leads.length) return null;
 
   return (
@@ -50,6 +93,7 @@ export default function BuyerLeadsPanel({ leads }) {
                 <Badge variant="secondary" className={CATEGORY_STYLE[lead.category] || 'bg-slate-100'}>{lead.category}</Badge>
               )}
             </div>
+            <IntelLine intel={intel[String(lead.company || '').trim().toLowerCase()]} />
             {lead.why_fit && <p className="text-xs leading-relaxed text-muted-foreground">{lead.why_fit}</p>}
             {lead.contact_role && <p className="text-xs"><span className="text-muted-foreground">Reach: </span>{lead.contact_role}</p>}
             {lead.approach && <p className="text-xs"><span className="text-muted-foreground">Opening move: </span>{lead.approach}</p>}

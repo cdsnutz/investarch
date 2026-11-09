@@ -1,0 +1,103 @@
+{
+  "name": "HubspotCompany",
+  "type": "object",
+  "properties": {
+    "company": {
+      "type": "string"
+    },
+    "company_name": {
+      "type": "string"
+    },
+    "hubspot_id": {
+      "type": "string"
+    },
+    "portal_id": {
+      "type": "string"
+    },
+    "domain": {
+      "type": "string"
+    },
+    "industry": {
+      "type": "string"
+    },
+    "employees": {
+      "type": "number"
+    },
+    "annual_revenue": {
+      "type": "number"
+    },
+    "city": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "lifecycle_stage": {
+      "type": "string"
+    },
+    "last_activity": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "synced_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "seed_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "company",
+    "company_name",
+    "hubspot_id",
+    "synced_date"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

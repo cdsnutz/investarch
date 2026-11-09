@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, Radar, Crosshair, BrainCircuit, Users } from 'lucide-react';
+import { Loader2, Radar, Crosshair, BrainCircuit, Users, Building2 } from 'lucide-react';
 import { SeedBody } from '@/components/ipFactory/SeedDetail';
 import RunCost from '@/components/ipFactory/RunCost';
 import AgentRegistryPanel from '@/components/ipFactory/AgentRegistryPanel';
@@ -49,6 +49,8 @@ export default function IpFactory() {
   const [brand, setBrand] = useState(null);
   const [sweeping, setSweeping] = useState(false);
   const [sweepNote, setSweepNote] = useState('');
+  const [syncingIntel, setSyncingIntel] = useState(false);
+  const [intelNote, setIntelNote] = useState('');
   const [ecosystems, setEcosystems] = useState([]);
   const [mixNote, setMixNote] = useState('');
   // Arriving from the dashboard's research gaps, the seed to open is named in the URL.
@@ -186,6 +188,22 @@ export default function IpFactory() {
     }
   };
 
+  const syncIntelligence = async () => {
+    setSyncingIntel(true);
+    setError('');
+    setIntelNote('');
+    try {
+      const res = await base44.functions.invoke('syncSeedBuyerIntel', { limit: 6 });
+      const run = res?.data || {};
+      setIntelNote(run.note || `${run.matched || 0} buyer companies read from HubSpot.`);
+      await load(filter);
+    } catch (err) {
+      setError(err?.response?.data?.error || err?.message || 'The HubSpot pull failed.');
+    } finally {
+      setSyncingIntel(false);
+    }
+  };
+
   const filingsBySeed = {};
   filings.forEach((f) => { (filingsBySeed[f.seed_id] = filingsBySeed[f.seed_id] || []).push(f); });
   const prospectusBySeed = {};
@@ -232,6 +250,10 @@ export default function IpFactory() {
         <Button variant="outline" onClick={sweepLeads} disabled={sweeping} className="w-full sm:w-auto">
           {sweeping ? <Loader2 className="size-4 mr-2 animate-spin" /> : <Users className="size-4 mr-2" />}
           {sweeping ? 'Drafting buyer leads' : 'Sweep buyer leads'}
+        </Button>
+        <Button variant="outline" onClick={syncIntelligence} disabled={syncingIntel} className="w-full sm:w-auto">
+          {syncingIntel ? <Loader2 className="size-4 mr-2 animate-spin" /> : <Building2 className="size-4 mr-2" />}
+          {syncingIntel ? 'Reading HubSpot' : 'Pull HubSpot intel'}
         </Button>
         <RebuildCodebasesButton seeds={seeds || []} brand={brand} onDone={() => load(filter)} />
         <Tabs value={filter} onValueChange={setFilter} className="w-full sm:w-auto">
@@ -285,6 +307,7 @@ export default function IpFactory() {
       )}
 
       {sweepNote && <p className="text-sm text-emerald-700 mb-4">{sweepNote}</p>}
+      {intelNote && <p className="text-sm text-emerald-700 mb-4">{intelNote}</p>}
       {mixNote && <p className="text-sm text-emerald-700 mb-4">{mixNote}</p>}
       {error && <p className="text-sm text-destructive mb-4">{error}</p>}
 

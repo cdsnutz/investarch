@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { secrets } from 'base44:runtime';
+import { clean, linkKey, gatherEvidence } from '../../shared/serp.ts';
 
 const MAX_BUYERS = 8;
 const SERP_RESULTS_PER_QUERY = 5;
@@ -51,34 +52,6 @@ const INTEL_PROMPT = [
   'Return one profile per company listed, in the same order, using the company name exactly as given.'
 ].join('\n');
 
-const clean = (value: any) => String(value ?? '').trim();
-
-const linkKey = (url: string) => clean(url).toLowerCase().replace(/#.*$/, '').replace(/\/+$/, '').split('?')[0];
-
-type Evidence = { title: string; link: string; snippet: string; date: string };
-
-async function serpSearch(query: string, apiKey: string): Promise<Evidence[]> {
-  const url = new URL('https://serpapi.com/search.json');
-  url.searchParams.set('engine', 'google');
-  url.searchParams.set('q', query);
-  url.searchParams.set('num', String(SERP_RESULTS_PER_QUERY));
-  url.searchParams.set('tbs', 'qdr:y');
-  url.searchParams.set('api_key', apiKey);
-
-  const res = await fetch(url.toString(), { signal: AbortSignal.timeout(SERP_TIMEOUT_MS) });
-  if (!res.ok) throw new Error(`SERP API ${res.status}`);
-  const data = await res.json();
-  const rows = Array.isArray(data?.organic_results) ? data.organic_results : [];
-  return rows
-    .map((row: any) => ({
-      title: clean(row?.title),
-      link: clean(row?.link),
-      snippet: clean(row?.snippet),
-      date: clean(row?.date)
-    }))
-    .filter((row: Evidence) => /^https?:\/\/\S+\.\S+/i.test(row.link));
-}
-
 function queriesFor(buyer: any) {
   const company = clean(buyer.company);
   const asset = clean(buyer.assets?.[0]).slice(0, 80);
@@ -86,40 +59,6 @@ function queriesFor(buyer: any) {
     `${company} news`,
     asset ? `${company} ${asset}` : `${company} product launch OR partnership OR hiring OR procurement`
   ].map((q) => q.slice(0, 200));
-}
-
-// Live search evidence per company, at most two queries each, run in small parallel batches.
-async function gatherEvidence(buyers: any[], apiKey: string) {
-  const jobs: { key: string; query: string }[] = [];
-  buyers.forEach((buyer: any) => {
-    queriesFor(buyer).forEach((query) => jobs.push({ key: clean(buyer.company).toLowerCase(), query }));
-  });
-
-  const evidence = new Map<string, Evidence[]>();
-  const seen = new Set<string>();
-
-  for (let index = 0; index < jobs.length; index += 4) {
-    const batch = jobs.slice(index, index + 4);
-    const settled = await Promise.allSettled(batch.map((job) => serpSearch(job.query, apiKey)));
-    settled.forEach((result, i) => {
-      const key = batch[i].key;
-      if (result.status === 'rejected') {
-        console.error('[buyerIntel] serp failed', batch[i].query, result.reason?.message);
-        if (!evidence.has(key)) evidence.set(key, []);
-        return;
-      }
-      const list = evidence.get(key) || [];
-      result.value.forEach((row) => {
-        const dedupe = `${key}:${linkKey(row.link)}`;
-        if (seen.has(dedupe)) return;
-        seen.add(dedupe);
-        list.push(row);
-      });
-      evidence.set(key, list.slice(0, 10));
-    });
-  }
-
-  return evidence;
 }
 
 function normalizeRow(row: any, allowed: Set<string>) {
@@ -219,7 +158,11 @@ export default async function (req: Request): Promise<Response> {
     const serpKey = secrets.get('SERP_API_KEY');
     if (!serpKey) return Response.json({ error: 'SERP_API_KEY is not configured' }, { status: 500 });
 
-    const evidence = await gatherEvidence(buyers, serpKey);
+    const jobs: { key: string; query: string }[] = [];
+    buyers.forEach((buyer: any) => {
+      queriesFor(buyer).forEach((query) => jobs.push({ key: clean(buyer.company).toLowerCase(), query }));
+    });
+    const evidence = await gatherEvidence(jobs, serpKey, { results: SERP_RESULTS_PER_QUERY });
 
     const seedIdsByCompany = new Map<string, string[]>();
     const queriesByCompany = new Map<string, string[]>();

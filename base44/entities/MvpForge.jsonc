@@ -1,0 +1,171 @@
+{
+  "name": "MvpForge",
+  "type": "object",
+  "properties": {
+    "seed_id": {
+      "type": "string"
+    },
+    "seed_title": {
+      "type": "string"
+    },
+    "headline": {
+      "type": "string"
+    },
+    "subhead": {
+      "type": "string"
+    },
+    "promise": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "core_loop": {
+      "type": "string"
+    },
+    "wedge": {
+      "type": "string"
+    },
+    "pricing": {
+      "type": "string"
+    },
+    "competitors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "offers": {
+            "type": "string"
+          },
+          "weakness": {
+            "type": "string"
+          },
+          "price_signal": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "parity_features": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "differentiators": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "feature": {
+            "type": "string"
+          },
+          "why_it_wins": {
+            "type": "string"
+          },
+          "proof": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "screens": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "db_schema": {
+      "type": "string"
+    },
+    "acceptance_criteria": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "score": {
+      "type": "number"
+    },
+    "forged_date": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "seed_id",
+    "seed_title",
+    "headline",
+    "forged_date"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

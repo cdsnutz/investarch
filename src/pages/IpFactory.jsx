@@ -8,6 +8,7 @@ import { SeedBody } from '@/components/ipFactory/SeedDetail';
 import RunCost from '@/components/ipFactory/RunCost';
 import AgentRegistryPanel from '@/components/ipFactory/AgentRegistryPanel';
 import CodebaseExportPanel from '@/components/ipFactory/CodebaseExportPanel';
+import GoldMvpPanel from '@/components/ipFactory/GoldMvpPanel';
 import BrandKitPanel from '@/components/brand/BrandKitPanel';
 import { Badge } from '@/components/ui/badge';
 import { HUNT_PRESETS } from '@/lib/ipVectors';
@@ -235,6 +236,7 @@ export default function IpFactory() {
       </div>
 
       <BrandKitPanel brand={brand} onChange={setBrand} />
+      <GoldMvpPanel seeds={seeds || []} brand={brand} onForged={() => load(filter)} />
       <CodebaseExportPanel seeds={seeds || []} brand={brand} />
 
       <AgentRegistryPanel onChanged={() => load(filter)} />

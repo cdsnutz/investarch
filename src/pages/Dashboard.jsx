@@ -10,6 +10,7 @@ import BuildButton from '@/components/command/BuildButton';
 import StatStrip from '@/components/dashboard/StatStrip';
 import SignalFeed from '@/components/dashboard/SignalFeed';
 import SeedFeed from '@/components/dashboard/SeedFeed';
+import ResearchGapsPanel from '@/components/dashboard/ResearchGapsPanel';
 
 export default function Dashboard() {
   const [projects, setProjects] = useState(null);
@@ -35,6 +36,8 @@ export default function Dashboard() {
       <BuildButton />
 
       <StatStrip />
+
+      <ResearchGapsPanel />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <SignalFeed />

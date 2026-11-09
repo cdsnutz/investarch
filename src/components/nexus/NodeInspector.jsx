@@ -8,7 +8,9 @@ const TYPE_LABEL = {
   dossier: 'Dossier',
   competitor: 'Competitor',
   funding: 'Capital claim',
-  archetype: 'Archetype'
+  archetype: 'Archetype',
+  seed: 'IP seed',
+  buyer: 'Buyer lead'
 };
 
 export default function NodeInspector({ graph, selectedId, onSelect }) {
@@ -72,6 +74,27 @@ export default function NodeInspector({ graph, selectedId, onSelect }) {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {node.type === 'buyer' && node.detail && (
+        <div className="space-y-2 rounded-md border border-[#d9c27a] bg-[#faf6e8] p-3">
+          <div className="flex flex-wrap gap-1">
+            {(node.detail.categories || []).map((c) => (
+              <Badge key={c} variant="outline" className="text-[10px] capitalize">{c}</Badge>
+            ))}
+          </div>
+          {node.detail.whyFit && (
+            <p className="text-xs leading-relaxed"><span className="text-muted-foreground">Why it fits: </span>{node.detail.whyFit}</p>
+          )}
+          {node.detail.contact && <p className="text-[11px] text-muted-foreground">Open with: {node.detail.contact}</p>}
+        </div>
+      )}
+
+      {node.type === 'seed' && node.detail?.gap && (
+        <div className="space-y-1 rounded-md border border-[#9a3b2e]/30 bg-[#fdf5f3] p-3">
+          <div className="text-[10px] uppercase tracking-wide text-[#9a3b2e]">The gap it fills</div>
+          <p className="text-xs leading-relaxed line-clamp-4">{node.detail.gap}</p>
         </div>
       )}
 

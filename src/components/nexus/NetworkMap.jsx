@@ -7,14 +7,17 @@ const STYLE = {
   dossier: { r: 9, fill: '#1a3c34', stroke: '#1a3c34', label: 'Dossier' },
   competitor: { r: 5, fill: '#ffffff', stroke: '#1a3c34', label: 'Competitor' },
   funding: { r: 5, fill: '#a8a29e', stroke: '#78716c', label: 'Capital claim' },
-  archetype: { r: 6, fill: '#efeae1', stroke: '#6b5b95', label: 'Archetype' }
+  archetype: { r: 6, fill: '#efeae1', stroke: '#6b5b95', label: 'Archetype' },
+  seed: { r: 7, fill: '#efeae1', stroke: '#9a3b2e', label: 'IP seed' },
+  buyer: { r: 5, fill: '#d9c27a', stroke: '#8a6c1f', label: 'Buyer lead' }
 };
 
 const EDGE = {
   competition: { color: '#9a3b2e', dash: undefined, width: 1.5, opacity: 0.6 },
   funding: { color: '#3d5a80', dash: undefined, width: 1.5, opacity: 0.6 },
   influence: { color: '#6b5b95', dash: '2 3', width: 1.2, opacity: 0.45 },
-  market: { color: '#a8a29e', dash: '4 4', width: 1, opacity: 0.3 }
+  market: { color: '#a8a29e', dash: '4 4', width: 1, opacity: 0.3 },
+  demand: { color: '#8a6c1f', dash: undefined, width: 1.3, opacity: 0.55 }
 };
 
 const BAND_RING = {
@@ -48,8 +51,8 @@ function computeLayout(nodes, edges) {
       }
     }
     e.forEach(({ s, t, kind }) => {
-      const rest = kind === 'funding' ? 110 : kind === 'influence' ? 150 : 175;
-      const k = kind === 'funding' ? 0.02 : kind === 'influence' ? 0.009 : 0.005;
+      const rest = kind === 'funding' ? 110 : kind === 'demand' ? 95 : kind === 'influence' ? 150 : 175;
+      const k = kind === 'funding' || kind === 'demand' ? 0.02 : kind === 'influence' ? 0.009 : 0.005;
       const dx = pts[t].x - pts[s].x, dy = pts[t].y - pts[s].y;
       const d = Math.sqrt(dx * dx + dy * dy) || 1;
       const f = (d - rest) * k;
@@ -165,6 +168,9 @@ export default function NetworkMap({ graph, selected, onSelect }) {
         </span>
         <span className="inline-flex items-center gap-1.5">
           <span className="inline-block w-4 border-t-2 border-dotted border-[#6b5b95]" /> Archetype influence
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="inline-block w-4 border-t-2 border-[#8a6c1f]" /> Market demand
         </span>
         <span className="inline-flex items-center gap-1.5">
           <span className="inline-block w-4 border-t border-dashed border-[#a8a29e]" /> Shared market

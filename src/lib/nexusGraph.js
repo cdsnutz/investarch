@@ -49,10 +49,11 @@ export const EDGE_LABEL = {
   competition: 'Direct competition',
   funding: 'Capital claim',
   influence: 'Archetype influence',
-  market: 'Shared market'
+  market: 'Shared market',
+  demand: 'Market demand'
 };
 
-export function buildNexus({ projects = [], competitors = [], funding = [], archetypes = [] } = {}) {
+export function buildNexus({ projects = [], competitors = [], funding = [], archetypes = [], seeds = [] } = {}) {
   const projectById = new Map(projects.map((p) => [p.id, p]));
 
   const projTerms = new Map(projects.map((p) => [p.id, termsOf([p.company_name, p.industry, ...(p.tags || [])])]));
@@ -64,11 +65,57 @@ export function buildNexus({ projects = [], competitors = [], funding = [], arch
   const fundTerms = new Map(funding.map((f) => [f.id, termsOf([f.name, f.focus_area, f.type])]));
   const archTerms = new Map(archetypes.map((a) => [a.id, termsOf([a.archetype_name, a.population_segment, a.imprint_thesis, ...(a.channels || [])])]));
 
+  // Buyer demand: each seed points at the buyer leads researched for it, so the map shows which
+  // technology a market is already asking for. Both sides are capped to keep the map readable.
+  const seedPool = seeds
+    .filter((s) => (s.buyer_leads || []).length)
+    .sort((a, b) => (b.asymmetric_score ?? 0) - (a.asymmetric_score ?? 0))
+    .slice(0, 30);
+
+  const buyerMap = new Map();
+  seedPool.forEach((seed) => {
+    const named = new Set();
+    (seed.buyer_leads || []).forEach((lead) => {
+      const company = String(lead.company || '').trim();
+      if (!company) return;
+      const key = company.toLowerCase();
+      if (named.has(key)) return;
+      named.add(key);
+      if (!buyerMap.has(key)) {
+        buyerMap.set(key, { company, categories: new Set(), seeds: [], whyFit: '', contact: '' });
+      }
+      const entry = buyerMap.get(key);
+      if (lead.category) entry.categories.add(lead.category);
+      entry.seeds.push(seed.title);
+      if (!entry.whyFit && lead.why_fit) entry.whyFit = lead.why_fit;
+      if (!entry.contact && lead.contact_role) entry.contact = lead.contact_role;
+    });
+  });
+
+  const buyerPool = [...buyerMap.entries()]
+    .sort((a, b) => b[1].seeds.length - a[1].seeds.length)
+    .slice(0, 40);
+  const buyerIds = new Set(buyerPool.map(([key]) => `buyer:${key}`));
+
   const nodes = [
     ...projects.map((p) => ({ id: p.id, type: 'dossier', label: p.company_name || 'Untitled dossier', sub: p.industry || p.status || 'dossier' })),
     ...competitors.map((c) => ({ id: c.id, type: 'competitor', label: c.name || 'Competitor', sub: c.overall_score != null ? `index ${c.overall_score}` : 'competitor', projectId: c.project_id })),
     ...funding.map((f) => ({ id: f.id, type: 'funding', label: f.name || 'Capital source', sub: [f.type, (f.outreach_status || '').replace(/_/g, ' ')].filter(Boolean).join(' · ') || 'capital claim', projectId: f.project_id })),
-    ...archetypes.map((a) => ({ id: a.id, type: 'archetype', label: a.archetype_name || 'Archetype', sub: a.imprint_depth_pct != null ? `${a.imprint_depth_pct}% imprint` : (a.status || 'archetype') }))
+    ...archetypes.map((a) => ({ id: a.id, type: 'archetype', label: a.archetype_name || 'Archetype', sub: a.imprint_depth_pct != null ? `${a.imprint_depth_pct}% imprint` : (a.status || 'archetype') })),
+    ...seedPool.map((s) => ({
+      id: `seed:${s.id}`,
+      type: 'seed',
+      label: s.title || 'IP seed',
+      sub: [s.strategy, s.asymmetric_score != null ? `asym ${s.asymmetric_score}/10` : null].filter(Boolean).join(' · ') || 'IP seed',
+      detail: { gap: s.gap || '', solution: s.solution || '' }
+    })),
+    ...buyerPool.map(([key, b]) => ({
+      id: `buyer:${key}`,
+      type: 'buyer',
+      label: b.company,
+      sub: [[...b.categories].join('/'), `${b.seeds.length} seed${b.seeds.length === 1 ? '' : 's'}`].filter(Boolean).join(' · '),
+      detail: { whyFit: b.whyFit, contact: b.contact, categories: [...b.categories], seeds: b.seeds }
+    }))
   ];
 
   const edges = [];
@@ -85,6 +132,16 @@ export function buildNexus({ projects = [], competitors = [], funding = [], arch
   // Structural links: what each record is officially attached to.
   competitors.forEach((c) => { if (projectById.has(c.project_id)) push(c.id, c.project_id, 'competition'); });
   funding.forEach((f) => { if (projectById.has(f.project_id)) push(f.id, f.project_id, 'funding'); });
+
+  // Demand links: the seed to the buyer leads that name it, carrying the fit rationale.
+  seedPool.forEach((seed) => {
+    (seed.buyer_leads || []).forEach((lead) => {
+      const key = String(lead.company || '').trim().toLowerCase();
+      if (!buyerIds.has(`buyer:${key}`)) return;
+      const via = lead.why_fit ? String(lead.why_fit).trim().slice(0, 64) : (lead.category || null);
+      push(`seed:${seed.id}`, `buyer:${key}`, 'demand', via);
+    });
+  });
 
   // Archetype influence: an archetype reaches a dossier, rival or capital claim
   // when they share the market vocabulary the imprint was written for.

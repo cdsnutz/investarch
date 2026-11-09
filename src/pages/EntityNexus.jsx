@@ -92,13 +92,13 @@ export default function EntityNexus() {
     );
   }
 
-  const total = data.projects.length + data.competitors.length + data.funding.length + data.archetypes.length;
+  const total = graph.nodes.length;
 
   return (
     <div className="bg-paper min-h-[calc(100vh-3.5rem)] md:min-h-screen p-6 md:p-12 max-w-6xl mx-auto space-y-8">
       <PageHeader
         title="Entity Nexus"
-        subtitle="Dossiers, competitors, capital claims and archetypes mapped together. Links are inferred from shared market vocabulary, and each dossier's funding readiness is scored by what its network actually contributes."
+        subtitle="Dossiers, competitors, capital claims, archetypes, IP seeds and their buyer leads mapped together. Links are inferred from shared market vocabulary and from researched buyer demand, and each dossier's funding readiness is scored by what its network actually contributes."
       />
 
       {total === 0 ? (

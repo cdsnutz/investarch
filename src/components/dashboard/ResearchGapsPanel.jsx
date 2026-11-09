@@ -22,6 +22,7 @@ const SHOWN = 6;
 
 export default function ResearchGapsPanel() {
   const [data, setData] = useState(null);
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -40,7 +41,8 @@ export default function ResearchGapsPanel() {
   }, []);
 
   const totals = data?.totals;
-  const open = (data?.rows || []).filter((row) => row.status !== 'verified').slice(0, SHOWN);
+  const openAll = (data?.rows || []).filter((row) => row.status !== 'verified');
+  const open = expanded ? openAll : openAll.slice(0, SHOWN);
 
   return (
     <Card className="p-5 rounded-md">
@@ -110,6 +112,19 @@ export default function ResearchGapsPanel() {
                 </li>
               ))}
             </ul>
+          )}
+
+          {openAll.length > SHOWN && (
+            <button
+              type="button"
+              onClick={() => setExpanded((value) => !value)}
+              className="mt-3 text-xs text-bottle hover:underline tabular-nums"
+              aria-expanded={expanded}
+            >
+              {expanded
+                ? `Show the top ${SHOWN} only`
+                : `Show all ${openAll.length} seeds needing research`}
+            </button>
           )}
         </>
       )}

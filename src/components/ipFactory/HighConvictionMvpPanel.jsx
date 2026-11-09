@@ -4,6 +4,7 @@ import { Loader2, Hammer } from 'lucide-react';
 import { loadSeedConviction, convictionResearch } from '@/lib/seedConviction';
 import { loadForgeSpecs, forgeSpec, downloadForgeBundle } from '@/lib/goldMvp';
 import GoldMvpResult from '@/components/ipFactory/GoldMvpResult';
+import { summarizeVerification } from '@/lib/mvpSources';
 
 const MAX_BATCH = 6;
 

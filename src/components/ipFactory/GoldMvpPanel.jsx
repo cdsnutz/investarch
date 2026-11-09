@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2, Rocket } from 'lucide-react';
 import { loadForgeSpecs, forgeSpec, downloadForgeBundle } from '@/lib/goldMvp';
 import GoldMvpResult from '@/components/ipFactory/GoldMvpResult';
+import { summarizeVerification } from '@/lib/mvpSources';
 
 const BATCH = 10;
 

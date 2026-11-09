@@ -49,7 +49,7 @@ export function verificationOf(spec) {
   return {
     summary:
       text(stored?.summary) ||
-      `${traced} of ${claims.length} market claim${claims.length === 1 ? '' : 's'} trace to a page read for this build.`,
+      `${traced} of ${claims.length} market claim${claims.length === 1 ? '' : 's'} trace${claims.length === 1 ? 's' : ''} to a page read for this build.`,
     checked_date: text(stored?.checked_date) || text(spec?.forged_date).slice(0, 10),
     evidence_read: Number(stored?.evidence_read) || 0,
     queries: Array.isArray(stored?.queries) ? stored.queries.map(text).filter(Boolean) : [],

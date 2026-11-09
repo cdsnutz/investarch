@@ -10,6 +10,8 @@ import AgentRegistryPanel from '@/components/ipFactory/AgentRegistryPanel';
 import CodebaseExportPanel from '@/components/ipFactory/CodebaseExportPanel';
 import GoldMvpPanel from '@/components/ipFactory/GoldMvpPanel';
 import HighConvictionMvpPanel from '@/components/ipFactory/HighConvictionMvpPanel';
+import ConvictionBadge from '@/components/ipFactory/ConvictionBadge';
+import { loadSeedConviction } from '@/lib/seedConviction';
 import ClickupSyncPanel from '@/components/clickup/ClickupSyncPanel';
 import BrandKitPanel from '@/components/brand/BrandKitPanel';
 import { Badge } from '@/components/ui/badge';
@@ -42,6 +44,7 @@ export default function IpFactory() {
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [counts, setCounts] = useState({ today: 0, hold: 0, flip: 0, build: 0 });
+  const [conviction, setConviction] = useState({});
   const [brand, setBrand] = useState(null);
   const [sweeping, setSweeping] = useState(false);
   const [sweepNote, setSweepNote] = useState('');
@@ -86,6 +89,16 @@ export default function IpFactory() {
   };
 
   useEffect(() => { load(filter).catch(() => setSeeds([])); }, [filter, load]);
+
+  // Conviction is read from the buyer research already on file, never from the seed's own prose.
+  useEffect(() => {
+    if (!seeds) return undefined;
+    let live = true;
+    loadSeedConviction(seeds)
+      .then((map) => { if (live) setConviction(map); })
+      .catch(() => { if (live) setConviction({}); });
+    return () => { live = false; };
+  }, [seeds]);
 
   useEffect(() => {
     base44.entities.BrandKit.filter({}, { sort: '-updated_date', limit: 1 })
@@ -281,6 +294,7 @@ export default function IpFactory() {
               <div className="mb-4">
                 <h3 className="text-lg sm:text-xl font-semibold leading-snug break-words">{s.title}</h3>
                 <div className="flex flex-wrap items-center gap-2 mt-2">
+                  <ConvictionBadge entry={conviction[s.id]} />
                   <Badge variant="secondary" className="bg-slate-100">Asym {s.asymmetric_score}/10</Badge>
                   {s.source_seed_titles?.length > 0 && (
                     <Badge variant="secondary" className="bg-emerald-50 text-emerald-800">Mix of {s.source_seed_titles.length}</Badge>

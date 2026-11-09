@@ -29,8 +29,13 @@ export default function EntityNexus() {
         fields: ['title', 'gap', 'solution', 'pain_signal', 'source_channel', 'ecosystem_interlocks', 'mix_thesis', 'asymmetric_score', 'strategy', 'buyer_leads', 'acquisition_playbook', 'funding_playbook']
       }),
       base44.entities.MarketVector.filter({}, { sort: '-created_date', limit: 40 }),
-      base44.entities.IpProspectus.filter({}, { sort: '-created_date', limit: 100 })
-    ]).then(([p, c, f, a, s, v, pr]) => {
+      base44.entities.IpProspectus.filter({}, { sort: '-created_date', limit: 100 }),
+      base44.entities.BuyerResearch.filter({}, {
+        sort: '-researched_date',
+        limit: 300,
+        fields: ['company', 'company_name', 'confidence', 'sources', 'buying_trigger', 'seed_ids', 'researched_date']
+      })
+    ]).then(([p, c, f, a, s, v, pr, br]) => {
       setData({
         projects: p.status === 'fulfilled' ? p.value.items : [],
         competitors: c.status === 'fulfilled' ? c.value.items : [],
@@ -38,7 +43,8 @@ export default function EntityNexus() {
         archetypes: a.status === 'fulfilled' ? a.value.items : [],
         seeds: s.status === 'fulfilled' ? s.value.items : [],
         vectors: v.status === 'fulfilled' ? v.value.items : [],
-        prospectuses: pr.status === 'fulfilled' ? pr.value.items : []
+        prospectuses: pr.status === 'fulfilled' ? pr.value.items : [],
+        research: br.status === 'fulfilled' ? br.value.items : []
       });
     });
   }, []);
@@ -108,6 +114,12 @@ export default function EntityNexus() {
         </div>
       ) : (
         <>
+          {!graph.nodes.some((n) => n.type === 'seed') && (
+            <p className="text-xs text-muted-foreground">
+              No seed has verified buyer research yet. A seed joins the map once research grades one of its buyer leads “verified” with public source URLs behind it — run the buyer book export in the IP Factory to research the ledger.
+            </p>
+          )}
+
           <NetworkMap graph={graph} selected={selected} onSelect={setSelected} />
 
           <div className="grid gap-6 lg:grid-cols-2">

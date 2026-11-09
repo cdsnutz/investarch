@@ -53,7 +53,7 @@ export const EDGE_LABEL = {
   demand: 'Market demand'
 };
 
-export function buildNexus({ projects = [], competitors = [], funding = [], archetypes = [], seeds = [] } = {}) {
+export function buildNexus({ projects = [], competitors = [], funding = [], archetypes = [], seeds = [], research = [] } = {}) {
   const projectById = new Map(projects.map((p) => [p.id, p]));
 
   const projTerms = new Map(projects.map((p) => [p.id, termsOf([p.company_name, p.industry, ...(p.tags || [])])]));
@@ -65,30 +65,62 @@ export function buildNexus({ projects = [], competitors = [], funding = [], arch
   const fundTerms = new Map(funding.map((f) => [f.id, termsOf([f.name, f.focus_area, f.type])]));
   const archTerms = new Map(archetypes.map((a) => [a.id, termsOf([a.archetype_name, a.population_segment, a.imprint_thesis, ...(a.channels || [])])]));
 
-  // Buyer demand: each seed points at the buyer leads researched for it, so the map shows which
-  // technology a market is already asking for. Both sides are capped to keep the map readable.
+  // Buyer demand, verified only: a seed joins the map when the researched public record supports
+  // at least one of its buyer leads — a "verified" read with source URLs behind it.
+  const verified = new Map();
+  research.forEach((row) => {
+    const key = String(row.company || '').trim().toLowerCase();
+    const sources = (row.sources || []).map((s) => String(s || '').trim()).filter(Boolean);
+    if (!key || row.confidence !== 'verified' || !sources.length) return;
+    verified.set(key, { ...row, sources });
+  });
+
+  const seedDemand = new Map();
+  seeds.forEach((seed) => {
+    const named = new Map();
+    (seed.buyer_leads || []).forEach((lead) => {
+      const key = String(lead.company || '').trim().toLowerCase();
+      const row = verified.get(key);
+      if (!key || !row || named.has(key)) return;
+      named.set(key, {
+        key,
+        label: row.company_name || lead.company,
+        category: lead.category || '',
+        whyFit: row.buying_trigger || lead.why_fit || '',
+        contact: lead.contact_role || '',
+        sources: row.sources
+      });
+    });
+    verified.forEach((row, key) => {
+      if (named.has(key) || !(row.seed_ids || []).includes(seed.id)) return;
+      named.set(key, {
+        key,
+        label: row.company_name || key,
+        category: '',
+        whyFit: row.buying_trigger || '',
+        contact: '',
+        sources: row.sources
+      });
+    });
+    if (named.size) seedDemand.set(seed.id, [...named.values()]);
+  });
+
   const seedPool = seeds
-    .filter((s) => (s.buyer_leads || []).length)
+    .filter((s) => seedDemand.has(s.id))
     .sort((a, b) => (b.asymmetric_score ?? 0) - (a.asymmetric_score ?? 0))
     .slice(0, 30);
 
   const buyerMap = new Map();
   seedPool.forEach((seed) => {
-    const named = new Set();
-    (seed.buyer_leads || []).forEach((lead) => {
-      const company = String(lead.company || '').trim();
-      if (!company) return;
-      const key = company.toLowerCase();
-      if (named.has(key)) return;
-      named.add(key);
-      if (!buyerMap.has(key)) {
-        buyerMap.set(key, { company, categories: new Set(), seeds: [], whyFit: '', contact: '' });
+    seedDemand.get(seed.id).forEach((lead) => {
+      if (!buyerMap.has(lead.key)) {
+        buyerMap.set(lead.key, { company: lead.label, categories: new Set(), seeds: [], whyFit: '', contact: '', sources: lead.sources });
       }
-      const entry = buyerMap.get(key);
+      const entry = buyerMap.get(lead.key);
       if (lead.category) entry.categories.add(lead.category);
       entry.seeds.push(seed.title);
-      if (!entry.whyFit && lead.why_fit) entry.whyFit = lead.why_fit;
-      if (!entry.contact && lead.contact_role) entry.contact = lead.contact_role;
+      if (!entry.whyFit && lead.whyFit) entry.whyFit = lead.whyFit;
+      if (!entry.contact && lead.contact) entry.contact = lead.contact;
     });
   });
 
@@ -106,7 +138,7 @@ export function buildNexus({ projects = [], competitors = [], funding = [], arch
       id: `seed:${s.id}`,
       type: 'seed',
       label: s.title || 'IP seed',
-      sub: [s.strategy, s.asymmetric_score != null ? `asym ${s.asymmetric_score}/10` : null].filter(Boolean).join(' · ') || 'IP seed',
+      sub: [s.strategy, s.asymmetric_score != null ? `asym ${s.asymmetric_score}/10` : null, `${seedDemand.get(s.id).length} verified buyer${seedDemand.get(s.id).length === 1 ? '' : 's'}`].filter(Boolean).join(' · '),
       detail: { gap: s.gap || '', solution: s.solution || '' }
     })),
     ...buyerPool.map(([key, b]) => ({
@@ -114,7 +146,7 @@ export function buildNexus({ projects = [], competitors = [], funding = [], arch
       type: 'buyer',
       label: b.company,
       sub: [[...b.categories].join('/'), `${b.seeds.length} seed${b.seeds.length === 1 ? '' : 's'}`].filter(Boolean).join(' · '),
-      detail: { whyFit: b.whyFit, contact: b.contact, categories: [...b.categories], seeds: b.seeds }
+      detail: { whyFit: b.whyFit, contact: b.contact, categories: [...b.categories], seeds: b.seeds, sources: b.sources }
     }))
   ];
 
@@ -133,13 +165,12 @@ export function buildNexus({ projects = [], competitors = [], funding = [], arch
   competitors.forEach((c) => { if (projectById.has(c.project_id)) push(c.id, c.project_id, 'competition'); });
   funding.forEach((f) => { if (projectById.has(f.project_id)) push(f.id, f.project_id, 'funding'); });
 
-  // Demand links: the seed to the buyer leads that name it, carrying the fit rationale.
+  // Demand links: the seed to the verified buyer leads that name it, carrying the fit rationale.
   seedPool.forEach((seed) => {
-    (seed.buyer_leads || []).forEach((lead) => {
-      const key = String(lead.company || '').trim().toLowerCase();
-      if (!buyerIds.has(`buyer:${key}`)) return;
-      const via = lead.why_fit ? String(lead.why_fit).trim().slice(0, 64) : (lead.category || null);
-      push(`seed:${seed.id}`, `buyer:${key}`, 'demand', via);
+    seedDemand.get(seed.id).forEach((lead) => {
+      if (!buyerIds.has(`buyer:${lead.key}`)) return;
+      const via = lead.whyFit ? String(lead.whyFit).trim().slice(0, 64) : 'verified research';
+      push(`seed:${seed.id}`, `buyer:${lead.key}`, 'demand', via);
     });
   });
 

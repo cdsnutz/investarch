@@ -88,6 +88,22 @@ export default function NodeInspector({ graph, selectedId, onSelect }) {
             <p className="text-xs leading-relaxed"><span className="text-muted-foreground">Why it fits: </span>{node.detail.whyFit}</p>
           )}
           {node.detail.contact && <p className="text-[11px] text-muted-foreground">Open with: {node.detail.contact}</p>}
+          {(node.detail.sources || []).length > 0 && (
+            <div className="space-y-0.5 pt-1">
+              <div className="text-[10px] uppercase tracking-wide text-[#8a6c1f]">Verified sources</div>
+              {node.detail.sources.slice(0, 3).map((url) => (
+                <a
+                  key={url}
+                  href={url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block text-[11px] break-all text-[#3d5a80] hover:underline"
+                >
+                  {url.replace(/^https?:\/\//, '').slice(0, 56)}
+                </a>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

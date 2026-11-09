@@ -20,6 +20,7 @@ export function collectBuyers(seeds) {
         company,
         category: lead?.category || 'incumbent',
         seeds: [],
+        seed_ids: [],
         why_fit: '',
         contact_role: '',
         approach: '',
@@ -30,6 +31,7 @@ export function collectBuyers(seeds) {
       };
 
       if (seed.title && !entry.seeds.includes(seed.title)) entry.seeds.push(seed.title);
+      if (seed.id && !entry.seed_ids.includes(seed.id)) entry.seed_ids.push(seed.id);
       if (!entry.why_fit && text(lead?.why_fit)) {
         entry.why_fit = text(lead.why_fit);
         entry.contact_role = text(lead?.contact_role);
@@ -64,7 +66,8 @@ export async function researchBuyers(buyers, onProgress) {
           category: buyer.category,
           why_fit: buyer.why_fit,
           assets: buyer.seeds.slice(0, 3),
-          pitch: buyer.pitch
+          pitch: buyer.pitch,
+          seed_ids: (buyer.seed_ids || []).slice(0, 12)
         }))
       });
       (response?.data?.buyers || []).forEach((row) => {

@@ -1,0 +1,113 @@
+{
+  "name": "BuyerResearch",
+  "type": "object",
+  "properties": {
+    "company": {
+      "type": "string"
+    },
+    "company_name": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "string",
+      "enum": [
+        "verified",
+        "likely",
+        "thin"
+      ],
+      "enumColors": [
+        "green",
+        "yellow",
+        "gray"
+      ],
+      "default": "thin"
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "snapshot": {
+      "type": "string"
+    },
+    "recent_moves": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "buying_trigger": {
+      "type": "string"
+    },
+    "unique_insight": {
+      "type": "string"
+    },
+    "osint_angle": {
+      "type": "string"
+    },
+    "search_queries": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "seed_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "researched_date": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "company",
+    "company_name",
+    "confidence",
+    "researched_date"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "Hubspot Company Dossier",
+  "description": "The moment a new company lands in InvestArch from HubSpot, a full research dossier is built for it and handed to the review queue.",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "HubspotCompany",
+      "events": [
+        "create"
+      ]
+    },
+    "condition": "${ (.trigger.data.domain // \"\") != \"\" }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "hubspot_company_dossier",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "build_dossier": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "buildCompanyDossier",
+            "args": {
+              "company_id": "${ .trigger.entity_id }",
+              "intensity": "quick"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Build the dossier",
+            "description": "Market read, competitors, forecast, narrative"
+          }
+        }
+      }
+    ]
+  }
+}

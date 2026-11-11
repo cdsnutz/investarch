@@ -29,6 +29,18 @@
       ],
       "default": "analyzing"
     },
+    "dossier_origin": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "hubspot"
+      ],
+      "enumColors": [
+        "gray",
+        "purple"
+      ],
+      "default": "manual"
+    },
     "tags": {
       "type": "array",
       "items": {
